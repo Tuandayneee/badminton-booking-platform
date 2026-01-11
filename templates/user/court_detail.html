@@ -1,0 +1,94 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row g-5">
+        <div class="col-lg-7 fade-in-up">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                <img src="https://images.unsplash.com/photo-1626224583764-847890e058f5?q=80&w=1000" class="img-fluid" style="max-height: 400px; object-fit: cover;">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h2 class="fw-bold mb-1">{{ court.name }}Sân Cầu Giấy Arena - Sân 1</h2>
+                            <p class="text-muted"><i class="fa fa-map-pin me-1 text-danger"></i> 123 Xuân Thủy, Cầu Giấy</p>
+                        </div>
+                        <div class="text-end">
+                            <div class="fs-3 fw-bold text-primary">50k<small class="fs-6 text-muted">/h</small></div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 my-3">
+                        <span class="badge bg-light text-dark border px-3 py-2"><i class="fa fa-check me-1 text-success"></i> Mặt thảm Yonex</span>
+                        <span class="badge bg-light text-dark border px-3 py-2"><i class="fa fa-wifi me-1 text-info"></i> Wifi Free</span>
+                        <span class="badge bg-light text-dark border px-3 py-2"><i class="fa fa-car me-1 text-warning"></i> Đỗ ô tô</span>
+                    </div>
+
+                    <h5 class="fw-bold mt-4">Mô tả sân</h5>
+                    <p class="text-muted">Sân mới nâng cấp ánh sáng LED chống chói 2025. Không gian thoáng đãng, trần cao 12m...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5 fade-in-up delay-100">
+            <div class="card border-0 shadow-lg rounded-4 sticky-top" style="top: 100px; z-index: 10;">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                    <h4 class="fw-bold mb-0">Đặt lịch giữ chỗ</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Ngày chơi</label>
+                            <input type="date" class="form-control form-control-lg bg-light border-0 fw-bold text-primary" value="2025-12-30">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-muted small text-uppercase mb-3">Chọn khung giờ (Còn trống)</label>
+                            <div class="row g-2">
+                                <div class="col-4">
+                                    <input type="checkbox" class="btn-check slot-input" id="t1" name="slots" value="17:00">
+                                    <label class="btn w-100 py-2 slot-label time-slot" for="t1">
+                                        17:00
+                                    </label>
+                                </div>
+                                
+                                <div class="col-4">
+                                    <input type="checkbox" class="btn-check slot-input" id="t2" name="slots" value="18:00">
+                                    <label class="btn w-100 py-2 slot-label time-slot" for="t2">
+                                        18:00
+                                    </label>
+                                </div>
+
+                                <div class="col-4">
+                                    <button class="btn w-100 py-2 slot-disabled border" disabled>
+                                        <del>19:00</del>
+                                    </button>
+                                </div>
+                                
+                                <div class="col-4">
+                                    <input type="checkbox" class="btn-check slot-input" id="t3" name="slots" value="20:00">
+                                    <label class="btn w-100 py-2 slot-label time-slot" for="t3">
+                                        20:00
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-light p-3 rounded-3 mb-4 d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Tổng tạm tính:</span>
+                            <span class="fs-4 fw-bold text-primary">0đ</span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill fw-bold fs-5 shadow-sm hover-up">
+                            Thanh toán ngay <i class="fa fa-arrow-right ms-2"></i>
+                        </button>
+                        <p class="text-center mt-3 mb-0 small text-muted"><i class="fa fa-lock me-1"></i>Thanh toán an toàn qua VNPay</p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

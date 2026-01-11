@@ -1,0 +1,129 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Đăng ký Đối tác - Badminton Pro{% endblock %}
+
+{% block extra_css %}
+
+{% endblock %}
+{% block body_class %}body-partner{% endblock %}
+{% block content %}
+<div class="container py-5 register-container-partner">
+    <div class="card-partner-register fade-in-up p-4 p-md-5">
+        
+        <div class="form-header">
+            <h3><i class="fa-solid fa-handshake me-2"></i>Đăng ký Đối tác</h3>
+            <p>Hợp tác phát triển kinh doanh sân cầu lông cùng Badminton Pro</p>
+        </div>
+
+        <form method="POST" action="{% url 'register_partner' %}">
+            {% csrf_token %}
+
+            {% if partner_form.non_field_errors %}
+                <div class="alert alert-danger rounded-3 mb-4">
+                    {{ partner_form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="row g-4"> <div class="col-md-6">
+                    <h5 class="section-title">1. Tài khoản quản trị</h5>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Tên đăng nhập</label>
+                        <div class="input-group-unified">
+                            <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                            <input type="text" name="username" class="form-control" placeholder="Ví dụ: san_cau_long_a" required value="{{ partner_form.username.value|default:'' }}">
+                        </div>
+                        <div class="text-danger small mt-1">{{ partner_form.username.errors.0 }}</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Email</label>
+                        <div class="input-group-unified">
+                            <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                            <input type="email" name="email" class="form-control" placeholder="name@example.com" required value="{{ partner_form.email.value|default:'' }}">
+                        </div>
+                        <div class="text-danger small mt-1">{{ partner_form.email.errors.0 }}</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Số điện thoại</label>
+                        <div class="input-group-unified">
+                            <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+                            <input type="text" name="phone_number" class="form-control" placeholder="0912..." required value="{{ partner_form.phone_number.value|default:'' }}">
+                        </div>
+                        <div class="text-danger small mt-1">{{ partner_form.phone_number.errors.0 }}</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Mật khẩu</label>
+                            <div class="input-group-unified">
+                                <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                                <input type="password" name="password" class="form-control" placeholder="••••••" required>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Nhập lại</label>
+                            <div class="input-group-unified">
+                                <span class="input-group-text"><i class="fa-solid fa-check-double"></i></span>
+                                <input type="password" name="confirm_password" class="form-control" placeholder="••••••" required>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="text-danger small">{{ partner_form.password.errors.0 }} {{ partner_form.confirm_password.errors.0 }}</div>
+                </div>
+
+                <div class="col-md-6">
+                    <h5 class="section-title">2. Hồ sơ Doanh nghiệp</h5>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Tên Sân / Đơn vị</label>
+                        <div class="input-group-unified">
+                            <span class="input-group-text"><i class="fa-solid fa-building"></i></span>
+                            <input type="text" name="name_company" class="form-control" placeholder="VD: Sân Cầu Lông Tuấn Sport" required value="{{ partner_form.name_company.value|default:'' }}">
+                        </div>
+                        <div class="text-danger small mt-1">{{ partner_form.name_company.errors.0 }}</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Địa chỉ kinh doanh</label>
+                        <div class="input-group-unified">
+                            <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
+                            <input type="text" name="address_company" class="form-control" placeholder="Số nhà, đường, phường/xã..." required value="{{ partner_form.address_company.value|default:'' }}">
+                        </div>
+                        <div class="text-danger small mt-1">{{ partner_form.address_company.errors.0 }}</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Người đại diện</label>
+                        <div class="input-group-unified">
+                            <span class="input-group-text"><i class="fa-solid fa-id-card-partner-register"></i></span>
+                            <input type="text" name="contact_person" class="form-control" placeholder="Họ và tên quản lý" required value="{{ partner_form.contact_person.value|default:'' }}">
+                        </div>
+                        <div class="text-danger small mt-1">{{ partner_form.contact_person.errors.0 }}</div>
+                    </div>
+                    
+                    <div class="alert alert-light border small mt-4">
+                        <i class="fa-solid fa-circle-info text-primary me-1"></i> 
+                        Thông tin doanh nghiệp sẽ được xác thực trước khi sân của bạn được hiển thị.
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid mt-4">
+                <button type="submit" class="btn btn-primary btn-submit btn-lg rounded-3 text-white">
+                    HOÀN TẤT ĐĂNG KÝ
+                </button>
+            </div>
+            
+            <div class="text-center mt-3">
+                <a href="{% url 'login' %}" class="text-decoration-none fw-bold small text-muted">
+                    <i class="fa-solid fa-arrow-left me-1"></i>Quay lại đăng nhập
+                </a>
+            </div>
+
+        </form>
+    </div>
+</div>
+{% endblock %}

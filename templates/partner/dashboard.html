@@ -1,0 +1,195 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Quản lý sân - Partner Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        
+        <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-white sidebar collapse shadow-sm" style="min-height: 100vh;">
+            <div class="position-sticky pt-3">
+                <div class="text-center mb-4">
+                    <img src="{% if user.avatar %}{{ user.avatar.url }}{% else %}https://ui-avatars.com/api/?name={{ user.username }}&background=0d6efd&color=fff{% endif %}" 
+                         class="rounded-circle mb-2" width="80" height="80">
+                    <h6 class="fw-bold">{{ user.username }}</h6>
+                    <span class="badge bg-success">Đối tác Uy tín</span>
+                </div>
+
+                <ul class="nav flex-column gap-2">
+                    <li class="nav-item">
+                        <a class="nav-link active rounded-3 bg-primary text-white" href="#">
+                            <i class="fa-solid fa-chart-line me-2"></i> Tổng quan
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark hover-bg-light rounded-3" href="#">
+                            <i class="fa-solid fa-calendar-days me-2"></i> Lịch đặt sân
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark hover-bg-light rounded-3" href="#">
+                            <i class="fa-solid fa-layer-group me-2"></i> Quản lý sân bãi
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark hover-bg-light rounded-3" href="#">
+                            <i class="fa-solid fa-file-invoice-dollar me-2"></i> Doanh thu & Hóa đơn
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark hover-bg-light rounded-3" href="#">
+                            <i class="fa-solid fa-gear me-2"></i> Cài đặt
+                        </a>
+                    </li>
+                </ul>
+                
+                <hr class="my-4">
+                <div class="px-3">
+                    <a href="{% url 'logout' %}" class="btn btn-outline-danger w-100">
+                        <i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 bg-light">
+            
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <h1 class="h2 fw-bold text-primary">Dashboard</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <button type="button" class="btn btn-sm btn-outline-secondary me-2">
+                        <i class="fa-solid fa-share me-1"></i> Xuất báo cáo
+                    </button>
+                    <button type="button" class="btn btn-sm btn-primary">
+                        <i class="fa-solid fa-plus me-1"></i> Tạo lịch đặt nhanh
+                    </button>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-xl-3 col-md-6">
+                    <div class="card border-0 shadow-sm h-100 border-start border-4 border-primary">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <p class="text-muted mb-1 small text-uppercase fw-bold">Doanh thu hôm nay</p>
+                                    <h4 class="mb-0 fw-bold">2.500.000đ</h4>
+                                </div>
+                                <div class="icon-shape bg-primary bg-opacity-10 text-primary rounded-3 p-3">
+                                    <i class="fa-solid fa-sack-dollar fa-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card border-0 shadow-sm h-100 border-start border-4 border-success">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <p class="text-muted mb-1 small text-uppercase fw-bold">Lịch đặt mới</p>
+                                    <h4 class="mb-0 fw-bold">12 Lượt</h4>
+                                </div>
+                                <div class="icon-shape bg-success bg-opacity-10 text-success rounded-3 p-3">
+                                    <i class="fa-solid fa-calendar-check fa-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card border-0 shadow-sm h-100 border-start border-4 border-warning">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <p class="text-muted mb-1 small text-uppercase fw-bold">Số sân trống</p>
+                                    <h4 class="mb-0 fw-bold">3 / 8 Sân</h4>
+                                </div>
+                                <div class="icon-shape bg-warning bg-opacity-10 text-warning rounded-3 p-3">
+                                    <i class="fa-solid fa-table-tennis-paddle-ball fa-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card border-0 shadow-sm h-100 border-start border-4 border-danger">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <p class="text-muted mb-1 small text-uppercase fw-bold">Khách chờ Check-in</p>
+                                    <h4 class="mb-0 fw-bold">2 Khách</h4>
+                                </div>
+                                <div class="icon-shape bg-danger bg-opacity-10 text-danger rounded-3 p-3">
+                                    <i class="fa-solid fa-users fa-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0 fw-bold"><i class="fa-solid fa-chart-area me-2 text-primary"></i>Biểu đồ doanh thu tuần</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="revenueChart" style="max-height: 300px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 fw-bold">Sắp tới giờ</h5>
+                            <a href="#" class="small text-decoration-none">Xem tất cả</a>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item d-flex align-items-center py-3">
+                                    <div class="bg-light rounded-circle p-2 me-3 text-center" style="width: 45px; height: 45px;">
+                                        <span class="fw-bold text-primary">17</span>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0 fw-bold">Nguyễn Văn A</h6>
+                                        <small class="text-muted"><i class="fa-regular fa-clock me-1"></i>17:00 - 18:00 | Sân 1</small>
+                                    </div>
+                                    <span class="badge bg-warning text-dark">Chưa đến</span>
+                                </div>
+                                <div class="list-group-item d-flex align-items-center py-3">
+                                    <div class="bg-light rounded-circle p-2 me-3 text-center" style="width: 45px; height: 45px;">
+                                        <span class="fw-bold text-primary">18</span>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0 fw-bold">Trần Thị B</h6>
+                                        <small class="text-muted"><i class="fa-regular fa-clock me-1"></i>18:00 - 20:00 | Sân 3</small>
+                                    </div>
+                                    <span class="badge bg-success">Đã cọc</span>
+                                </div>
+                                <div class="list-group-item d-flex align-items-center py-3">
+                                    <div class="bg-light rounded-circle p-2 me-3 text-center" style="width: 45px; height: 45px;">
+                                        <span class="fw-bold text-primary">19</span>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0 fw-bold">Nhóm Cầu Lông IT</h6>
+                                        <small class="text-muted"><i class="fa-regular fa-clock me-1"></i>19:00 - 21:00 | Sân VIP</small>
+                                    </div>
+                                    <span class="badge bg-primary">Thành viên</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/partner/dashboard.js' %}"></script>
+{% endblock %}

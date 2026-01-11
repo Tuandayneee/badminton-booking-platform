@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  # 1. DATABASE (Tự động tải và chạy Postgres)
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      - POSTGRES_DB=badminton_db # <--- Tên DB nó sẽ TỰ TẠO cho bạn
+      - POSTGRES_USER=postgres # <--- User mặc định
+      - POSTGRES_PASSWORD=123456 # <--- Pass mặc định
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Lưu dữ liệu để tắt máy không mất
+    ports:
+      - "5432:5432"
+
+  # 2. REDIS (Tự động chạy Redis)
+  redis:
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6379:6379"
+
+  # 3. WEB (Django App của bạn)
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DB_HOST=db
+      - DB_NAME=badminton_db
+      - DB_USER=postgres
+      - DB_PASS=123456
+
+volumes:
+  postgres_data:

@@ -1,0 +1,83 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 fade-in-up">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold mb-0">Lịch sử đặt sân</h3>
+                    <p class="text-muted small">Quản lý các vé điện tử của bạn</p>
+                </div>
+                <button class="btn btn-outline-primary rounded-pill px-4">
+                    <i class="fa fa-filter me-2"></i>Lọc
+                </button>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-muted small text-uppercase">
+                            <tr>
+                                <th class="py-3 ps-4 border-0">Mã vé</th>
+                                <th class="py-3 border-0">Sân / Loại</th>
+                                <th class="py-3 border-0">Ngày giờ</th>
+                                <th class="py-3 border-0">Tổng tiền</th>
+                                <th class="py-3 border-0">Trạng thái</th>
+                                <th class="py-3 border-0 text-end pe-4">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody class="border-top-0">
+                            <tr class="transition">
+                                <td class="ps-4">
+                                    <span class="fw-bold text-dark">#ORD-8821</span>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-primary">Sân Cầu Giấy - Sân 1</div>
+                                    <span class="badge bg-light text-dark border mt-1">Sân Thảm</span>
+                                </td>
+                                <td>
+                                    <div class="fw-medium">30 Th12, 2025</div>
+                                    <small class="text-muted">17:00 - 19:00</small>
+                                </td>
+                                <td class="fw-bold">100.000đ</td>
+                                <td>
+                                    <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill fw-medium">
+                                        <i class="fa fa-check-circle me-1"></i>Thành công
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <button class="btn btn-light btn-sm rounded-circle shadow-sm text-primary" data-bs-toggle="tooltip" title="Xem QR Code">
+                                        <i class="fa fa-qrcode"></i>
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="ps-4"><span class="fw-bold text-muted">#ORD-8822</span></td>
+                                <td>
+                                    <div class="fw-bold">Sân Mỹ Đình - Sân 3</div>
+                                </td>
+                                <td>
+                                    <div class="fw-medium">01 Th01, 2026</div>
+                                    <small class="text-muted">08:00 - 09:00</small>
+                                </td>
+                                <td class="fw-bold">50.000đ</td>
+                                <td>
+                                    <span class="badge bg-warning bg-opacity-10 text-warning px-3 py-2 rounded-pill fw-medium">
+                                        <i class="fa fa-clock me-1"></i>Chờ thanh toán
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a href="#" class="btn btn-primary btn-sm rounded-pill px-3">Thanh toán</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block navbar %}{% endblock %}
+
+{% block title %}Đăng nhập - Badminton Pro{% endblock %}
+
+{% block content %}
+<div class="login-wrapper">
+    <div class="banner-side" style="background: linear-gradient(rgba(13, 110, 253, 0.7), rgba(13, 110, 253, 0.5)), url('{% static 'images/banner.jpg' %}');">
+        <div class="banner-text fade-in-up">
+            <h1>Badminton Pro</h1>
+            <p>Hệ thống đặt sân cầu lông số #1 Việt Nam.<br>Cháy hết mình cùng đam mê!</p>
+        </div>
+    </div>
+
+    <div class="form-side">
+        <div class="form-content fade-in-up {% if register_form.errors %}hidden{% endif %}" id="loginBox">
+            <a href="{% url 'home' %}" class="brand-logo"><i class="fas fa-shuttlecock"></i> Badminton Pro</a>
+            <h2 class="fw-bold mb-2">Chào mừng trở lại! 👋</h2>
+            
+            <form method="POST" action="{% url 'login' %}">
+                {% csrf_token %}
+                
+                {% if login_form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ login_form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <label class="form-label fw-medium">Tên đăng nhập</label>
+                    {{ login_form.username }} 
+                    <div class="text-danger small">{{ login_form.username.errors }}</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-medium">Mật khẩu</label>
+                    {{ login_form.password }}
+                    <div class="text-danger small">{{ login_form.password.errors }}</div>
+                </div>
+                
+                <button type="submit" name="btn_login" class="btn btn-primary w-100 mb-3">Đăng nhập</button>
+
+                <div class="text-center mb-4">
+                    <span class="text-muted">Chưa có tài khoản? </span>
+                    <a href="javascript:void(0)" onclick="toggleForm()" class="fw-bold text-primary text-decoration-none">Đăng ký khách hàng</a>
+                </div>
+
+                <div class="text-center pt-3 border-top">
+                    <p class="small text-muted mb-1">Bạn là chủ sân cầu lông?</p>
+                    <a href="{% url 'register_partner' %}" class="btn btn-outline-success w-100 fw-bold">
+                        <i class="fa-solid fa-handshake me-2"></i>Đăng ký làm Đối tác
+                    </a>
+                </div>
+                </form>
+        </div>
+
+        <div class="form-content fade-in-up {% if not register_form.errors %}hidden{% endif %}" id="registerBox">
+            <a href="{% url 'home' %}" class="brand-logo"><i class="fas fa-shuttlecock"></i> Badminton Pro</a>
+            <h2 class="fw-bold mb-2">Tạo tài khoản khách</h2>
+            
+            <form method="POST" action="{% url 'register' %}">
+                {% csrf_token %}
+
+                {% if register_form.non_field_errors %}
+                    <div class="alert alert-danger">{{ register_form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <label class="form-label fw-medium">Tên đăng nhập</label>
+                    {{ register_form.username }}
+                    <div class="text-danger small">{{ register_form.username.errors }}</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-medium">Email</label>
+                    {{ register_form.email }}
+                    <div class="text-danger small">{{ register_form.email.errors }}</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-medium">Số điện thoại</label>
+                    {{ register_form.phone_number }}
+                    <div class="text-danger small">{{ register_form.phone_number.errors }}</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-medium">Mật khẩu</label>
+                    {{ register_form.password }}
+                    <div class="text-danger small">{{ register_form.password.errors }}</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-medium">Nhập lại mật khẩu</label>
+                    {{ register_form.confirm_password }}
+                    <div class="text-danger small">{{ register_form.confirm_password.errors }}</div>
+                </div>
+
+                <button type="submit" name="btn_register" class="btn btn-primary w-100 mb-3">Đăng ký</button>
+                
+                <div class="text-center mb-4">
+                    <span class="text-muted">Đã có tài khoản? </span>
+                    <a href="javascript:void(0)" onclick="toggleForm()" class="fw-bold text-primary text-decoration-none">Đăng nhập</a>
+                </div>
+
+                 <div class="text-center pt-3 border-top">
+                    <p class="small text-muted mb-1">Bạn muốn hợp tác kinh doanh?</p>
+                    <a href="{% url 'register_partner' %}" class="fw-bold text-success text-decoration-none">
+                        <i class="fa-solid fa-arrow-right me-1"></i>Đăng ký dành cho Chủ sân
+                    </a>
+                </div>
+                </form>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/user/login_register.js' %}"></script>
+{% endblock %}

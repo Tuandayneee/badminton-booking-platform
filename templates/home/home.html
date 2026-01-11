@@ -1,0 +1,112 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="hero-section position-relative d-flex align-items-center text-white" 
+         style="min-height: 600px; background: #333 url('{% static 'images/banner.jpg' %}') no-repeat center center/cover;">
+    
+    <div class="container position-relative z-2">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-8 fade-in-up">
+                <span class="badge bg-primary bg-opacity-75 mb-3 px-3 py-2 rounded-pill fw-normal text-uppercase spacing-1">Hệ thống đặt sân #1</span>
+                <h1 class="display-3 fw-bold mb-4 text-shadow">Cháy hết mình cùng<br><span class="text-gradient fw-black">Đam mê cầu lông</span></h1>
+                <p class="lead mb-5 text-white-50">Đặt sân nhanh chóng - Thanh toán tiện lợi - Check-in bằng QR Code.</p>
+                
+                <div class="bg-white p-4 rounded-4 shadow-lg fade-in-up delay-100">
+                    <form class="row g-3">
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="date" class="form-control border-0 bg-light fw-bold" id="dateInput">
+                                <label for="dateInput">Ngày chơi</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <select class="form-select border-0 bg-light fw-bold" id="timeSelect">
+                                    <option selected>17:00 - 18:00</option>
+                                    <option>18:00 - 19:00</option>
+                                    <option>19:00 - 20:00</option>
+                                </select>
+                                <label for="timeSelect">Khung giờ</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-primary w-100 h-100 fs-5 rounded-3 fw-bold shadow-sm">
+                                <i class="fa fa-search me-2"></i>Tìm sân
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-light">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-end mb-5 fade-in-up">
+            <div>
+                <h6 class="text-primary fw-bold text-uppercase ls-1">Khám phá</h6>
+                <h2 class="fw-bold mb-0">Sân cầu lông nổi bật</h2>
+            </div>
+            <a href="#" class="btn btn-outline-dark rounded-pill px-4">Xem tất cả <i class="fa fa-arrow-right ms-2"></i></a>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4 fade-in-up delay-100">
+                <div class="card h-100 border-0 shadow-sm hover-shadow">
+                    <div class="position-relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1613918108466-292b78a8ef95?q=80&w=600" class="card-img-top" alt="...">
+                        <div class="position-absolute top-0 end-0 m-3">
+                            <span class="badge bg-white text-dark shadow-sm fw-bold"><i class="fa fa-star text-warning me-1"></i>4.8</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill">Sân Thảm</span>
+                            <small class="text-muted text-decoration-line-through">70k</small>
+                        </div>
+                        <h5 class="card-title fw-bold mb-1">Sân Cầu Giấy Arena</h5>
+                        <p class="text-muted small mb-3"><i class="fa fa-location-dot me-1"></i> 123 Xuân Thủy, Hà Nội</p>
+                        
+                        <div class="d-flex align-items-center justify-content-between pt-3 border-top">
+                            <div>
+                                <span class="fw-bold text-primary fs-5">50.000đ</span><small>/giờ</small>
+                            </div>
+                            <a href="#" class="btn btn-primary rounded-pill btn-sm px-4">Đặt ngay</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 fade-in-up delay-200">
+                <div class="card h-100 border-0 shadow-sm hover-shadow">
+                    <div class="position-relative overflow-hidden">
+                        <img src="https://plus.unsplash.com/premium_photo-1676634832558-6654a134e920?q=80&w=600" class="card-img-top" alt="...">
+                        <div class="position-absolute top-0 end-0 m-3">
+                            <span class="badge bg-white text-dark shadow-sm fw-bold"><i class="fa fa-star text-warning me-1"></i>5.0</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                         <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill">Sân Gỗ</span>
+                        </div>
+                        <h5 class="card-title fw-bold mb-1">Sân Mỹ Đình Sport</h5>
+                        <p class="text-muted small mb-3"><i class="fa fa-location-dot me-1"></i> Lê Đức Thọ, Hà Nội</p>
+                        
+                        <div class="d-flex align-items-center justify-content-between pt-3 border-top">
+                            <div>
+                                <span class="fw-bold text-primary fs-5">60.000đ</span><small>/giờ</small>
+                            </div>
+                            <a href="#" class="btn btn-primary rounded-pill btn-sm px-4">Đặt ngay</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 fade-in-up delay-300">
+                 </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
