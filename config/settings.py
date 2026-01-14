@@ -37,12 +37,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'phonenumber_field',
     'users',
-    'booking',
+    
     'home',
+    'partner',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.github',
+    'django.contrib.humanize',
 ]
-
+SITE_ID = 1
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -51,8 +59,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
-
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
@@ -146,3 +158,40 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 PHONENUMBER_DEFAULT_REGION = "VN"
+
+
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'OAUTH_PKCE_ENABLED': True,
+    },
+    'github': {
+        'SCOPE': [
+            'user',
+            'read:user',
+            'user:email',
+        ],
+    }
+}
+SOCIALACCOUNT_AUTO_SIGNUP = True
+
+ACCOUNT_PASSWORD_REQUIRED = False 
+ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
+SOCIALACCOUNT_LOGIN_ON_GET = True
+ACCOUNT_SIGNUP_FIELDS = [
+    'username*', 
+    'email*',   
+]
+
+LOGIN_REDIRECT_URL = 'home'
+ACCOUNT_SIGNUP_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = '/'
+
+ACCOUNT_ADAPTER = 'users.adapters.MyAccountAdapter'

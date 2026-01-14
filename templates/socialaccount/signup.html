@@ -1,0 +1,61 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Hoàn tất đăng ký - Badminton Pro{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold text-primary">🎉 Sắp xong rồi!</h2>
+                        <p class="text-muted">
+                            Bạn đang đăng nhập bằng tài khoản Google <br>
+                            <strong>{{ account.extra_data.email }}</strong>.
+                        </p>
+                        <p class="small text-muted">Vui lòng chọn một tên đăng nhập để hoàn tất.</p>
+                    </div>
+
+                    <form class="signup" id="signup_form" method="post" action="{% url 'socialaccount_signup' %}">
+                        {% csrf_token %}
+                        {% if redirect_field_value %}
+                        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+                        {% endif %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Tên đăng nhập mong muốn</label>
+                            <input type="text" name="username" 
+                                   class="form-control form-control-lg {% if form.username.errors %}is-invalid{% endif %}" 
+                                   placeholder="Ví dụ: deptraivai"
+                                   value="{{ form.username.value|default:'' }}" required>
+                            <div class="invalid-feedback">
+                                {{ form.username.errors }}
+                            </div>
+                        </div>
+
+                        {# Hidden email field - always include #}
+                        <input type="hidden" name="email" value="{{ form.email.value|default:account.extra_data.email }}">
+                        
+                        {# Render any other hidden fields from form #}
+                        {% for field in form.hidden_fields %}
+                            {{ field }}
+                        {% endfor %}
+
+                        <button type="submit" class="btn btn-primary w-100 btn-lg fw-bold shadow-sm">
+                            Hoàn tất & Vào trang chủ
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

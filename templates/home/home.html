@@ -1,111 +1,253 @@
 {% extends 'base/base.html' %}
 {% load static %}
+{% load humanize %}
+
+{% block title %}Trang chủ - Badminton Pro{% endblock %}
 
 {% block content %}
-<section class="hero-section position-relative d-flex align-items-center text-white" 
-         style="min-height: 600px; background: #333 url('{% static 'images/banner.jpg' %}') no-repeat center center/cover;">
+<section class="hero-section">
+    <div class="hero-bg-image" style="background-image: url('{% static 'images/banner.jpg' %}');"></div>
     
-    <div class="container position-relative z-2">
-        <div class="row justify-content-center text-center">
-            <div class="col-lg-8 fade-in-up">
-                <span class="badge bg-primary bg-opacity-75 mb-3 px-3 py-2 rounded-pill fw-normal text-uppercase spacing-1">Hệ thống đặt sân #1</span>
-                <h1 class="display-3 fw-bold mb-4 text-shadow">Cháy hết mình cùng<br><span class="text-gradient fw-black">Đam mê cầu lông</span></h1>
-                <p class="lead mb-5 text-white-50">Đặt sân nhanh chóng - Thanh toán tiện lợi - Check-in bằng QR Code.</p>
+    <div class="hero-overlay"></div>
+
+    <div class="container hero-content">
+        <div class="row align-items-center">
+            
+            <div class="col-lg-7 text-white mb-5 mb-lg-0">
+                <div class="badge-glass fade-in-up">
+                    <i class="fa-solid fa-fire text-warning"></i>
+                    <span class="fw-bold text-uppercase small spacing-1">Nền tảng số 1 Việt Nam</span>
+                </div>
+
+                <h1 class="hero-title fade-in-up delay-100">
+                    Chinh phục đỉnh cao
+                    <span class="text-gradient-hero">Đam mê cầu lông</span>
+                </h1>
+
+                <p class="hero-description fade-in-up delay-200">
+                    Hệ thống đặt sân thông minh, kết nối cộng đồng vợt thủ toàn quốc. 
+                    Tìm sân gần nhất, so sánh giá và thanh toán chỉ trong 30 giây!
+                </p>
                 
-                <div class="bg-white p-4 rounded-4 shadow-lg fade-in-up delay-100">
-                    <form class="row g-3">
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <input type="date" class="form-control border-0 bg-light fw-bold" id="dateInput">
-                                <label for="dateInput">Ngày chơi</label>
-                            </div>
+                <div class="d-flex gap-3 fade-in-up delay-300">
+                    <a href="#courts" class="btn btn-hero-primary">
+                        Đặt sân ngay <i class="fa-solid fa-arrow-right ms-2"></i>
+                    </a>
+                    <a href="#" class="btn btn-hero-secondary">
+                        <i class="fa-regular fa-circle-play me-2"></i>Xem hướng dẫn
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-5 ms-auto fade-in-up delay-200">
+                <div class="search-card-floating">
+                    <h4 class="fw-bold text-dark mb-4 d-flex align-items-center">
+                        <span class="bg-primary bg-opacity-10 text-primary p-2 rounded-circle me-3">
+                            <i class="fa-solid fa-magnifying-glass fs-5"></i>
+                        </span>
+                        Tìm sân nhanh
+                    </h4>
+                    
+                    <form action="#" method="GET">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-secondary text-uppercase ls-1">Ngày chơi</label>
+                            <input type="date" class="form-control form-control-lg-custom" value="{% now 'Y-m-d' %}">
                         </div>
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <select class="form-select border-0 bg-light fw-bold" id="timeSelect">
-                                    <option selected>17:00 - 18:00</option>
-                                    <option>18:00 - 19:00</option>
-                                    <option>19:00 - 20:00</option>
-                                </select>
-                                <label for="timeSelect">Khung giờ</label>
-                            </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-secondary text-uppercase ls-1">Khu vực</label>
+                            <select class="form-select form-select-lg form-control-lg-custom">
+                                <option selected>Tất cả khu vực</option>
+                                <option>Cầu Giấy</option>
+                                <option>Thanh Xuân</option>
+                                <option>Mỹ Đình</option>
+                            </select>
                         </div>
-                        <div class="col-md-4">
-                            <button class="btn btn-primary w-100 h-100 fs-5 rounded-3 fw-bold shadow-sm">
-                                <i class="fa fa-search me-2"></i>Tìm sân
-                            </button>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-secondary text-uppercase ls-1">Khung giờ</label>
+                            <select class="form-select form-select-lg form-control-lg-custom">
+                                <option selected>17:00 - 18:00</option>
+                                <option>18:00 - 19:00</option>
+                                <option>19:00 - 20:00</option>
+                            </select>
                         </div>
+                        
+                        <button type="submit" class="btn btn-primary-gradient w-100 py-3 rounded-3 fw-bold fs-5 shadow-sm">
+                            Tìm kiếm ngay
+                        </button>
                     </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-white">
+    <div class="container py-lg-4">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-box h-100">
+                    <div class="icon-circle">
+                        <i class="fa-regular fa-calendar-check"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Đặt sân siêu tốc</h5>
+                    <p class="text-secondary mb-0">Xem tình trạng sân trống theo thời gian thực. Đặt lịch chỉ với 3 cú chạm.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-box h-100">
+                    <div class="icon-circle">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Thanh toán an toàn</h5>
+                    <p class="text-secondary mb-0">Hỗ trợ đa dạng phương thức: QR Code, Ví điện tử, Thẻ ngân hàng. Hoàn tiền nếu hủy lịch.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-box h-100">
+                    <div class="icon-circle">
+                        <i class="fa-solid fa-medal"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Tích điểm đổi quà</h5>
+                    <p class="text-secondary mb-0">Tích lũy điểm thưởng sau mỗi lần đặt sân để nâng hạng thành viên và nhận voucher.</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<section class="py-5 bg-light">
+<section class="py-5 bg-light" id="courts">
     <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-end mb-5 fade-in-up">
+        <div class="d-flex justify-content-between align-items-end mb-5">
             <div>
-                <h6 class="text-primary fw-bold text-uppercase ls-1">Khám phá</h6>
-                <h2 class="fw-bold mb-0">Sân cầu lông nổi bật</h2>
+                <span class="text-primary fw-bold text-uppercase ls-1 small">Điểm đến yêu thích</span>
+                <h2 class="fw-bold mb-0 mt-1">Sân cầu lông nổi bật</h2>
             </div>
-            <a href="#" class="btn btn-outline-dark rounded-pill px-4">Xem tất cả <i class="fa fa-arrow-right ms-2"></i></a>
+            <a href="#" class="btn btn-outline-primary rounded-pill px-4 fw-bold">Xem tất cả <i class="fa-solid fa-arrow-right ms-2"></i></a>
         </div>
 
         <div class="row g-4">
-            <div class="col-md-4 fade-in-up delay-100">
-                <div class="card h-100 border-0 shadow-sm hover-shadow">
-                    <div class="position-relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1613918108466-292b78a8ef95?q=80&w=600" class="card-img-top" alt="...">
-                        <div class="position-absolute top-0 end-0 m-3">
-                            <span class="badge bg-white text-dark shadow-sm fw-bold"><i class="fa fa-star text-warning me-1"></i>4.8</span>
+            <div class="col-md-6 col-lg-4">
+                <div class="card court-card h-100">
+                    <div class="court-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1626224583764-847890e05851?q=80&w=600" class="court-img-top" alt="Sân Cầu Giấy">
+                        <div class="rating-badge text-dark">
+                            <i class="fa-solid fa-star text-warning me-1"></i>4.8
+                        </div>
+                        <div class="court-type-badge badge-synthetic">
+                            <i class="fa-solid fa-layer-group me-1"></i>Sân Thảm
                         </div>
                     </div>
                     <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill">Sân Thảm</span>
-                            <small class="text-muted text-decoration-line-through">70k</small>
-                        </div>
-                        <h5 class="card-title fw-bold mb-1">Sân Cầu Giấy Arena</h5>
-                        <p class="text-muted small mb-3"><i class="fa fa-location-dot me-1"></i> 123 Xuân Thủy, Hà Nội</p>
+                        <h5 class="card-title fw-bold mb-2">Sân Cầu Giấy Arena</h5>
+                        <p class="text-secondary small mb-3"><i class="fa-solid fa-location-dot me-1 text-danger"></i> 123 Xuân Thủy, Cầu Giấy, HN</p>
                         
-                        <div class="d-flex align-items-center justify-content-between pt-3 border-top">
+                        <div class="d-flex flex-wrap gap-2 mb-4">
+                            <span class="badge bg-light text-secondary border fw-normal">Wifi miễn phí</span>
+                            <span class="badge bg-light text-secondary border fw-normal">Bãi đỗ xe</span>
+                            <span class="badge bg-light text-secondary border fw-normal">Kiot nước</span>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between pt-3 border-top border-light">
                             <div>
-                                <span class="fw-bold text-primary fs-5">50.000đ</span><small>/giờ</small>
+                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Giá từ</small>
+                                <span class="fw-bold text-primary fs-5">50.000đ</span><small class="text-muted">/h</small>
                             </div>
-                            <a href="#" class="btn btn-primary rounded-pill btn-sm px-4">Đặt ngay</a>
+                            <button class="btn btn-primary-gradient rounded-pill px-4 py-2 fw-bold btn-sm shadow-sm">Đặt ngay</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-4 fade-in-up delay-200">
-                <div class="card h-100 border-0 shadow-sm hover-shadow">
-                    <div class="position-relative overflow-hidden">
-                        <img src="https://plus.unsplash.com/premium_photo-1676634832558-6654a134e920?q=80&w=600" class="card-img-top" alt="...">
-                        <div class="position-absolute top-0 end-0 m-3">
-                            <span class="badge bg-white text-dark shadow-sm fw-bold"><i class="fa fa-star text-warning me-1"></i>5.0</span>
+            <div class="col-md-6 col-lg-4">
+                <div class="card court-card h-100">
+                    <div class="court-img-wrapper">
+                        <img src="https://plus.unsplash.com/premium_photo-1676634832558-6654a134e920?q=80&w=600" class="court-img-top" alt="Sân Mỹ Đình">
+                        <div class="rating-badge text-dark">
+                            <i class="fa-solid fa-star text-warning me-1"></i>5.0
+                        </div>
+                        <div class="court-type-badge badge-wood">
+                            <i class="fa-solid fa-tree me-1"></i>Sân Gỗ
                         </div>
                     </div>
                     <div class="card-body p-4">
-                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill">Sân Gỗ</span>
-                        </div>
-                        <h5 class="card-title fw-bold mb-1">Sân Mỹ Đình Sport</h5>
-                        <p class="text-muted small mb-3"><i class="fa fa-location-dot me-1"></i> Lê Đức Thọ, Hà Nội</p>
+                        <h5 class="card-title fw-bold mb-2">Sân Mỹ Đình Sport</h5>
+                        <p class="text-secondary small mb-3"><i class="fa-solid fa-location-dot me-1 text-danger"></i> Lê Đức Thọ, Nam Từ Liêm, HN</p>
                         
-                        <div class="d-flex align-items-center justify-content-between pt-3 border-top">
+                        <div class="d-flex flex-wrap gap-2 mb-4">
+                            <span class="badge bg-light text-secondary border fw-normal">Điều hòa</span>
+                            <span class="badge bg-light text-secondary border fw-normal">Thuê vợt</span>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between pt-3 border-top border-light">
                             <div>
-                                <span class="fw-bold text-primary fs-5">60.000đ</span><small>/giờ</small>
+                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Giá từ</small>
+                                <span class="fw-bold text-primary fs-5">60.000đ</span><small class="text-muted">/h</small>
                             </div>
-                            <a href="#" class="btn btn-primary rounded-pill btn-sm px-4">Đặt ngay</a>
+                            <button class="btn btn-primary-gradient rounded-pill px-4 py-2 fw-bold btn-sm shadow-sm">Đặt ngay</button>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="col-md-4 fade-in-up delay-300">
-                 </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card court-card h-100">
+                    <div class="court-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=600" class="court-img-top" alt="Sân Thanh Xuân">
+                        <div class="rating-badge text-dark">
+                            <i class="fa-solid fa-star text-warning me-1"></i>4.5
+                        </div>
+                        <div class="court-type-badge badge-synthetic">
+                            <i class="fa-solid fa-layer-group me-1"></i>Sân Thảm
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <h5 class="card-title fw-bold mb-2">CLB Cầu Lông 365</h5>
+                        <p class="text-secondary small mb-3"><i class="fa-solid fa-location-dot me-1 text-danger"></i> 365 Nguyễn Trãi, Thanh Xuân, HN</p>
+                        
+                        <div class="d-flex flex-wrap gap-2 mb-4">
+                            <span class="badge bg-light text-secondary border fw-normal">Mở xuyên đêm</span>
+                            <span class="badge bg-light text-secondary border fw-normal">Tắm nóng lạnh</span>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between pt-3 border-top border-light">
+                            <div>
+                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Giá từ</small>
+                                <span class="fw-bold text-primary fs-5">45.000đ</span><small class="text-muted">/h</small>
+                            </div>
+                            <button class="btn btn-primary-gradient rounded-pill px-4 py-2 fw-bold btn-sm shadow-sm">Đặt ngay</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-white">
+    <div class="container py-4">
+        <div class="partner-cta-section p-5">
+            <div class="partner-cta-bg"></div>
+            <div class="row position-relative z-1 align-items-center">
+                <div class="col-lg-7 text-white">
+                    <span class="badge bg-warning text-dark mb-3 px-3 py-2 fw-bold text-uppercase">Dành cho chủ sân</span>
+                    <h2 class="display-5 fw-bold mb-4">Bạn đang sở hữu sân cầu lông?</h2>
+                    <p class="lead text-white-50 mb-4">
+                        Hợp tác cùng Badminton Pro để tối ưu hóa doanh thu, quản lý lịch đặt sân dễ dàng 
+                        và tiếp cận hàng ngàn khách hàng tiềm năng mỗi tháng.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="btn btn-primary-gradient rounded-pill px-5 py-3 fw-bold fs-5 shadow-lg">
+                            Đăng ký đối tác
+                        </a>
+                        <a href="#" class="btn btn-outline-light rounded-pill px-4 py-3 fw-bold">
+                            Tìm hiểu thêm
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>

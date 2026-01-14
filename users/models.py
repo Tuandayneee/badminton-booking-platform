@@ -1,31 +1,33 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.dispatch import receiver
+from django.db.models.signals import post_save
 class User(AbstractUser):
     class Role(models.TextChoices):
         CUSTOMER = 'customer', 'Khách hàng'
         PARTNER = 'partner', 'Đối tác'
         ADMIN = 'admin', 'Quản trị viên'
-    role = models.CharField(max_length=10, choices=Role.choices)
+    role = models.CharField(max_length=10, choices=Role.choices, default=Role.CUSTOMER)
     email = models.EmailField(unique=True)
     
     
-    phone_number = models.CharField(max_length=15, blank=True, null=True,unique=True,)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
     
 
     def __str__(self):
-        return {self.username}
+        return self.username
     
    
     
 
 class CustomerProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='customer_profile')
-    class ranking (models.TextChoices):
+    class Ranking (models.TextChoices):
         BRONZE = 'bronze', 'Hạng Đồng'
         SILVER = 'silver', 'Hạng Bạc'
         GOLD = 'gold', 'Hạng Vàng'
         DIAMOND = 'diamond', 'Hạng Kim Cương'
-    rank = models.CharField(max_length=10, choices=ranking.choices, default=ranking.BRONZE)
+    rank = models.CharField(max_length=10, choices=Ranking.choices, default=Ranking.BRONZE)
     points = models.IntegerField(default=0)
 
     def __str__(self):
@@ -56,3 +58,9 @@ class PartnerProfile(models.Model):
 
     def __str__(self):
         return f"Partner: {self.business_name} ({self.user.username})"
+    
+
+@receiver(post_save, sender=User)
+def create_customer_profile(sender, instance, created, **kwargs):
+    if created and instance.role == User.Role.CUSTOMER:
+        CustomerProfile.objects.create(user=instance)

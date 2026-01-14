@@ -105,7 +105,8 @@ def register_partner(request):
 
     
     return render(request, 'partner/register_partner.html', {'partner_form': partner_form})
-@login_required 
-def partner_dashboard(request):
+
+
+def login_social_account(request):
     
-    return render(request, 'partner/dashboard.html')
+    return redirect('home')

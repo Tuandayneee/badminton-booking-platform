@@ -6,3 +6,8 @@ tzdata==2025.3
 psycopg2-binary>=2.9.9
 phonenumberslite==8.13.26
 django-phonenumber-field[phonenumberslite]
+django-allauth
+requests
+requests-oauthlib
+pyjwt
+cryptography
