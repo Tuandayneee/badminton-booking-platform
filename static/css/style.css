@@ -1,159 +1,382 @@
 /* =========================================
-   CORE VARIABLES & RESET
+   1. CORE VARIABLES (THEME: TRẦM & SANG)
    ========================================= */
-@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap");
-
 :root {
-  --primary-color: #0d6efd;
-  --primary-dark: #0a58ca;
-  --accent-color: #f59e0b; /* Màu cam thể thao */
-  --text-dark: #1e293b;
-  --text-light: #64748b;
-  --bg-light: #f8fafc;
-  --navbar-height: 76px;
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
-    0 4px 6px -2px rgb(0 0 0 / 0.05);
+  /* Brand Colors - Tông Trầm */
+  --brand-primary: #020617; /* Slate 950 - Đen sâu thẳm */
+  --brand-secondary: #1e293b; /* Slate 800 - Nền phụ tối */
+
+  /* Màu nhấn (Accent) - Thay màu xanh chói bằng màu Xám Xanh Đậm */
+  --brand-accent: #334155; /* Slate 700 - Màu nhấn trầm */
+  --brand-accent-hover: #0f172a; /* Slate 900 - Hover đen */
+
+  /* Gradient: Từ Xám đậm sang Đen (Rất sang) */
+  --brand-gradient: linear-gradient(135deg, #475569 0%, #1e293b 100%);
+
+  /* Backgrounds */
+  --bg-body: #f1f5f9; /* Slate 100 - Nền xám nhẹ (ko phải trắng tinh) */
+  --bg-surface: #ffffff;
+
+  /* Text */
+  --text-main: #334155; /* Slate 700 - Chữ xám đậm dễ đọc */
+  --text-muted: #64748b; /* Slate 500 */
+  --text-light: #94a3b8;
+
+  /* Borders & Shadows (Bóng đen thay vì bóng xanh) */
+  --border-color: #e2e8f0;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 body {
-  font-family: "Be Vietnam Pro", sans-serif; /* Font hiện đại hơn cho tiếng Việt */
-  background-color: var(--bg-light);
-  color: var(--text-dark);
-  padding-top: var(--navbar-height); /* Thay thế cho div spacer 80px */
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  overflow-x: hidden;
+  line-height: 1.6;
 }
 
-/* Scrollbar đẹp hơn */
-::-webkit-scrollbar {
-  width: 8px;
+/* Bootstrap Overrides - Giảm độ chói */
+.text-primary {
+  color: #475569 !important;
+} /* Chữ primary giờ là xám xanh */
+.bg-primary {
+  background-color: var(--brand-secondary) !important;
 }
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
+.btn-primary {
+  background-color: var(--brand-secondary);
+  border-color: var(--brand-secondary);
 }
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+.btn-primary:hover {
+  background-color: var(--brand-primary);
+  border-color: var(--brand-primary);
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+a {
+  text-decoration: none;
+  transition: color 0.2s;
+  color: var(--text-main);
+}
+a:hover {
+  color: var(--brand-secondary);
 }
 
 /* =========================================
-   GLASS NAVBAR
+   2. NAVBAR (GLASS & MINIMAL)
    ========================================= */
 .navbar-glass {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px); /* Hiệu ứng kính mờ */
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  height: var(--navbar-height);
-  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
 }
 
 .navbar-brand {
   font-weight: 800;
-  letter-spacing: -0.5px;
-  background: linear-gradient(45deg, var(--primary-color), var(--primary-dark));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent; /* Chữ gradient */
+  letter-spacing: -0.03em;
+  color: var(--brand-primary) !important;
 }
 
 .nav-link {
-  font-weight: 500;
-  color: var(--text-dark) !important;
-  position: relative;
-  padding: 0.5rem 1rem;
-  transition: color 0.3s ease;
+  font-weight: 600;
+  color: var(--text-muted) !important;
+  font-size: 0.9rem;
+  text-transform: uppercase; /* Chữ in hoa nhỏ tạo cảm giác gọn */
+  letter-spacing: 0.05em;
 }
 
-.nav-link:hover {
-  color: var(--primary-color) !important;
-}
-
-/* Hiệu ứng gạch chân khi hover menu */
-.nav-link::after {
-  content: "";
-  position: absolute;
-  width: 0;
-  height: 2px;
-  bottom: 5px;
-  left: 50%;
-  background-color: var(--primary-color);
-  transition: all 0.3s ease;
-  transform: translateX(-50%);
-}
-
-.nav-link:hover::after {
-  width: 80%; /* Gạch chân mở rộng ra */
+.nav-link:hover,
+.nav-link.active {
+  color: var(--brand-primary) !important; /* Hover chuyển màu đen */
 }
 
 /* =========================================
-   BUTTONS & BADGES UI
+   3. BUTTONS (THEME TRẦM)
    ========================================= */
-.btn-primary-gradient {
-  background: linear-gradient(
-    135deg,
-    var(--primary-color),
-    var(--primary-dark)
-  );
-  border: none;
-  color: white;
-  box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
-  transition: transform 0.2s, box-shadow 0.2s;
+
+/* Nút Đăng nhập Premium (Phiên bản Trầm) */
+.btn-login-premium {
+  /* Gradient Xám -> Đen */
+  background: var(--brand-gradient);
+
+  color: #ffffff !important;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 10px 28px;
+  border-radius: 6px; /* Bo góc vuông hơn chút cho nam tính */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  /* Bóng đổ xám nhẹ, không màu mè */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
 }
 
-.btn-primary-gradient:hover {
+.btn-login-premium:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(13, 110, 253, 0.3);
+  /* Hover chuyển sang đen tuyền */
+  background: #0f172a;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+.btn-login-premium:active {
+  transform: translateY(0);
+}
+
+/* Nút Submit Form */
+.btn-submit {
+  background-color: var(--brand-secondary);
   color: white;
+  font-weight: 700;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
 }
-
-.user-dropdown-btn {
-  transition: all 0.3s ease;
-  border: 1px solid #e2e8f0 !important;
-}
-
-.user-dropdown-btn:hover {
-  background-color: white !important;
-  box-shadow: var(--shadow-md) !important;
-  transform: translateY(-1px);
+.btn-submit:hover {
+  background-color: var(--brand-primary);
 }
 
 /* =========================================
-   FOOTER
-   ========================================= */
-.footer-modern {
-  background-color: #0f172a; /* Dark Slate */
-  border-top: 4px solid var(--primary-color);
-}
-
-.footer-link {
-  color: #94a3b8;
-  text-decoration: none;
-  transition: color 0.2s;
-  display: block;
-  margin-bottom: 8px;
-}
-
-.footer-link:hover {
-  color: white;
-  transform: translateX(5px); /* Hiệu ứng đẩy nhẹ sang phải */
-}
-/* =========================================
-   HOME PAGE STYLES
+   4. AUTH & FORMS (CLEAN & MATTE)
    ========================================= */
 
-/* --- HERO SECTION --- */
-.hero-section {
-  position: relative;
-  min-height: 85vh; /* Chiếm 85% chiều cao màn hình để hoành tráng hơn */
-  margin-top: -76px; /* Bù trừ cho navbar glass */
-  padding-top: 100px;
-  overflow: hidden; /* Cắt bỏ phần ảnh thừa khi zoom */
+.body-partner {
+  background-color: #f1f5f9;
+  /* Nền hạt (Grainy) hoặc trơn, bỏ gradient xanh */
+  background-image: none;
+}
+
+.register-container-partner {
+  max-width: 850px;
+  margin-top: 100px;
+  margin-bottom: 60px;
+}
+
+.card-partner-register {
+  background: #ffffff;
+  border-radius: 12px; /* Bo góc vừa phải */
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color);
+}
+
+/* Header Form */
+.form-header h3 {
+  font-weight: 800;
+  color: var(--brand-primary);
+  letter-spacing: -0.02em;
+}
+
+.section-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-muted); /* Màu xám thay vì xanh */
+  margin-bottom: 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
   display: flex;
   align-items: center;
 }
+.section-title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border-color);
+  margin-left: 12px;
+}
+
+/* --- INPUT UNIFIED (Tông xám) --- */
+.input-group-unified {
+  display: flex;
+  align-items: center;
+  background-color: #f8fafc; /* Nền input hơi xám nhẹ */
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.input-group-unified .input-group-text {
+  background-color: transparent;
+  border: none;
+  color: var(--text-muted);
+}
+
+.input-group-unified .form-control {
+  border: none;
+  box-shadow: none;
+  padding: 0.85rem 0.85rem 0.85rem 0;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  background-color: transparent;
+  font-weight: 500;
+}
+
+/* Focus: Viền đen/xám đậm thay vì xanh */
+.input-group-unified:focus-within {
+  border-color: var(--brand-secondary);
+  background-color: #fff;
+  box-shadow: 0 0 0 2px rgba(30, 41, 59, 0.1);
+}
+.input-group-unified:focus-within .input-group-text {
+  color: var(--brand-secondary);
+}
+
+/* =========================================
+   5. FOOTER (DARK & MINIMAL)
+   ========================================= */
+.footer-modern {
+  background-color: #0f172a; /* Nền tối hẳn */
+  border-top: none;
+  padding-top: 4rem;
+  padding-bottom: 2rem;
+}
+.footer-link {
+  color: #94a3b8;
+  text-decoration: none;
+  transition: 0.2s;
+}
+.footer-link:hover {
+  color: white;
+}
+.hover-primary:hover {
+  color: #e2e8f0 !important;
+}
+
+/* Animation */
+.fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* =========================================
+   6. AUTH SPLIT SCREEN LAYOUT
+   ========================================= */
+.auth-split-screen {
+  min-height: 100vh;
+  display: flex;
+  width: 100%;
+}
+
+/* Cột Visual bên trái */
+.auth-visual-side {
+  background-color: var(--brand-primary); /* Slate 900 */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 3rem;
+  overflow: hidden;
+}
+
+.auth-visual-side::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Overlay ảnh mờ tối */
+  background: linear-gradient(
+    to bottom,
+    rgba(15, 23, 42, 0.8),
+    rgba(15, 23, 42, 0.9)
+  );
+  z-index: 1;
+}
+
+.auth-visual-content {
+  position: relative;
+  z-index: 2;
+  color: white;
+}
+
+/* Card đánh giá nổi (Floating Cards) */
+.glass-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Cột Form bên phải */
+.auth-form-side {
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+}
+
+.auth-form-wrapper {
+  width: 100%;
+  max-width: 420px;
+  /* Hiệu ứng chuyển đổi mượt */
+  transition: all 0.3s ease;
+}
+
+/* Nút Social (Google/Github) - Style phẳng */
+.btn-social-flat {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-main);
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+.btn-social-flat:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+/* Ẩn hiện form */
+.hidden {
+  display: none !important;
+}
+/* =========================================
+   7. HOME PAGE STYLES (PREMIUM)
+   ========================================= */
+
+/* --- Hero Section --- */
+.hero-section {
+  position: relative;
+  min-height: 85vh; /* Cao gần hết màn hình */
+  display: flex;
+  align-items: center;
+  background-color: var(--brand-primary);
+  overflow: hidden;
+  padding-top: 80px; /* Tránh navbar */
+}
+
 .hero-bg-image {
   position: absolute;
   top: 0;
@@ -162,260 +385,514 @@ body {
   height: 100%;
   background-size: cover;
   background-position: center;
-  z-index: 0;
-  /* Hiệu ứng Zoom chậm */
-  animation: zoomEffect 20s infinite alternate;
+  opacity: 0.4; /* Làm tối ảnh nền */
+  /* Hiệu ứng Parallax nhẹ */
+  background-attachment: fixed;
 }
 
-@keyframes zoomEffect {
-  0% {
-    transform: scale(1);
-  }
-  100% {
-    transform: scale(1.1);
-  }
-}
 .hero-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 1;
-  /* Gradient chéo: Tối ở góc trái dưới, sáng dần lên phải */
+  /* Gradient từ đen dưới lên để làm nổi bật text */
   background: linear-gradient(
-    105deg,
-    rgba(15, 23, 42, 0.95) 0%,
-    /* Màu xanh đen đậm đè chữ */ rgba(15, 23, 42, 0.8) 40%,
-    rgba(15, 23, 42, 0.2) 100%
-  ); /* Trong suốt để lộ ảnh bên phải */
+    to top,
+    var(--brand-primary) 10%,
+    rgba(15, 23, 42, 0.4) 100%
+  );
 }
+
 .hero-content {
   position: relative;
-  z-index: 10;
+  z-index: 2;
 }
-.badge-glass {
+
+.hero-title {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Badge trên Hero */
+.badge-hero {
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #e2e8f0;
   padding: 8px 16px;
-  border-radius: 50px;
+  border-radius: 50rem;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-.hero-title {
-  font-size: 3.5rem; /* To hơn */
-  font-weight: 800; /* Đậm hơn */
-  line-height: 1.1;
-  letter-spacing: -1px;
-  margin-bottom: 20px;
-  color: white;
-}
-.text-gradient-hero {
-  background: linear-gradient(
-    to right,
-    #60a5fa,
-    #38bdf8,
-    #a855f7
-  ); /* Thêm chút tím cho hiện đại */
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  display: block; /* Xuống dòng */
-  position: relative;
-  text-shadow: 0 0 30px rgba(96, 165, 250, 0.3); /* Hiệu ứng Glow nhẹ */
-}
-.hero-description {
-  font-size: 1.15rem;
-  color: #cbd5e1; /* Màu xám xanh sáng hơn */
-  font-weight: 400;
-  line-height: 1.6;
-  margin-bottom: 35px;
-  max-width: 90%;
-}
-.form-label-hero {
   font-size: 0.85rem;
-  font-weight: 700;
-  color: #475569;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 8px;
-}
-.btn-hero-primary {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  border: none;
-  padding: 14px 32px;
-  border-radius: 50px;
-  font-weight: 700;
-  color: white;
-  box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
-  transition: all 0.3s;
+  margin-bottom: 1.5rem;
 }
 
-.btn-hero-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.5);
-  color: white;
-}
-.btn-hero-secondary {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 14px 32px;
-  border-radius: 50px;
-  font-weight: 700;
-  color: white;
-  backdrop-filter: blur(5px);
-  transition: all 0.3s;
-}
-
-.btn-hero-secondary:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  transform: translateY(-3px);
-}
-/* Thanh tìm kiếm nổi */
+/* --- Search Card (Floating) --- */
 .search-card-floating {
-  background: rgba(255, 255, 255, 0.95); /* Tăng độ đậm màu trắng lên chút */
-  backdrop-filter: blur(10px);
-  border-radius: 24px;
-  padding: 35px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* Bóng đổ sâu hơn */
-  border: 1px solid rgba(255, 255, 255, 0.8);
-}
-
-.search-card-floating:hover {
-  transform: translateY(-5px);
-}
-
-.form-control-lg-custom {
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 12px 20px;
-  font-size: 1rem;
-  font-weight: 500;
-  height: 55px;
-}
-.form-control-lg-custom:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
-}
-
-/* --- COURT CARD (Thẻ sân) --- */
-.court-card {
-  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
   border-radius: 16px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 2rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* --- Feature Box --- */
+.feature-card {
   background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 2rem;
+  height: 100%;
+  transition: all 0.3s ease;
+}
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--brand-secondary);
+}
+.feature-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background-color: #f1f5f9;
+  color: var(--brand-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: 0.3s;
+}
+.feature-card:hover .feature-icon {
+  background-color: var(--brand-primary);
+  color: white;
+}
+
+/* --- Court Card (Sân) --- */
+/* --- Court Card (Sân) --- */
+.court-card {
+  background: white;
+  /* 1. Thêm viền mỏng để tách biệt với nền */
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
   overflow: hidden;
+  /* 2. Tạo bóng đổ nhẹ giúp card "nhấc" khỏi mặt sàn */
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .court-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transform: translateY(-5px);
+  /* 3. Khi hover: Bóng đổ sâu hơn và viền chuyển màu chủ đạo */
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 8px 10px -6px rgba(0, 0, 0, 0.01);
+  border-color: var(
+    --brand-accent
+  ); /* Màu viền chuyển sang màu nhấn (xám xanh/đen) */
 }
 
+/* Các phần bên trong giữ nguyên */
 .court-img-wrapper {
-  height: 220px;
   position: relative;
+  height: 220px;
   overflow: hidden;
 }
-
 .court-img-top {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.5s ease;
 }
-
 .court-card:hover .court-img-top {
-  transform: scale(1.05); /* Zoom nhẹ ảnh khi hover */
+  transform: scale(1.05);
 }
 
-.rating-badge {
+/* Badge trên ảnh sân */
+.court-badge {
   position: absolute;
-  top: 15px;
-  right: 15px;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 5px 10px;
-  border-radius: 8px;
-  font-weight: 700;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  font-size: 0.85rem;
-}
-
-.court-type-badge {
-  position: absolute;
-  bottom: 15px;
-  left: 15px;
-  padding: 5px 12px;
+  top: 12px;
+  padding: 6px 12px;
   border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.court-badge-rating {
+  right: 12px;
+  background: white;
+  color: var(--brand-primary);
+}
+.court-badge-type {
+  left: 12px;
+  background: rgba(15, 23, 42, 0.85);
+  color: white;
   backdrop-filter: blur(4px);
 }
-.badge-wood {
-  background: rgba(245, 158, 11, 0.9);
-  color: white;
-} /* Sàn gỗ - Cam */
-.badge-synthetic {
-  background: rgba(13, 110, 253, 0.9);
-  color: white;
-} /* Thảm - Xanh */
 
-/* --- FEATURE ICON BOX --- */
-.feature-box {
-  padding: 30px 20px;
-  border-radius: 16px;
-  background: white;
-  text-align: center;
-  transition: all 0.3s;
-  border: 1px solid #f1f5f9;
+/* --- Partner CTA Section --- */
+.partner-section {
+  background-color: var(--brand-primary); /* Nền đen xanh */
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
 }
-.feature-box:hover {
+/* Họa tiết nền mờ */
+.partner-bg-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(#334155 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.1;
+}
+/* =========================================
+   8. USER DASHBOARD / BOOKING
+   ========================================= */
+
+/* Tabs lọc dạng viên thuốc (Segmented Control) */
+.nav-pills-custom {
+  background-color: #f1f5f9; /* Nền xám nhẹ */
+  padding: 4px;
+  border-radius: 10px;
+  display: inline-flex;
+  gap: 4px;
+}
+.nav-pills-custom .nav-link {
+  color: var(--text-muted) !important;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 6px 20px !important;
+  border-radius: 8px;
+  transition: all 0.2s;
+  background: transparent;
+}
+.nav-pills-custom .nav-link:hover {
+  color: var(--brand-primary) !important;
+}
+.nav-pills-custom .nav-link.active {
+  background-color: white;
+  color: var(--brand-primary) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Badge Mã vé */
+.badge-id {
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  background-color: #f1f5f9;
+  color: var(--text-main);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  border: 1px solid var(--border-color);
+}
+/* =========================================
+   9. BOOKING PAGE (USER)
+   ========================================= */
+
+/* Ảnh bìa sân */
+.court-hero-img {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 24px;
   box-shadow: var(--shadow-lg);
-  border-color: transparent;
-  transform: translateY(-5px);
 }
-.icon-circle {
-  width: 70px;
-  height: 70px;
-  margin: 0 auto 20px;
+
+/* Card thông tin sân */
+.court-info-card {
+  background: white;
+  border-radius: 24px;
+  border: 1px solid var(--border-color);
+  padding: 2rem;
+  margin-top: -60px; /* Đẩy lên đè lên ảnh một chút tạo layer */
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+  max-width: 95%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Form đặt lịch (Sticky) */
+.booking-card {
+  position: sticky;
+  top: 100px; /* Dính khi cuộn */
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  box-shadow: var(--shadow-lg);
+  z-index: 10;
+}
+
+/* Ô chọn giờ (Time Slot Button) */
+.slot-label {
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  font-weight: 600;
+  transition: all 0.2s;
+  background-color: white;
+}
+.slot-input:checked + .slot-label {
+  background-color: var(--brand-secondary); /* Màu tối khi chọn */
+  color: white;
+  border-color: var(--brand-secondary);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+.slot-disabled {
+  background-color: #f1f5f9;
+  color: #cbd5e1;
+  border-color: #e2e8f0;
+  cursor: not-allowed;
+}
+
+/* Badge tiện ích */
+.badge-amenity {
+  background-color: #f8fafc;
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  padding: 8px 16px;
+  border-radius: 50rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+/* =========================================
+   10. PARTNER LANDING PAGE (B2B)
+   ========================================= */
+
+/* Hero Section riêng cho trang Partner */
+.partner-hero-section {
+  background-color: var(--brand-primary);
+  padding: 100px 0 80px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+.partner-hero-bg-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(
+    rgba(255, 255, 255, 0.1) 1px,
+    transparent 1px
+  );
+  background-size: 30px 30px;
+  opacity: 0.3;
+}
+
+/* Các thẻ lợi ích */
+.benefit-card {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  height: 100%;
+  transition: all 0.3s ease;
+}
+.benefit-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--brand-accent);
+}
+.benefit-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  margin-bottom: 1.5rem;
+  background-color: #f8fafc;
+  color: var(--brand-primary);
+  transition: 0.3s;
+}
+.benefit-card:hover .benefit-icon-wrapper {
+  background-color: var(--brand-primary);
+  color: white;
+}
+
+/* Thống kê (Stats) */
+.stat-item h3 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--brand-accent);
+  margin-bottom: 0.5rem;
+}
+
+/* Quy trình (Steps) */
+.step-card {
+  position: relative;
+  padding: 2rem;
+  text-align: center;
+}
+.step-number {
+  width: 40px;
+  height: 40px;
+  background-color: var(--brand-primary);
+  color: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.8rem;
-  background: var(--bg-light);
-  color: var(--primary-color);
-  transition: all 0.3s;
+  font-weight: bold;
+  margin: 0 auto 1.5rem;
+  position: relative;
+  z-index: 2;
 }
-.feature-box:hover .icon-circle {
-  background: var(--primary-color);
-  color: white;
+/* Đường nối giữa các bước (chỉ hiện trên màn hình lớn) */
+@media (min-width: 992px) {
+  .step-card::after {
+    content: "";
+    position: absolute;
+    top: 40px; /* Căn chỉnh với step-number */
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background-color: #e2e8f0;
+    z-index: 1;
+  }
+  .col-lg-4:last-child .step-card::after {
+    display: none; /* Ẩn đường nối ở bước cuối */
+  }
+}
+/* =========================================
+   11. BOOKING FLOW (USER)
+   ========================================= */
+
+/* --- Timeline Grid (Trang chọn giờ) --- */
+.booking-timeline-wrapper {
+  overflow-x: auto;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  /* Thanh cuộn đẹp */
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
 }
 
-/* --- PARTNER CTA SECTION --- */
-.partner-cta-section {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  border-radius: 24px;
-  position: relative;
-  overflow: hidden;
+.booking-table {
+  width: 100%;
+  min-width: 800px; /* Đảm bảo ko bị co trên mobile */
+  border-collapse: separate;
+  border-spacing: 0;
 }
-.partner-cta-bg {
-  position: absolute;
+
+/* Cột tên sân cố định bên trái */
+.court-name-col {
+  position: sticky;
+  left: 0;
+  background: white;
+  z-index: 10;
+  width: 100px;
+  border-right: 2px solid #e2e8f0;
+  font-weight: 700;
+  color: var(--brand-primary);
+  padding: 10px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Ô giờ header */
+.time-header {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-align: center;
+  padding: 8px;
+  border-bottom: 1px solid var(--border-color);
+  border-right: 1px solid #f1f5f9;
+}
+
+/* Ô chọn giờ (Slot) */
+.booking-slot {
+  height: 50px;
+  border-bottom: 1px solid #f1f5f9;
+  border-right: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: all 0.1s;
+  position: relative;
+}
+
+/* Trạng thái Slot */
+.booking-slot.free {
+  background-color: #ffffff;
+}
+.booking-slot.free:hover {
+  background-color: #f1f5f9;
+}
+
+/* Đã đặt (Đỏ nhạt) */
+.booking-slot.booked {
+  background-color: #fee2e2; /* Red 100 */
+  cursor: not-allowed;
+  /* Gạch chéo */
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.5) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0.5) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 10px 10px;
+}
+
+/* Đang chọn (Xanh thương hiệu) */
+.booking-slot.selected {
+  background-color: var(--brand-accent);
+  border-color: var(--brand-accent);
+}
+
+/* Thanh toán Footer (Sticky) */
+.booking-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
   right: 0;
-  top: 0;
-  height: 100%;
-  width: 50%;
-  background: url("https://images.unsplash.com/photo-1526676037777-05a232554f77?q=80&w=1000")
-    no-repeat center center/cover;
-  opacity: 0.2;
-  mask-image: linear-gradient(to right, transparent, black);
-  -webkit-mask-image: linear-gradient(to right, transparent, black);
+  background: white;
+  padding: 1rem 0;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  border-top: 1px solid var(--border-color);
+}
+
+/* --- Confirmation Page --- */
+.confirm-section-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--brand-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.booking-summary-card {
+  background: var(--brand-primary); /* Nền tối */
+  color: white;
+  border-radius: 12px;
+  padding: 1.5rem;
 }

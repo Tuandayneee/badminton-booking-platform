@@ -1,0 +1,169 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Đặt lịch - Badminton Pro{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 100px; padding-bottom: 100px;"> 
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold text-dark mb-0">Đặt lịch trực quan</h3>
+        
+        <div class="d-flex gap-2">
+            <div class="input-group-unified bg-white shadow-sm" style="width: auto;">
+                <span class="input-group-text pe-2"><i class="fa-regular fa-calendar"></i></span>
+                
+                <input type="date" 
+                       id="bookingDate" 
+                       class="form-control fw-bold border-0" 
+                       value="{{ selected_date }}" 
+                       min="{{ min_date }}" 
+                       max="{{ max_date }}" 
+                       onchange="window.location.href='?date=' + this.value">
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex gap-4 mb-4 small fade-in-up">
+        <div class="d-flex align-items-center gap-2">
+            <div class="border rounded bg-white" style="width: 20px; height: 20px;"></div>
+            <span class="text-secondary">Trống</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <div class="rounded" style="width: 20px; height: 20px; background-color: #fee2e2;"></div>
+            <span class="text-secondary">Đã đặt</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <div class="rounded" style="width: 20px; height: 20px; background-color: var(--brand-accent);"></div>
+            <span class="text-secondary fw-bold">Đang chọn</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <div class="rounded" style="width: 20px; height: 20px; background-color: #6d6d6e;"></div>
+            <span class="text-secondary fw-bold">Khóa</span>
+        </div>
+    </div>
+
+    <div class="booking-timeline-wrapper shadow-sm fade-in-up" style="animation-delay: 0.1s;">
+        <table class="booking-table">
+            <thead>
+                <tr>
+                    <th class="court-name-col border-bottom">Sân</th>
+                    {% for time in time_labels %}
+                        <th class="time-header">{{ time }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in courts_data %}
+                <tr>
+                    <td class="court-name-col">
+                        <div class="d-flex flex-column align-items-center">
+                            <span>{{ item.court_obj.name }}</span>
+                            <span class="badge bg-light text-secondary border fw-normal mt-1" style="font-size: 0.6rem;">
+                                {{ item.court_obj.get_type_court_display }}
+                            </span>
+                        </div>
+                    </td>
+                    
+                    {% for slot in item.slots %}
+                    <td class="booking-slot {{ slot.status }} position-relative" 
+                        data-court-id="{{ item.court_obj.id }}" 
+                        data-court-name="{{ item.court_obj.name }}"
+                        data-time="{{ slot.time }}"
+                        data-price="{{ slot.price }}"
+                        {% if slot.status == 'booked' %}
+                            title="Đã có người đặt"
+                            style="cursor: not-allowed; background-color: #fee2e2;"
+                            
+                        {% elif slot.status == 'expired' or slot.status == 'completed' %}
+                            title="Đã qua thời gian đặt"
+                            style="cursor: not-allowed; background-color: #6d6d6e; color: #9ca3af;"
+                            
+                        {% else %}
+                            title="Sân trống: {{ slot.time }}"
+                            onclick="toggleSlot(this)"
+                        {% endif %}
+                    >
+                        {% if slot.is_golden and slot.status == 'free' %}
+                            <i class="fa-solid fa-bolt text-warning position-absolute top-0 end-0 m-1" style="font-size: 8px;"></i>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="booking-footer slide-up">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <small class="text-muted d-block">Tổng tạm tính</small>
+                <div class="d-flex align-items-baseline">
+                    <h3 class="fw-bold text-primary mb-0" id="totalPrice">0đ</h3>
+                    <span class="text-secondary ms-2 small" id="totalHours">(0h)</span>
+                </div>
+            </div>
+            
+            <form method="POST" action="{% url 'booking_confirm' %}" id="bookingForm">
+                {% csrf_token %}
+                <input type="hidden" name="booking_data" id="bookingDataInput">
+                <input type="hidden" name="selected_date" id="selectedDateInput">
+
+                <button type="button" onclick="submitBooking()" class="btn btn-login-premium px-5 py-3 rounded-pill shadow-lg">
+                    Tiếp theo <i class="fa-solid fa-arrow-right ms-2"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedSlots = []; 
+    let total = 0;
+
+    function toggleSlot(element) {
+        const courtId = element.getAttribute('data-court-id');
+        const courtName = element.getAttribute('data-court-name');
+        const time = element.getAttribute('data-time');
+        const pricePerHour = parseFloat(element.getAttribute('data-price'));
+        const pricePerSlot = pricePerHour / 2; 
+
+        const slotKey = `${courtId}_${time}`;
+
+        if (element.classList.contains('selected')) {
+            element.classList.remove('selected');
+            total -= pricePerSlot;
+            selectedSlots = selectedSlots.filter(slot => slot.key !== slotKey);
+        } else {
+            element.classList.add('selected');
+            total += pricePerSlot;
+            selectedSlots.push({
+                key: slotKey, court_id: courtId, court_name: courtName, time: time, price: pricePerSlot
+            });
+        }
+        updateFooter();
+    }
+
+    function updateFooter() {
+        document.getElementById('totalPrice').innerText = total.toLocaleString('vi-VN') + 'đ';
+        const totalHours = selectedSlots.length * 0.5;
+        document.getElementById('totalHours').innerText = '(' + totalHours + 'h)';
+    }
+
+    function submitBooking() {
+        if (selectedSlots.length === 0) {
+            alert("Vui lòng chọn ít nhất một khung giờ!");
+            return;
+        }
+        const dateValue = document.getElementById('bookingDate').value;
+        document.getElementById('selectedDateInput').value = dateValue;
+
+        const jsonString = JSON.stringify(selectedSlots);
+        document.getElementById('bookingDataInput').value = jsonString;
+        document.getElementById('bookingForm').submit();
+    }
+</script>
+{% endblock %}

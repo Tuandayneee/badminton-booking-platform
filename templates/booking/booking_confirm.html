@@ -1,0 +1,102 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Xác nhận đặt sân{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            
+            <div class="mb-4 fade-in-up">
+                <a href="#" class="text-decoration-none text-muted small mb-2 d-inline-block">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Quay lại chọn giờ
+                </a>
+                <h3 class="fw-bold text-dark">Xác nhận & Thanh toán</h3>
+            </div>
+
+            <form method="POST" class="fade-in-up" style="animation-delay: 0.1s;">
+                {% csrf_token %}
+
+                <div class="booking-summary-card mb-4 shadow-lg">
+                    <div class="mb-4">
+                        <div class="confirm-section-title text-white-50">
+                            <i class="fa-solid fa-map-location-dot"></i> Thông tin sân
+                        </div>
+                        <h5 class="fw-bold mb-1">Cụm thể thao Cầu Giấy Arena</h5>
+                        <p class="text-white-50 small mb-0">123 Xuân Thủy, Cầu Giấy, Hà Nội</p>
+                    </div>
+                    
+                    <hr class="border-secondary opacity-25">
+
+                    <div>
+                        <div class="confirm-section-title text-white-50">
+                            <i class="fa-regular fa-clock"></i> Chi tiết lịch đặt
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Ngày:</span>
+                            <span class="fw-bold">20/01/2026</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Sân 1:</span>
+                            <span class="fw-bold">19:00 - 21:00</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top border-secondary border-opacity-25">
+                            <span class="text-white-50">Tổng tiền (2h):</span>
+                            <span class="fs-4 fw-bold text-warning">1.200.000đ</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4 mb-4 p-4">
+                    <h6 class="confirm-section-title text-dark mb-4">
+                        <i class="fa-solid fa-user-pen text-primary"></i> Thông tin của bạn
+                    </h6>
+
+                    <div class="mb-3">
+                        <label class="form-label">Họ và tên</label>
+                        <div class="input-group-unified">
+                            <span class="input-group-text"><i class="fa-regular fa-user"></i></span>
+                            <input type="text" class="form-control" value="Lê Anh Tuấn">
+                            <button type="button" class="btn text-muted border-0"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Số điện thoại</label>
+                        <div class="input-group-unified">
+                            <span class="input-group-text"><img src="https://upload.wikimedia.org/wikipedia/commons/2/21/Flag_of_Vietnam.svg" width="20"></span>
+                            <input type="text" class="form-control" value="0966886500">
+                            <button type="button" class="btn text-muted border-0"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="mb-0">
+                        <label class="form-label">Ghi chú cho chủ sân</label>
+                        <div class="input-group-unified">
+                            <span class="input-group-text align-self-start pt-3"><i class="fa-regular fa-comment"></i></span>
+                            <textarea class="form-control" rows="2" placeholder="Ví dụ: Tôi cần thuê thêm 2 vợt..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert bg-warning bg-opacity-10 border-warning border-opacity-25 rounded-3 d-flex gap-3 mb-4">
+                    <i class="fa-solid fa-triangle-exclamation text-warning mt-1"></i>
+                    <div class="small text-secondary">
+                        <strong>Lưu ý:</strong> Vui lòng đến đúng giờ. Nếu hủy sân, bạn cần báo trước tối thiểu 2 tiếng để được hoàn tiền.
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-login-premium w-100 py-3 rounded-pill fw-bold fs-6 shadow-lg mb-3">
+                    XÁC NHẬN & THANH TOÁN
+                </button>
+                <div class="text-center">
+                    <small class="text-muted"><i class="fa-solid fa-shield-halved me-1"></i>Bảo mật thanh toán 100%</small>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

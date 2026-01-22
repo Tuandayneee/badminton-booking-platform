@@ -1,0 +1,318 @@
+{% load static %}
+
+<div class="modal fade" id="addCenterModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            
+            <div class="modal-header px-4 py-3 bg-white border-bottom">
+                <div>
+                    <h5 class="modal-title fw-bold text-dark" id="modalTitle">THÊM CƠ SỞ MỚI</h5>
+                    <p class="mb-0 small text-secondary">Nhập thông tin chi tiết và ghim vị trí trên bản đồ</p>
+                </div>
+                <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-4 bg-f8fafc"> <form action="{% url 'partner_add_center' %}" method="POST" enctype="multipart/form-data" id="addCenterForm">
+                    {% csrf_token %}
+                    
+                    <div class="d-none">
+                        {{ center_form.address }} 
+                    </div>
+
+                    <div class="row g-4">
+                        
+                        <div class="col-lg-5">
+                            <div class="card-modern h-100 p-4">
+                                <h6 class="fw-bold text-dark mb-3 small text-uppercase ls-tight">
+                                    <i class="fa-regular fa-id-card me-2 text-primary"></i>Thông tin chung
+                                </h6>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold small text-secondary">Tên trung tâm <span class="text-danger">*</span></label>
+                                    {{ center_form.name }}
+                                </div>
+
+                                <div class="p-3 bg-light rounded-3 mb-3 border border-light">
+                                    <label class="form-label fw-bold text-dark small mb-2">
+                                        <i class="fa-solid fa-map-pin me-1 text-danger"></i>Địa chỉ hành chính
+                                    </label>
+                                    
+                                    <div class="mb-2">
+                                        <select class="form-select form-select-sm" id="districtSelect">
+                                            <option value="">-- Chọn Quận/Huyện --</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-2">
+                                        <select class="form-select form-select-sm" id="wardSelect" disabled>
+                                            <option value="">-- Chọn Phường/Xã --</option>
+                                        </select>
+                                    </div>
+
+                                    <input type="text" class="form-control form-control-sm" id="streetInput" placeholder="Số nhà, Tên đường...">
+                                </div>
+
+                                <div class="mb-0">
+                                    <label class="form-label fw-bold small text-secondary">Mô tả giới thiệu</label>
+                                    {{ center_form.description }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-7">
+                            <div class="card-modern h-100 p-4 d-flex flex-column">
+                                <h6 class="fw-bold text-dark mb-3 small text-uppercase ls-tight">
+                                    <i class="fa-solid fa-crosshairs me-2 text-primary"></i>Vị trí bản đồ
+                                </h6>
+
+                                <div id="mapContainer" class="map-container-pro flex-grow-1 mb-3" style="min-height: 350px;"></div>
+                                
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <small class="text-muted fst-italic">
+                                        <i class="fa-solid fa-circle-info me-1"></i>Kéo ghim đỏ để lấy tọa độ.
+                                    </small>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <label class="form-label fw-bold small text-secondary">Vĩ độ (Lat)</label>
+                                        <input type="text" name="latitude" id="id_latitude" class="form-control bg-light text-muted" readonly>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label fw-bold small text-secondary">Kinh độ (Lng)</label>
+                                        <input type="text" name="longitude" id="id_longitude" class="form-control bg-light text-muted" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-4 mt-1">
+                        <div class="col-12">
+                            <div class="card-modern p-4">
+                                <h6 class="fw-bold text-dark mb-3 small text-uppercase ls-tight">
+                                    <i class="fa-solid fa-sliders me-2 text-primary"></i>Cấu hình vận hành
+                                </h6>
+                                
+                                <div class="row g-3 align-items-start">
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold small text-secondary">Giờ mở cửa</label>
+                                        {{ center_form.open_time }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold small text-secondary">Giờ đóng cửa</label>
+                                        {{ center_form.close_time }}
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold small text-secondary">Ảnh bìa</label>
+                                        {{ center_form.image }}
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-bold small text-secondary d-block">Trạng thái</label>
+                                        <div class="form-check form-switch mt-2">
+                                            {{ center_form.is_active }}
+                                            <label class="form-check-label small" for="id_is_active">Đang hoạt động</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 pt-3 border-top">
+                                    <label class="form-label fw-bold small text-secondary mb-2">Tiện ích có sẵn</label>
+                                    <div class="amenity-grid p-3 bg-light rounded-3 border border-light">
+                                        {{ center_form.amenities }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-pro btn-pro-light px-4" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-pro btn-pro-primary px-4 shadow-sm">
+                            <i class="fa-solid fa-check me-2"></i>
+                            {% if is_edit %}Lưu Cập Nhật{% else %}Tạo Trung Tâm{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // --- GIỮ NGUYÊN LOGIC JS CỦA BẠN (Đã test và hoạt động tốt) ---
+        const modalEl = document.getElementById('addCenterModal');
+        const form = document.getElementById('addCenterForm');
+        const modalTitle = document.getElementById('modalTitle');
+        
+        // Input Form
+        const nameInput = form.querySelector('[name="name"]');
+        const typeInput = form.querySelector('[name="type_court"]');
+        const descInput = form.querySelector('[name="description"]');
+        const openInput = form.querySelector('[name="open_time"]');
+        const closeInput = form.querySelector('[name="close_time"]');
+        const activeInput = document.getElementById('id_is_active');
+        const amenitiesInputs = form.querySelectorAll('[name="amenities"]');
+
+        // Input Địa chính & Bản đồ
+        const districtSelect = document.getElementById('districtSelect');
+        const wardSelect = document.getElementById('wardSelect');
+        const streetInput = document.getElementById('streetInput');
+        const finalAddressInput = document.querySelector('[name="address"]'); 
+        const latInput = document.getElementById('id_latitude');
+        const lngInput = document.getElementById('id_longitude');
+
+        // Biến Map
+        let map;
+        let marker;
+        const defaultLat = 21.0285; 
+        const defaultLng = 105.8542;
+
+        // 1. API HÀNH CHÍNH
+        fetch('https://provinces.open-api.vn/api/p/1?depth=2')
+            .then(response => response.json())
+            .then(data => {
+                data.districts.forEach(district => {
+                    let option = document.createElement('option');
+                    option.value = district.code;
+                    option.text = district.name;
+                    districtSelect.add(option);
+                });
+            })
+            .catch(err => console.error("Lỗi API Quận:", err));
+
+        districtSelect.addEventListener('change', function() {
+            wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+            if (this.value) {
+                wardSelect.disabled = false;
+                fetch(`https://provinces.open-api.vn/api/d/${this.value}?depth=2`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.wards.forEach(ward => {
+                            let option = document.createElement('option');
+                            option.value = ward.name;
+                            option.text = ward.name;
+                            wardSelect.add(option);
+                        });
+                    })
+                    .catch(err => console.error("Lỗi API Phường:", err));
+            } else {
+                wardSelect.disabled = true;
+            }
+            updateFullAddress();
+        });
+
+        function updateFullAddress() {
+            let street = streetInput.value;
+            let ward = wardSelect.options[wardSelect.selectedIndex]?.text || '';
+            let district = districtSelect.options[districtSelect.selectedIndex]?.text || '';
+            if (ward.includes('--')) ward = '';
+            if (district.includes('--')) district = '';
+            let fullAddr = [street, ward, district, 'Hà Nội'].filter(item => item && item.trim() !== "").join(', ');
+            finalAddressInput.value = fullAddr;
+        }
+
+        wardSelect.addEventListener('change', updateFullAddress);
+        streetInput.addEventListener('input', updateFullAddress);
+
+        // 2. MODAL LOGIC
+        modalEl.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget; 
+            const mode = button.getAttribute('data-mode');
+            const actionUrl = button.getAttribute('data-action');
+
+            form.action = actionUrl;
+
+            if (mode === 'edit') {
+                modalTitle.textContent = "CẬP NHẬT THÔNG TIN";
+                nameInput.value = button.getAttribute('data-name');
+                if(typeInput) typeInput.value = button.getAttribute('data-type');
+                descInput.value = button.getAttribute('data-desc');
+                openInput.value = button.getAttribute('data-open');
+                closeInput.value = button.getAttribute('data-close');
+                
+                finalAddressInput.value = button.getAttribute('data-address'); 
+                if (button.getAttribute('data-address')) {
+                    streetInput.value = button.getAttribute('data-address').split(',')[0];
+                }
+                districtSelect.value = ""; 
+                wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+                wardSelect.disabled = true;
+
+                latInput.value = button.getAttribute('data-lat');
+                lngInput.value = button.getAttribute('data-lng');
+
+                if (activeInput) activeInput.checked = button.getAttribute('data-active') === 'true';
+
+                amenitiesInputs.forEach(input => input.checked = false);
+                const amenitiesData = button.getAttribute('data-amenities');
+                if (amenitiesData) {
+                    try {
+                        const amenitiesIds = JSON.parse(amenitiesData);
+                        amenitiesInputs.forEach(input => {
+                            if (amenitiesIds.includes(parseInt(input.value))) {
+                                input.checked = true;
+                            }
+                        });
+                    } catch (e) { console.error("Lỗi parse tiện ích:", e); }
+                }
+
+            } else {
+                modalTitle.textContent = "THÊM CƠ SỞ MỚI";
+                form.reset();
+                streetInput.value = "";
+                finalAddressInput.value = "";
+                latInput.value = "";
+                lngInput.value = "";
+                if (activeInput) activeInput.checked = true;
+                districtSelect.value = "";
+                wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+                wardSelect.disabled = true;
+                amenitiesInputs.forEach(input => input.checked = false);
+            }
+
+            setTimeout(() => {
+                initMap(mode, latInput.value, lngInput.value);
+            }, 200);
+        });
+
+        // 3. MAP LOGIC
+        function initMap(mode, lat, lng) {
+            let initialLat = (lat && lat !== '') ? parseFloat(lat) : defaultLat;
+            let initialLng = (lng && lng !== '') ? parseFloat(lng) : defaultLng;
+
+            if (!map) {
+                map = L.map('mapContainer').setView([initialLat, initialLng], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap'
+                }).addTo(map);
+
+                marker = L.marker([initialLat, initialLng], {draggable: true}).addTo(map);
+
+                marker.on('dragend', function(e) { updateLatLng(marker.getLatLng()); });
+                map.on('click', function(e) {
+                    marker.setLatLng(e.latlng);
+                    updateLatLng(e.latlng);
+                });
+            } else {
+                map.invalidateSize();
+                map.setView([initialLat, initialLng], 13);
+                marker.setLatLng([initialLat, initialLng]);
+            }
+        }
+
+        function updateLatLng(latlng) {
+            latInput.value = latlng.lat.toFixed(6);
+            lngInput.value = latlng.lng.toFixed(6);
+        }
+
+        form.addEventListener('submit', function() {
+            const btn = form.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang lưu...';
+        });
+    });
+</script>

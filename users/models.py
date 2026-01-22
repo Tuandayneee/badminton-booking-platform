@@ -9,8 +9,6 @@ class User(AbstractUser):
         ADMIN = 'admin', 'Quản trị viên'
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.CUSTOMER)
     email = models.EmailField(unique=True)
-    
-    
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     
 

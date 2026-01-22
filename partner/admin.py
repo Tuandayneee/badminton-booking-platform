@@ -2,8 +2,9 @@ from django.contrib import admin
 from django.utils.html import format_html
 from .models import (
     Amenity, BadmintonCenter, CenterImage, Court, PriceRule,
-    Booking, FixedSchedule, Product, ServiceOrder, ServiceOrderItem
+    Product, ServiceOrder, ServiceOrderItem
 )
+
 
 # ==============================================================================
 # INLINES (Nhập liệu phụ trong trang chính)
@@ -50,64 +51,12 @@ class BadmintonCenterAdmin(admin.ModelAdmin):
 @admin.register(Court)
 class CourtAdmin(admin.ModelAdmin):
     # Đã bỏ court_type theo model của bạn
-    list_display = ('name', 'center', 'base_price_per_hour', 'is_active')
+    list_display = ('name', 'center', 'base_price_per_hour','golden_price_per_hour','golden_start_time','golden_end_time', 'is_active')
     list_filter = ('center', 'is_active')
     search_fields = ('name', 'center__name')
     list_editable = ('is_active', 'base_price_per_hour')
 
-@admin.register(Booking)
-class BookingAdmin(admin.ModelAdmin):
-    # Lưu ý: Model của bạn dùng 'date', không phải 'booking_date'
-    list_display = ('booking_code', 'user_info', 'court_info', 'date', 'time_range', 'total_price', 'status_colored', 'is_paid')
-    list_filter = ('status', 'is_paid', 'date', 'court__center')
-    search_fields = ('booking_code', 'user__username', 'court__name')
-    readonly_fields = ('booking_code', 'created_at')
-    date_hierarchy = 'date' 
 
-    def user_info(self, obj):
-        # Model bạn hiện tại chỉ có User, không có guest_name/guest_phone nên tôi chỉ hiển thị User
-        return f"{obj.user.username}"
-    user_info.short_description = 'Khách hàng'
-
-    def court_info(self, obj):
-        return f"{obj.court.name} - {obj.court.center.name}"
-    court_info.short_description = 'Sân'
-
-    def time_range(self, obj):
-        return f"{obj.start_time.strftime('%H:%M')} - {obj.end_time.strftime('%H:%M')}"
-    time_range.short_description = 'Khung giờ'
-
-    def status_colored(self, obj):
-        colors = {
-            'pending': 'orange',
-            'confirmed': 'blue',
-            'checked_in': 'green',
-            'completed': 'gray',
-        }
-        return format_html(
-            '<span style="color: {}; font-weight: bold;">{}</span>',
-            colors.get(obj.status, 'black'),
-            obj.get_status_display()
-        )
-    status_colored.short_description = 'Trạng thái'
-
-@admin.register(FixedSchedule)
-class FixedScheduleAdmin(admin.ModelAdmin):
-    list_display = ('customer_name', 'customer_phone', 'center', 'days_display', 'date_range', 'is_active')
-    list_filter = ('center', 'is_active')
-    search_fields = ('customer_name', 'customer_phone')
-
-    def days_display(self, obj):
-        day_map = {0:'T2', 1:'T3', 2:'T4', 3:'T5', 4:'T6', 5:'T7', 6:'CN'}
-        try:
-            return ", ".join([day_map.get(d, str(d)) for d in obj.days_of_week])
-        except:
-            return str(obj.days_of_week)
-    days_display.short_description = 'Thứ'
-
-    def date_range(self, obj):
-        return f"{obj.start_date.strftime('%d/%m')} - {obj.end_date.strftime('%d/%m')}"
-    date_range.short_description = 'Thời hạn'
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):

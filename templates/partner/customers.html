@@ -5,191 +5,212 @@
 {% block title %}Khách hàng - Badminton Pro{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 fade-in-up gap-3">
-    <div>
-        <h6 class="text-uppercase text-secondary fw-bold small ls-1 mb-1">CRM & Chăm sóc</h6>
-        <h2 class="fw-bold text-dark mb-0">Danh sách thành viên</h2>
-    </div>
-
-    <div class="d-flex gap-2 w-100 w-md-auto">
-        <div class="search-group-sport">
-            <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" class="form-control" placeholder="Tìm kiếm tên, SĐT...">
+<div class="container-fluid px-4 py-4">
+    
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3 fade-in-up">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small text-muted">
+                    <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-secondary">CRM & Chăm sóc</a></li>
+                    <li class="breadcrumb-item active text-dark" aria-current="page">Danh sách thành viên</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold text-dark mb-0 ls-tight">Khách hàng</h3>
         </div>
-        
-        <button class="btn btn-primary-sport text-white text-nowrap px-3">
-            <i class="fa-solid fa-user-plus"></i>
-        </button>
-    </div>
-</div>
 
-<div class="row g-4 mb-4">
-    <div class="col-md-4">
-        <div class="card card-dashboard h-100 border-start border-4 border-primary">
-            <div class="card-body">
+        <div class="d-flex gap-2 w-100 w-md-auto">
+            <div class="input-group input-group-pro shadow-sm" style="min-width: 280px;">
+                <input type="text" class="form-control" placeholder="Tìm kiếm tên, SĐT...">
+                <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+            </div>
+            
+            <button class="btn btn-pro btn-pro-primary shadow-sm text-nowrap">
+                <i class="fa-solid fa-user-plus"></i> Thêm mới
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4 fade-in-up" style="animation-delay: 0.1s;">
+        <div class="col-xl-4 col-md-6">
+            <div class="card-modern p-4 border-start border-4 border-primary">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <p class="text-secondary mb-1 small text-uppercase fw-bold ls-1">Tổng thành viên</p>
+                        <p class="text-secondary mb-1 small text-uppercase fw-bold ls-tight">Tổng thành viên</p>
                         <h3 class="mb-0 fw-bold text-dark">1,250</h3>
-                        <small class="text-success fw-bold"><i class="fa-solid fa-arrow-trend-up me-1"></i>+12 tuần này</small>
+                        <div class="mt-2 text-success small fw-medium">
+                            <i class="fa-solid fa-arrow-trend-up me-1"></i>+12 tuần này
+                        </div>
                     </div>
-                    <div class="icon-shape bg-primary bg-opacity-10 text-primary rounded-4 p-3 fs-4">
+                    <div class="icon-shape bg-soft-primary">
                         <i class="fa-solid fa-users"></i>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="col-md-4">
-        <div class="card card-dashboard h-100 border-start border-4 border-warning">
-            <div class="card-body">
+        <div class="col-xl-4 col-md-6">
+            <div class="card-modern p-4 border-start border-4 border-warning">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <p class="text-secondary mb-1 small text-uppercase fw-bold ls-1">Khách hàng VIP</p>
+                        <p class="text-secondary mb-1 small text-uppercase fw-bold ls-tight">Khách hàng VIP</p>
                         <h3 class="mb-0 fw-bold text-dark">68</h3>
-                        <small class="text-warning fw-bold"><i class="fa-solid fa-crown me-1"></i>Chi tiêu > 5tr</small>
+                        <div class="mt-2 text-warning small fw-medium">
+                            <i class="fa-solid fa-crown me-1"></i>Chi tiêu > 5tr
+                        </div>
                     </div>
-                    <div class="icon-shape bg-warning bg-opacity-10 text-warning rounded-4 p-3 fs-4">
+                    <div class="icon-shape bg-soft-warning">
                         <i class="fa-solid fa-star"></i>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="col-md-4">
-        <div class="card card-dashboard h-100 border-start border-4 border-success">
-            <div class="card-body">
+        <div class="col-xl-4 col-md-6">
+            <div class="card-modern p-4 border-start border-4 border-success">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <p class="text-secondary mb-1 small text-uppercase fw-bold ls-1">Doanh thu TB/Khách</p>
-                        <h3 class="mb-0 fw-bold text-dark">450.000<small class="fs-6 text-muted">đ</small></h3>
-                        <small class="text-muted">Trung bình tháng</small>
+                        <p class="text-secondary mb-1 small text-uppercase fw-bold ls-tight">Doanh thu TB/Khách</p>
+                        <h3 class="mb-0 fw-bold text-dark">450k<small class="fs-6 text-muted">/tháng</small></h3>
+                        <div class="mt-2 text-secondary small">
+                            Trung bình 30 ngày qua
+                        </div>
                     </div>
-                    <div class="icon-shape bg-success bg-opacity-10 text-success rounded-4 p-3 fs-4">
+                    <div class="icon-shape bg-soft-success">
                         <i class="fa-solid fa-wallet"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="card card-dashboard border-0 shadow-sm">
-    <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center gap-2">
-            <h5 class="mb-0 fw-bold text-dark">Danh sách chi tiết</h5>
-            <span class="badge bg-light text-secondary border rounded-pill">1,250</span>
+    <div class="card-modern overflow-hidden fade-in-up" style="animation-delay: 0.2s;">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <h6 class="mb-0 fw-bold text-dark">Danh sách chi tiết</h6>
+                <span class="badge badge-soft badge-soft-secondary">1,250</span>
+            </div>
+            
+            <div class="dropdown">
+                <button class="btn btn-sm btn-pro-light text-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fa-solid fa-arrow-down-wide-short me-1"></i> Sắp xếp
+                </button>
+                <ul class="dropdown-menu border-0 shadow-lg rounded-3">
+                    <li><a class="dropdown-item small" href="#">Chi tiêu cao nhất</a></li>
+                    <li><a class="dropdown-item small" href="#">Đặt sân gần nhất</a></li>
+                    <li><a class="dropdown-item small" href="#">Tên A-Z</a></li>
+                </ul>
+            </div>
         </div>
-        
-        <div class="dropdown">
-            <button class="btn btn-sm btn-white border fw-bold text-secondary" type="button" data-bs-toggle="dropdown">
-                <i class="fa-solid fa-arrow-down-wide-short me-1"></i> Sắp xếp
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg">
-                <li><a class="dropdown-item" href="#">Chi tiêu cao nhất</a></li>
-                <li><a class="dropdown-item" href="#">Đặt sân gần nhất</a></li>
-                <li><a class="dropdown-item" href="#">Tên A-Z</a></li>
-            </ul>
-        </div>
-    </div>
 
-    <div class="table-responsive">
-        <table class="table table-sport align-middle mb-0">
-            <thead>
-                <tr>
-                    <th class="ps-4">Thành viên</th>
-                    <th>Liên hệ</th>
-                    <th>Hạng thành viên</th>
-                    <th>Tổng chi tiêu</th>
-                    <th>Lịch sử</th>
-                    <th class="text-end pe-4">Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for customer in customers %}
-                <tr>
-                    <td class="ps-4">
-                        <div class="d-flex align-items-center">
-                            {% if customer.avatar %}
-                                <img src="{{ customer.avatar.url }}" class="rounded-circle me-3 border" width="45" height="45" style="object-fit: cover;">
-                            {% else %}
-                                <div class="avatar-circle bg-primary bg-opacity-10 text-primary me-3 border border-primary border-opacity-10">
-                                    {{ customer.username|slice:":1"|upper }}
+        <div class="table-responsive">
+            <table class="table table-modern align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4" style="width: 30%;">Thành viên</th>
+                        <th style="width: 20%;">Liên hệ</th>
+                        <th style="width: 15%;">Hạng thành viên</th>
+                        <th style="width: 15%;">Tổng chi tiêu</th>
+                        <th style="width: 10%;">Lịch sử</th>
+                        <th class="text-end pe-4" style="width: 10%;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in customers %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                {% if customer.avatar %}
+                                    <img src="{{ customer.avatar.url }}" class="rounded-circle me-3 border object-fit-cover" width="42" height="42">
+                                {% else %}
+                                    <div class="avatar-circle bg-soft-primary me-3 text-primary border border-primary border-opacity-10">
+                                        {{ customer.username|slice:":1"|upper }}
+                                    </div>
+                                {% endif %}
+                                
+                                <div>
+                                    <h6 class="mb-0 fw-bold text-dark fs-6">{{ customer.full_name|default:customer.username }}</h6>
+                                    <small class="text-muted font-monospace" style="font-size: 0.75rem;">ID: #{{ customer.id }}</small>
                                 </div>
-                            {% endif %}
-                            
-                            <div>
-                                <h6 class="mb-0 fw-bold text-dark">{{ customer.full_name|default:customer.username }}</h6>
-                                <small class="text-muted">ID: #{{ customer.id }}</small>
                             </div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="d-flex flex-column">
-                            <span class="fw-bold text-dark font-monospace">
-                                <i class="fa-solid fa-phone me-1 text-secondary" style="font-size: 0.7rem;"></i>{{ customer.phone|default:"---" }}
-                            </span>
-                            <small class="text-muted">{{ customer.email|truncatechars:20 }}</small>
-                        </div>
-                    </td>
-                    <td>
-                        {% if customer.total_spent > 5000000 %}
-                            <span class="badge-rank rank-gold"><i class="fa-solid fa-crown"></i> VIP Vàng</span>
-                        {% elif customer.total_spent > 2000000 %}
-                            <span class="badge-rank rank-silver"><i class="fa-solid fa-medal"></i> Bạc</span>
-                        {% elif customer.total_spent > 500000 %}
-                            <span class="badge-rank rank-bronze"><i class="fa-solid fa-medal"></i> Đồng</span>
-                        {% else %}
-                            <span class="badge-rank rank-new">Mới</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <div class="fw-bold text-success">{{ customer.total_spent|intcomma }}đ</div>
-                        <small class="text-muted">{{ customer.booking_count }} lượt đặt</small>
-                    </td>
-                    <td>
-                        {% if customer.last_booking %}
-                            <div class="text-dark fw-bold small">{{ customer.last_booking|date:"d/m/Y" }}</div>
-                            <small class="text-muted">{{ customer.last_booking|timesince }} trước</small>
-                        {% else %}
-                            <span class="text-muted small fst-italic">Chưa đặt</span>
-                        {% endif %}
-                    </td>
-                    <td class="text-end pe-4">
-                        <div class="btn-group">
-                            <button class="btn btn-sm btn-white border hover-bg-light text-primary" title="Xem chi tiết">
+                        </td>
+
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="fw-bold text-dark font-monospace" style="font-size: 0.9rem;">
+                                    {{ customer.phone|default:"---" }}
+                                </span>
+                                <small class="text-secondary">{{ customer.email|truncatechars:20 }}</small>
+                            </div>
+                        </td>
+
+                        <td>
+                            {% if customer.total_spent > 5000000 %}
+                                <span class="badge badge-soft badge-soft-gold">
+                                    <i class="fa-solid fa-crown"></i> VIP Vàng
+                                </span>
+                            {% elif customer.total_spent > 2000000 %}
+                                <span class="badge badge-soft badge-soft-silver">
+                                    <i class="fa-solid fa-medal"></i> Bạc
+                                </span>
+                            {% elif customer.total_spent > 500000 %}
+                                <span class="badge badge-soft badge-soft-bronze">
+                                    <i class="fa-solid fa-medal"></i> Đồng
+                                </span>
+                            {% else %}
+                                <span class="badge badge-soft badge-soft-new">Thành viên mới</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <div class="fw-bold text-success">{{ customer.total_spent|intcomma }}đ</div>
+                            <small class="text-muted">{{ customer.booking_count }} lượt đặt</small>
+                        </td>
+
+                        <td>
+                            {% if customer.last_booking %}
+                                <div class="text-dark fw-medium small">{{ customer.last_booking|date:"d/m/Y" }}</div>
+                                <small class="text-muted">{{ customer.last_booking|timesince }} trước</small>
+                            {% else %}
+                                <span class="text-muted small fst-italic">Chưa đặt</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end pe-4">
+                            <button class="btn btn-icon me-1" title="Xem chi tiết">
                                 <i class="fa-regular fa-eye"></i>
                             </button>
-                            <button class="btn btn-sm btn-white border hover-bg-light text-warning" title="Lịch sử đặt sân">
+                            <button class="btn btn-icon" title="Lịch sử giao dịch">
                                 <i class="fa-solid fa-clock-rotate-left"></i>
                             </button>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="text-center py-5">
-                        <div class="mb-3"><i class="fa-solid fa-users-slash fa-3x text-secondary opacity-25"></i></div>
-                        <p class="text-muted fw-bold">Chưa có thành viên nào trong danh sách.</p>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="d-flex flex-column align-items-center">
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                                    <i class="fa-solid fa-users-slash fs-4 text-muted opacity-50"></i>
+                                </div>
+                                <h6 class="fw-bold text-dark">Chưa có khách hàng</h6>
+                                <p class="text-secondary small">Danh sách thành viên sẽ hiển thị tại đây.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-    <div class="card-footer bg-white border-0 py-3">
-        <nav>
-            <ul class="pagination pagination-sport justify-content-center mb-0">
-                <li class="page-item disabled"><a class="page-link" href="#"><i class="fa-solid fa-chevron-left"></i></a></li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item"><a class="page-link" href="#"><i class="fa-solid fa-chevron-right"></i></a></li>
-            </ul>
-        </nav>
+        <div class="card-footer bg-white border-top-0 py-3">
+            <nav>
+                <ul class="pagination justify-content-center mb-0">
+                    <li class="page-item disabled"><a class="page-link border-0 text-secondary" href="#"><i class="fa-solid fa-chevron-left"></i></a></li>
+                    <li class="page-item active"><a class="page-link border-0 rounded-circle bg-primary text-white mx-1 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link border-0 text-secondary rounded-circle mx-1 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link border-0 text-secondary" href="#"><i class="fa-solid fa-chevron-right"></i></a></li>
+                </ul>
+            </nav>
+        </div>
     </div>
 </div>
 {% endblock %}

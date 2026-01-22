@@ -7,73 +7,79 @@
 {% block content %}
 <section class="hero-section">
     <div class="hero-bg-image" style="background-image: url('{% static 'images/banner.jpg' %}');"></div>
-    
     <div class="hero-overlay"></div>
 
     <div class="container hero-content">
         <div class="row align-items-center">
             
-            <div class="col-lg-7 text-white mb-5 mb-lg-0">
-                <div class="badge-glass fade-in-up">
-                    <i class="fa-solid fa-fire text-warning"></i>
-                    <span class="fw-bold text-uppercase small spacing-1">Nền tảng số 1 Việt Nam</span>
+            <div class="col-lg-7 text-white mb-5 mb-lg-0 fade-in-up">
+                <div class="badge-hero">
+                    <span class="d-inline-block rounded-circle bg-success" style="width: 8px; height: 8px;"></span>
+                    <span>Nền tảng số 1 Việt Nam</span>
                 </div>
 
-                <h1 class="hero-title fade-in-up delay-100">
-                    Chinh phục đỉnh cao
-                    <span class="text-gradient-hero">Đam mê cầu lông</span>
+                <h1 class="hero-title display-3 mb-4">
+                    Chinh phục đỉnh cao <br>
+                    <span style="color: #94a3b8;">Đam mê cầu lông</span>
                 </h1>
 
-                <p class="hero-description fade-in-up delay-200">
+                <p class="lead text-white-50 mb-5" style="max-width: 550px;">
                     Hệ thống đặt sân thông minh, kết nối cộng đồng vợt thủ toàn quốc. 
-                    Tìm sân gần nhất, so sánh giá và thanh toán chỉ trong 30 giây!
+                    Tìm sân gần nhất và thanh toán chỉ trong 30 giây.
                 </p>
                 
-                <div class="d-flex gap-3 fade-in-up delay-300">
-                    <a href="#courts" class="btn btn-hero-primary">
-                        Đặt sân ngay <i class="fa-solid fa-arrow-right ms-2"></i>
+                <div class="d-flex gap-3">
+                    <a href="#courts" class="btn btn-login-premium px-4 py-3">
+                        Đặt sân ngay
                     </a>
-                    <a href="#" class="btn btn-hero-secondary">
-                        <i class="fa-regular fa-circle-play me-2"></i>Xem hướng dẫn
+                    <a href="#" class="btn btn-outline-light fw-bold px-4 py-3 rounded-3" style="border: 1px solid rgba(255,255,255,0.2);">
+                        <i class="fa-solid fa-play me-2"></i>Xem Demo
                     </a>
                 </div>
             </div>
 
-            <div class="col-lg-5 ms-auto fade-in-up delay-200">
+            <div class="col-lg-5 ms-auto fade-in-up" style="animation-delay: 0.2s;">
                 <div class="search-card-floating">
                     <h4 class="fw-bold text-dark mb-4 d-flex align-items-center">
-                        <span class="bg-primary bg-opacity-10 text-primary p-2 rounded-circle me-3">
-                            <i class="fa-solid fa-magnifying-glass fs-5"></i>
-                        </span>
+                        <i class="fa-solid fa-magnifying-glass me-2 text-primary"></i>
                         Tìm sân nhanh
                     </h4>
                     
                     <form action="#" method="GET">
                         <div class="mb-3">
-                            <label class="form-label fw-bold small text-secondary text-uppercase ls-1">Ngày chơi</label>
-                            <input type="date" class="form-control form-control-lg-custom" value="{% now 'Y-m-d' %}">
+                            <label class="form-label">Ngày chơi</label>
+                            <div class="input-group-unified">
+                                <span class="input-group-text"><i class="fa-regular fa-calendar"></i></span>
+                                <input type="date" class="form-control" value="{% now 'Y-m-d' %}">
+                            </div>
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label fw-bold small text-secondary text-uppercase ls-1">Khu vực</label>
-                            <select class="form-select form-select-lg form-control-lg-custom">
-                                <option selected>Tất cả khu vực</option>
-                                <option>Cầu Giấy</option>
-                                <option>Thanh Xuân</option>
-                                <option>Mỹ Đình</option>
-                            </select>
+                            <label class="form-label">Khu vực</label>
+                            <div class="input-group-unified">
+                                <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
+                                <select class="form-select form-control">
+                                    <option selected>Tất cả khu vực</option>
+                                    <option>Cầu Giấy</option>
+                                    <option>Thanh Xuân</option>
+                                    <option>Mỹ Đình</option>
+                                </select>
+                            </div>
                         </div>
                         
                         <div class="mb-4">
-                            <label class="form-label fw-bold small text-secondary text-uppercase ls-1">Khung giờ</label>
-                            <select class="form-select form-select-lg form-control-lg-custom">
-                                <option selected>17:00 - 18:00</option>
-                                <option>18:00 - 19:00</option>
-                                <option>19:00 - 20:00</option>
-                            </select>
+                            <label class="form-label">Khung giờ</label>
+                            <div class="input-group-unified">
+                                <span class="input-group-text"><i class="fa-regular fa-clock"></i></span>
+                                <select class="form-select form-control">
+                                    <option selected>17:00 - 18:00</option>
+                                    <option>18:00 - 19:00</option>
+                                    <option>19:00 - 20:00</option>
+                                </select>
+                            </div>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary-gradient w-100 py-3 rounded-3 fw-bold fs-5 shadow-sm">
+                        <button type="submit" class="btn btn-login-premium w-100 py-3 shadow-sm">
                             Tìm kiếm ngay
                         </button>
                     </form>
@@ -84,170 +90,139 @@
     </div>
 </section>
 
-<section class="py-5 bg-white">
-    <div class="container py-lg-4">
+<section class="py-5 bg-body">
+    <div class="container py-lg-5">
         <div class="row g-4">
-            <div class="col-md-4">
-                <div class="feature-box h-100">
-                    <div class="icon-circle">
+            <div class="col-md-4 fade-in-up" style="animation-delay: 0.1s;">
+                <div class="feature-card">
+                    <div class="feature-icon">
                         <i class="fa-regular fa-calendar-check"></i>
                     </div>
-                    <h5 class="fw-bold mb-3">Đặt sân siêu tốc</h5>
-                    <p class="text-secondary mb-0">Xem tình trạng sân trống theo thời gian thực. Đặt lịch chỉ với 3 cú chạm.</p>
+                    <h5 class="fw-bold mb-3 text-dark">Đặt sân siêu tốc</h5>
+                    <p class="text-secondary mb-0 small">Xem tình trạng sân trống theo thời gian thực. Đặt lịch và giữ chỗ chỉ với 3 cú chạm.</p>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="feature-box h-100">
-                    <div class="icon-circle">
+            <div class="col-md-4 fade-in-up" style="animation-delay: 0.2s;">
+                <div class="feature-card">
+                    <div class="feature-icon">
                         <i class="fa-solid fa-shield-halved"></i>
                     </div>
-                    <h5 class="fw-bold mb-3">Thanh toán an toàn</h5>
-                    <p class="text-secondary mb-0">Hỗ trợ đa dạng phương thức: QR Code, Ví điện tử, Thẻ ngân hàng. Hoàn tiền nếu hủy lịch.</p>
+                    <h5 class="fw-bold mb-3 text-dark">Thanh toán an toàn</h5>
+                    <p class="text-secondary mb-0 small">Hỗ trợ đa dạng phương thức: QR Code, Ví điện tử. Hoàn tiền tự động nếu hủy lịch.</p>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="feature-box h-100">
-                    <div class="icon-circle">
+            <div class="col-md-4 fade-in-up" style="animation-delay: 0.3s;">
+                <div class="feature-card">
+                    <div class="feature-icon">
                         <i class="fa-solid fa-medal"></i>
                     </div>
-                    <h5 class="fw-bold mb-3">Tích điểm đổi quà</h5>
-                    <p class="text-secondary mb-0">Tích lũy điểm thưởng sau mỗi lần đặt sân để nâng hạng thành viên và nhận voucher.</p>
+                    <h5 class="fw-bold mb-3 text-dark">Hạng thành viên</h5>
+                    <p class="text-secondary mb-0 small">Tích lũy điểm thưởng sau mỗi lần đặt sân để nâng hạng VIP và nhận ưu đãi độc quyền.</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<section class="py-5 bg-light" id="courts">
+<section class="py-5 bg-body" id="courts">
     <div class="container py-4">
         <div class="d-flex justify-content-between align-items-end mb-5">
             <div>
-                <span class="text-primary fw-bold text-uppercase ls-1 small">Điểm đến yêu thích</span>
-                <h2 class="fw-bold mb-0 mt-1">Sân cầu lông nổi bật</h2>
+                <span class="text-primary fw-bold text-uppercase small ls-tight">Điểm đến yêu thích</span>
+                <h2 class="fw-bold mb-0 mt-1 text-dark">Sân cầu lông nổi bật</h2>
             </div>
-            <a href="#" class="btn btn-outline-primary rounded-pill px-4 fw-bold">Xem tất cả <i class="fa-solid fa-arrow-right ms-2"></i></a>
+            <a href="#" class="btn btn-outline-secondary rounded-pill px-4 fw-bold small">Xem tất cả <i class="fa-solid fa-arrow-right ms-2"></i></a>
         </div>
 
         <div class="row g-4">
-            <div class="col-md-6 col-lg-4">
-                <div class="card court-card h-100">
-                    <div class="court-img-wrapper">
-                        <img src="https://images.unsplash.com/photo-1626224583764-847890e05851?q=80&w=600" class="court-img-top" alt="Sân Cầu Giấy">
-                        <div class="rating-badge text-dark">
-                            <i class="fa-solid fa-star text-warning me-1"></i>4.8
-                        </div>
-                        <div class="court-type-badge badge-synthetic">
-                            <i class="fa-solid fa-layer-group me-1"></i>Sân Thảm
-                        </div>
-                    </div>
-                    <div class="card-body p-4">
-                        <h5 class="card-title fw-bold mb-2">Sân Cầu Giấy Arena</h5>
-                        <p class="text-secondary small mb-3"><i class="fa-solid fa-location-dot me-1 text-danger"></i> 123 Xuân Thủy, Cầu Giấy, HN</p>
-                        
-                        <div class="d-flex flex-wrap gap-2 mb-4">
-                            <span class="badge bg-light text-secondary border fw-normal">Wifi miễn phí</span>
-                            <span class="badge bg-light text-secondary border fw-normal">Bãi đỗ xe</span>
-                            <span class="badge bg-light text-secondary border fw-normal">Kiot nước</span>
+            
+            {% for center in centers %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card court-card h-100">
+                        <div class="court-img-wrapper">
+                            {% if center.image %}
+                                <img src="{{ center.image.url }}" class="court-img-top" alt="{{ center.name }}">
+                            {% else %}
+                                <img src="https://via.placeholder.com/600x400" class="court-img-top" alt="No Image">
+                            {% endif %}
+
+                            {% if center.is_active %}
+                                <div class="court-badge court-badge-type" style="background: rgba(16, 185, 129, 0.9);">
+                                    <i class="fa-solid fa-circle-check me-1"></i>Đang hoạt động
+                                </div>
+                            {% else %}
+                                <div class="court-badge court-badge-type" style="background: rgba(100, 116, 139, 0.9);">
+                                    <i class="fa-solid fa-lock me-1"></i>Tạm dừng
+                                </div>
+                            {% endif %}
                         </div>
 
-                        <div class="d-flex align-items-center justify-content-between pt-3 border-top border-light">
-                            <div>
-                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Giá từ</small>
-                                <span class="fw-bold text-primary fs-5">50.000đ</span><small class="text-muted">/h</small>
+                        <div class="card-body p-4">
+                            <h6 class="fw-bold text-dark mb-1">{{ center.name }}</h6>
+                            <p class="text-secondary small mb-3">
+                                <i class="fa-solid fa-location-dot me-1 text-danger"></i> {{ center.address }}
+                            </p>
+                            
+                            <div class="d-flex flex-wrap gap-2 mb-4">
+                                {% for amenity in center.amenities.all|slice:":3" %}
+                                    <span class="badge badge-soft-secondary text-secondary bg-light border fw-normal">
+                                        {{ amenity.name }}
+                                    </span>
+                                {% empty %}
+                                    <span class="text-muted small fst-italic">Đang cập nhật tiện ích</span>
+                                {% endfor %}
                             </div>
-                            <button class="btn btn-primary-gradient rounded-pill px-4 py-2 fw-bold btn-sm shadow-sm">Đặt ngay</button>
+
+                            <div class="d-flex align-items-center justify-content-between pt-3 border-top border-light">
+                                <div>
+                                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.65rem;">Giá từ</small>
+                                    <span class="fw-bold text-primary fs-5">
+                                        {% if center.min_price %}
+                                            {{ center.min_price|intcomma }}đ
+                                        {% else %}
+                                            Liên hệ
+                                        {% endif %}
+                                    </span>
+                                    {% if center.min_price %}
+                                        <small class="text-muted">/h</small>
+                                    {% endif %}
+                                </div>
+                                
+                                <a href="{% url 'booking_timeline' center.id%}" class="btn btn-sm btn-login-premium rounded-pill px-4">
+                                    Đặt ngay
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="col-md-6 col-lg-4">
-                <div class="card court-card h-100">
-                    <div class="court-img-wrapper">
-                        <img src="https://plus.unsplash.com/premium_photo-1676634832558-6654a134e920?q=80&w=600" class="court-img-top" alt="Sân Mỹ Đình">
-                        <div class="rating-badge text-dark">
-                            <i class="fa-solid fa-star text-warning me-1"></i>5.0
-                        </div>
-                        <div class="court-type-badge badge-wood">
-                            <i class="fa-solid fa-tree me-1"></i>Sân Gỗ
-                        </div>
-                    </div>
-                    <div class="card-body p-4">
-                        <h5 class="card-title fw-bold mb-2">Sân Mỹ Đình Sport</h5>
-                        <p class="text-secondary small mb-3"><i class="fa-solid fa-location-dot me-1 text-danger"></i> Lê Đức Thọ, Nam Từ Liêm, HN</p>
-                        
-                        <div class="d-flex flex-wrap gap-2 mb-4">
-                            <span class="badge bg-light text-secondary border fw-normal">Điều hòa</span>
-                            <span class="badge bg-light text-secondary border fw-normal">Thuê vợt</span>
-                        </div>
-
-                        <div class="d-flex align-items-center justify-content-between pt-3 border-top border-light">
-                            <div>
-                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Giá từ</small>
-                                <span class="fw-bold text-primary fs-5">60.000đ</span><small class="text-muted">/h</small>
-                            </div>
-                            <button class="btn btn-primary-gradient rounded-pill px-4 py-2 fw-bold btn-sm shadow-sm">Đặt ngay</button>
-                        </div>
-                    </div>
+            {% empty %}
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">Chưa có sân nào được đăng ký.</p>
                 </div>
-            </div>
-
-            <div class="col-md-6 col-lg-4">
-                <div class="card court-card h-100">
-                    <div class="court-img-wrapper">
-                        <img src="https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=600" class="court-img-top" alt="Sân Thanh Xuân">
-                        <div class="rating-badge text-dark">
-                            <i class="fa-solid fa-star text-warning me-1"></i>4.5
-                        </div>
-                        <div class="court-type-badge badge-synthetic">
-                            <i class="fa-solid fa-layer-group me-1"></i>Sân Thảm
-                        </div>
-                    </div>
-                    <div class="card-body p-4">
-                        <h5 class="card-title fw-bold mb-2">CLB Cầu Lông 365</h5>
-                        <p class="text-secondary small mb-3"><i class="fa-solid fa-location-dot me-1 text-danger"></i> 365 Nguyễn Trãi, Thanh Xuân, HN</p>
-                        
-                        <div class="d-flex flex-wrap gap-2 mb-4">
-                            <span class="badge bg-light text-secondary border fw-normal">Mở xuyên đêm</span>
-                            <span class="badge bg-light text-secondary border fw-normal">Tắm nóng lạnh</span>
-                        </div>
-
-                        <div class="d-flex align-items-center justify-content-between pt-3 border-top border-light">
-                            <div>
-                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Giá từ</small>
-                                <span class="fw-bold text-primary fs-5">45.000đ</span><small class="text-muted">/h</small>
-                            </div>
-                            <button class="btn btn-primary-gradient rounded-pill px-4 py-2 fw-bold btn-sm shadow-sm">Đặt ngay</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+            {% endfor %} </div> </div>
 </section>
 
-<section class="py-5 bg-white">
+<section class="py-5 bg-body">
     <div class="container py-4">
-        <div class="partner-cta-section p-5">
-            <div class="partner-cta-bg"></div>
+        <div class="partner-section p-5">
+            <div class="partner-bg-pattern"></div>
             <div class="row position-relative z-1 align-items-center">
                 <div class="col-lg-7 text-white">
-                    <span class="badge bg-warning text-dark mb-3 px-3 py-2 fw-bold text-uppercase">Dành cho chủ sân</span>
-                    <h2 class="display-5 fw-bold mb-4">Bạn đang sở hữu sân cầu lông?</h2>
-                    <p class="lead text-white-50 mb-4">
-                        Hợp tác cùng Badminton Pro để tối ưu hóa doanh thu, quản lý lịch đặt sân dễ dàng 
-                        và tiếp cận hàng ngàn khách hàng tiềm năng mỗi tháng.
+                    <span class="badge bg-body text-dark mb-3 px-3 py-2 fw-bold text-uppercase" style="font-size: 0.7rem;">Dành cho chủ sân</span>
+                    <h2 class="display-5 fw-bold mb-4">Hợp tác cùng phát triển</h2>
+                    <p class="lead text-white-50 mb-4 fs-6">
+                        Tối ưu hóa doanh thu, quản lý lịch đặt sân thông minh và tiếp cận hàng ngàn khách hàng tiềm năng mỗi tháng cùng Badminton Pro.
                     </p>
                     <div class="d-flex gap-3">
-                        <a href="#" class="btn btn-primary-gradient rounded-pill px-5 py-3 fw-bold fs-5 shadow-lg">
+                        <a href="{% url 'register_partner' %}" class="btn btn-light text-dark rounded-pill px-5 py-3 fw-bold shadow-lg">
                             Đăng ký đối tác
                         </a>
-                        <a href="#" class="btn btn-outline-light rounded-pill px-4 py-3 fw-bold">
+                        <a href="{% url 'partner_info'%}" class="btn btn-outline-light rounded-pill px-4 py-3 fw-bold">
                             Tìm hiểu thêm
                         </a>
                     </div>
                 </div>
-            </div>
+                </div>
         </div>
     </div>
 </section>

@@ -1,0 +1,323 @@
+{% extends 'base/base_partner.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Quản lý Sân - {{ center.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0"> <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3 fade-in-up">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small text-muted">
+                    <li class="breadcrumb-item"><a href="{% url 'centers_management' %}" class="text-decoration-none text-secondary">Hệ thống sân</a></li>
+                    <li class="breadcrumb-item active text-dark" aria-current="page">{{ center.name }}</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold text-dark mb-0 ls-tight">Danh sách Sân con</h3>
+        </div>
+        
+        <div class="d-flex gap-2">
+            <a href="{% url 'centers_management' %}" class="btn btn-pro btn-pro-light">
+                <i class="fa-solid fa-arrow-left me-2 text-secondary"></i>Quay lại
+            </a>
+            <button class="btn btn-pro btn-pro-primary" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#courtModal"
+                    data-mode="add"
+                    data-action="{% url 'add_court' center.id %}">
+                <i class="fa-solid fa-plus"></i>Thêm Sân Mới
+            </button>
+        </div>
+    </div>
+
+    <div class="card-modern fade-in-up" style="animation-delay: 0.1s;">
+        <div class="table-responsive">
+            <table class="table table-modern">
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">#</th>
+                        <th style="width: 30%;">Tên sân</th>
+                        <th style="width: 20%;">Loại mặt sân</th>
+                        <th style="width: 20%;">Giá niêm yết</th>
+                        <th class="text-center" style="width: 10%;">Trạng thái</th>
+                        <th class="text-end" style="width: 15%;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for court in courts %}
+                    <tr>
+                        <td class="text-secondary fw-medium">{{ forloop.counter }}</td>
+                        
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center me-3 border" style="width: 36px; height: 36px;">
+                                    <i class="fa-solid fa-table-tennis-paddle-ball text-secondary"></i>
+                                </div>
+                                <span class="fw-semibold text-dark">{{ court.name }}</span>
+                            </div>
+                        </td>
+
+                        <td>
+                            <span class="text-secondary">{{ court.court_type|default:"Tiêu chuẩn" }}</span>
+                        </td>
+
+                        <td>
+                            <span class="fw-bold text-dark">{{ court.base_price_per_hour|intcomma }}</span> 
+                            <span class="small text-muted ms-1">VND/h</span>
+                        </td>
+
+                        <td class="text-center">
+                            {% if court.is_active %}
+                                <span class="badge badge-soft badge-soft-success">
+                                    <span class="badge-dot"></span> Hoạt động
+                                </span>
+                            {% else %}
+                                <span class="badge badge-soft badge-soft-secondary">
+                                    <span class="badge-dot"></span> Bảo trì
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end">
+                            <button class="btn btn-icon me-1"
+                                title="Chỉnh sửa"
+                                data-bs-toggle="modal" 
+                                data-bs-target="#courtModal"
+                                data-mode="edit"
+                                data-action="{% url 'edit_court' court.id %}"\
+                                data-name="{{ court.name }}"
+                                data-type="{{ court.type_court }}" 
+                                data-price="{{ court.base_price_per_hour }}"
+                                data-active="{{ court.is_active|yesno:'true,false' }}"
+                                data-golden-start="{{ court.golden_start_time|date:'H:i'|default:'' }}"
+                                data-golden-end="{{ court.golden_end_time|date:'H:i'|default:'' }}"
+                                data-golden-price="{{ court.golden_price_per_hour|default:'' }}">
+
+                            <i class="fa-regular fa-pen-to-square"></i>
+                        </button>
+                            
+                            <button class="btn btn-icon delete text-danger"
+                                    title="Xóa sân"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#deleteModal"
+                                    data-court-name="{{ court.name }}"
+                                    data-action="{% url 'delete_court' court.id %}">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <div class="modal fade" id="deleteCourtModal{{ court.id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-sm">
+                            <div class="modal-content">
+                                <div class="modal-body p-4 text-center">
+                                    <div class="mb-3 text-warning">
+                                        <i class="fa-solid fa-triangle-exclamation fa-3x"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-2">Xác nhận xóa?</h6>
+                                    <p class="small text-muted mb-4">Bạn có chắc muốn xóa <strong>{{ court.name }}</strong>? Dữ liệu này không thể khôi phục.</p>
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <button type="button" class="btn btn-pro btn-pro-light btn-sm" data-bs-dismiss="modal">Hủy</button>
+                                        <form action="{% url 'delete_court' court.id %}" method="POST">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm fw-medium px-3 rounded-2">Xóa ngay</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="d-flex flex-column align-items-center">
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                                    <i class="fa-solid fa-layer-group fs-4 text-muted opacity-50"></i>
+                                </div>
+                                <h6 class="fw-bold text-dark">Chưa có dữ liệu sân</h6>
+                                <p class="text-secondary small mb-3">Hãy tạo sân đầu tiên để bắt đầu nhận lịch đặt.</p>
+                                <button class="btn btn-pro btn-pro-primary btn-sm"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#courtModal"
+                                        data-mode="add"
+                                        data-action="{% url 'add_court' center.id %}">
+                                    Thêm Sân Ngay
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="courtModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg"> <div class="modal-content">
+            
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="courtModalTitle">THÊM SÂN MỚI</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <form method="POST" id="courtForm" class="needs-validation">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-secondary">Tên sân đấu <span class="text-danger">*</span></label>
+                        {{ court_form.name }}
+                        <div class="form-text small text-muted">Ví dụ: Sân 1, Sân VIP...</div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-secondary">Loại sân</label>
+                            {{ court_form.type_court }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-secondary">Giá thường <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                {{ court_form.base_price_per_hour }}
+                                <span class="input-group-text small bg-light">VND</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-warning bg-opacity-10 rounded-3 border border-warning border-opacity-25 mb-4">
+                        <h6 class="fw-bold text-dark small mb-3"><i class="fa-solid fa-bolt text-warning me-1"></i>Cấu hình Giờ Vàng (Tùy chọn)</h6>
+                        
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-secondary">Bắt đầu</label>
+                                {{ court_form.golden_start_time }} 
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-secondary">Kết thúc</label>
+                                {{ court_form.golden_end_time }}
+                            </div>
+                        </div>
+
+                        <div class="mb-0">
+                            <label class="form-label fw-bold small text-secondary">Giá giờ vàng</label>
+                            <div class="input-group">
+                                {{ court_form.golden_price_per_hour }}
+                                <span class="input-group-text small bg-white text-warning fw-bold">VND</span>
+                            </div>
+                            <div class="form-text small text-muted mt-1">Để trống nếu không áp dụng giá riêng.</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-3 mb-4 border border-light">
+                        <div>
+                            <span class="fw-bold text-dark d-block small">Trạng thái hoạt động</span>
+                            <span class="small text-muted" style="font-size: 0.75rem;">Cho phép khách tìm và đặt sân này</span>
+                        </div>
+                        <div class="form-check form-switch">
+                            {{ court_form.is_active }}
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary py-2 fw-bold">
+                            <i class="fa-solid fa-save me-2"></i>Lưu Thông Tin
+                        </button>
+                    </div>
+                </form>
+            </div>
+            </div>
+    </div>
+</div>
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3 text-warning">
+                    <div class="bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 60px; height: 60px;">
+                        <i class="fa-solid fa-triangle-exclamation fa-2x"></i>
+                    </div>
+                </div>
+                
+                <h6 class="fw-bold mb-2 text-dark">Xác nhận xóa?</h6>
+                <p class="small text-muted mb-4">
+                    Bạn có chắc muốn xóa <strong id="deleteCourtName" class="text-dark">...</strong>?<br>
+                    Hành động này không thể hoàn tác.
+                </p>
+                
+                <div class="d-flex justify-content-center gap-2">
+                    <button type="button" class="btn btn-light btn-sm fw-bold px-3" data-bs-dismiss="modal">Hủy bỏ</button>
+                    
+                    <form id="deleteForm" method="POST" action="">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm fw-bold px-3">
+                            <i class="fa-solid fa-trash-can me-1"></i>Xóa ngay
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const courtModal = document.getElementById('courtModal');
+        const courtForm = document.getElementById('courtForm');
+        const modalTitle = document.getElementById('courtModalTitle');
+        
+        // 1. Lấy các input
+        const nameInput = courtForm.querySelector('[name="name"]');
+        const priceInput = courtForm.querySelector('[name="base_price_per_hour"]');
+        const typeInput = courtForm.querySelector('[name="type_court"]'); 
+        const activeInput = courtForm.querySelector('[name="is_active"]');
+        
+        // Input Giờ vàng
+        const goldenStartInput = courtForm.querySelector('[name="golden_start_time"]');
+        const goldenEndInput = courtForm.querySelector('[name="golden_end_time"]');
+        const goldenPriceInput = courtForm.querySelector('[name="golden_price_per_hour"]');
+
+        courtModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget; 
+            const mode = button.getAttribute('data-mode');
+            const actionUrl = button.getAttribute('data-action');
+            
+            courtForm.action = actionUrl;
+
+            if (mode === 'edit') {
+                // CHẾ ĐỘ SỬA
+                modalTitle.textContent = "CẬP NHẬT THÔNG TIN";
+                
+                nameInput.value = button.getAttribute('data-name');
+                priceInput.value = button.getAttribute('data-price');
+                if(typeInput) typeInput.value = button.getAttribute('data-type');
+                if(activeInput) activeInput.checked = button.getAttribute('data-active') === 'true';
+
+                // Điền giờ vàng
+                if(goldenStartInput) goldenStartInput.value = button.getAttribute('data-golden-start') || '';
+                if(goldenEndInput) goldenEndInput.value = button.getAttribute('data-golden-end') || '';
+                if(goldenPriceInput) goldenPriceInput.value = button.getAttribute('data-golden-price') || '';
+
+            } else {
+                // CHẾ ĐỘ THÊM MỚI
+                modalTitle.textContent = "THÊM SÂN MỚI";
+                courtForm.reset();
+                if(activeInput) activeInput.checked = true;
+            }
+        });
+        const deleteModal = document.getElementById('deleteModal');
+        const deleteForm = document.getElementById('deleteForm');
+        const deleteCourtName = document.getElementById('deleteCourtName');
+
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const courtName = button.getAttribute('data-court-name');
+                const deleteUrl = button.getAttribute('data-action');
+                deleteCourtName.textContent = courtName;
+                deleteForm.action = deleteUrl; 
+            });
+        }
+    });
+</script>
+{% endblock %}

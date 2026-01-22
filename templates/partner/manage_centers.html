@@ -1,0 +1,175 @@
+{% extends 'base/base_partner.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Quản lý Cơ sở - Badminton Pro{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3 fade-in-up">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small text-muted">
+                    <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-secondary">Hệ thống sân bãi</a></li>
+                    <li class="breadcrumb-item active text-dark" aria-current="page">Danh sách cơ sở</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold text-dark mb-0 ls-tight">Quản lý Cơ sở</h3>
+        </div>
+        
+        <button class="btn btn-pro btn-pro-primary shadow-sm px-4" 
+                data-bs-toggle="modal" 
+                data-bs-target="#addCenterModal"
+                data-mode="add" 
+                data-action="{% url 'partner_add_center' %}">
+            <i class="fa-solid fa-plus me-2"></i>Thêm Cơ sở mới
+        </button>
+    </div>
+
+    <div class="card-modern overflow-hidden fade-in-up" style="animation-delay: 0.1s;">
+        <div class="table-responsive">
+            <table class="table table-modern mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4" style="width: 40%;">Cơ sở / Địa chỉ</th>
+                        <th style="width: 20%;">Giờ mở cửa</th>
+                        <th class="text-center" style="width: 15%;">Trạng thái</th>
+                        <th class="text-end pe-4" style="width: 25%;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for center in centers %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 me-3">
+                                    {% if center.image %}
+                                        <img src="{{ center.image.url }}" class="rounded-3 object-fit-cover border" width="56" height="56" alt="{{ center.name }}">
+                                    {% else %}
+                                        <div class="bg-light rounded-3 d-flex align-items-center justify-content-center border" style="width: 56px; height: 56px;">
+                                            <i class="fa-regular fa-image text-secondary opacity-50"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold text-dark mb-1 fs-6">{{ center.name }}</h6>
+                                    <div class="text-secondary small d-flex align-items-start" style="line-height: 1.4;">
+                                        <i class="fa-solid fa-location-dot me-2 mt-1 text-muted" style="font-size: 0.7rem;"></i>
+                                        <span>{{ center.address }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="fw-bold text-dark text-nowrap">
+                                    {{ center.open_time|time:"H:i" }} - {{ center.close_time|time:"H:i" }}
+                                </span>
+                                <span class="text-muted small">Hằng ngày</span>
+                            </div>
+                        </td>
+
+                        <td class="text-center">
+                            {% if center.is_active %}
+                                <span class="badge badge-soft badge-soft-success">
+                                    <span class="badge-dot"></span> Hoạt động
+                                </span>
+                            {% else %}
+                                <span class="badge badge-soft badge-soft-secondary">
+                                    <span class="badge-dot"></span> Tạm dừng
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end pe-4">
+                            <div class="d-flex justify-content-end align-items-center gap-2">
+                                <a href="{% url 'manage_courts' center.id %}" 
+                                   class="btn btn-pro btn-pro-light btn-sm fw-medium text-secondary"
+                                   title="Danh sách sân con">
+                                    <i class="fa-solid fa-list-check me-1"></i>Sân con
+                                </a>
+
+                                <button type="button" class="btn btn-icon"
+                                        title="Chỉnh sửa thông tin"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#addCenterModal"
+                                        data-mode="edit"
+                                        data-action="{% url 'partner_edit_center' center.id %}" 
+                                        data-name="{{ center.name }}"
+                                        data-address="{{ center.address }}"
+                                        data-lat="{{ center.latitude|default_if_none:'' }}"
+                                        data-lng="{{ center.longitude|default_if_none:'' }}"
+                                        data-type="{{ center.type_court }}"
+                                        data-desc="{{ center.description }}"
+                                        data-open="{{ center.open_time|time:'H:i' }}"
+                                        data-close="{{ center.close_time|time:'H:i' }}"
+                                        data-active="{{ center.is_active|yesno:'true,false' }}"
+                                        data-image="{% if center.image %}{{ center.image.url }}{% endif %}"
+                                        data-amenities="[{% for a in center.amenities.all %}{{ a.id }}{% if not forloop.last %},{% endif %}{% endfor %}]">
+                                    <i class="fa-regular fa-pen-to-square"></i>
+                                </button>
+
+                                <button type="button" class="btn btn-icon delete" 
+                                        title="Xóa cơ sở"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#deleteCenterModal{{ center.id }}">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <div class="modal fade" id="deleteCenterModal{{ center.id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-sm">
+                            <div class="modal-content border-0">
+                                <div class="modal-body p-4 text-center">
+                                    <div class="mb-3 text-warning">
+                                        <i class="fa-solid fa-triangle-exclamation fa-3x"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-2">Xóa cơ sở này?</h6>
+                                    <p class="small text-muted mb-4">
+                                        Bạn có chắc muốn xóa <strong>{{ center.name }}</strong>?<br>
+                                        Toàn bộ sân con và lịch đặt sẽ bị xóa vĩnh viễn.
+                                    </p>
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <button type="button" class="btn btn-pro btn-pro-light btn-sm" data-bs-dismiss="modal">Hủy</button>
+                                        <form action="{% url 'partner_delete_center' center.id %}" method="POST">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm fw-bold px-3" style="border-radius: 6px;">Xác nhận xóa</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5">
+                            <div class="d-flex flex-column align-items-center">
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                                    <i class="fa-solid fa-store-slash fs-4 text-muted opacity-50"></i>
+                                </div>
+                                <h6 class="fw-bold text-dark">Chưa có cơ sở nào</h6>
+                                <p class="text-secondary small mb-3">Hãy tạo cơ sở đầu tiên để bắt đầu quản lý.</p>
+                                <button class="btn btn-pro btn-pro-primary btn-sm"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#addCenterModal"
+                                        data-mode="add" 
+                                        data-action="{% url 'partner_add_center' %}">
+                                    Thêm Cơ sở ngay
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% include 'partner/add_center.html' %}
+
+{% endblock %}

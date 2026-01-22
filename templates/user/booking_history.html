@@ -1,80 +1,178 @@
 {% extends 'base/base.html' %}
 {% load static %}
+{% load humanize %}
+
+{% block title %}Vé của tôi - Badminton Pro{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10 fade-in-up">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container py-5" style="min-height: 80vh;">
+    
+    <div class="row justify-content-center mb-4 fade-in-up">
+        <div class="col-lg-10">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
                 <div>
-                    <h3 class="fw-bold mb-0">Lịch sử đặt sân</h3>
-                    <p class="text-muted small">Quản lý các vé điện tử của bạn</p>
+                    <h2 class="fw-bold text-dark mb-1 ls-tight">Vé của tôi</h2>
+                    <p class="text-muted small mb-0">Quản lý lịch đặt sân và trạng thái thanh toán.</p>
                 </div>
-                <button class="btn btn-outline-primary rounded-pill px-4">
-                    <i class="fa fa-filter me-2"></i>Lọc
-                </button>
+                
+                <div class="nav nav-pills-custom" role="tablist">
+                    <a class="nav-link active" href="#">Tất cả</a>
+                    <a class="nav-link" href="#">Sắp tới</a>
+                    <a class="nav-link" href="#">Hoàn thành</a>
+                    <a class="nav-link" href="#">Đã hủy</a>
+                </div>
             </div>
+        </div>
+    </div>
 
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="row justify-content-center fade-in-up" style="animation-delay: 0.1s;">
+        <div class="col-lg-10">
+            <div class="card-modern overflow-hidden">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-light text-muted small text-uppercase">
+                    <table class="table table-modern align-middle mb-0">
+                        <thead>
                             <tr>
-                                <th class="py-3 ps-4 border-0">Mã vé</th>
-                                <th class="py-3 border-0">Sân / Loại</th>
-                                <th class="py-3 border-0">Ngày giờ</th>
-                                <th class="py-3 border-0">Tổng tiền</th>
-                                <th class="py-3 border-0">Trạng thái</th>
-                                <th class="py-3 border-0 text-end pe-4">Thao tác</th>
+                                <th class="ps-4" style="width: 15%;">Mã vé</th>
+                                <th style="width: 30%;">Thông tin sân</th>
+                                <th style="width: 20%;">Thời gian</th>
+                                <th style="width: 15%;">Tổng tiền</th>
+                                <th class="text-center" style="width: 10%;">Trạng thái</th>
+                                <th class="text-end pe-4" style="width: 10%;">Thao tác</th>
                             </tr>
                         </thead>
-                        <tbody class="border-top-0">
-                            <tr class="transition">
+                        <tbody>
+                            <tr>
                                 <td class="ps-4">
-                                    <span class="fw-bold text-dark">#ORD-8821</span>
+                                    <span class="badge-id">#ORD-8821</span>
                                 </td>
                                 <td>
-                                    <div class="fw-bold text-primary">Sân Cầu Giấy - Sân 1</div>
-                                    <span class="badge bg-light text-dark border mt-1">Sân Thảm</span>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light rounded p-2 me-3 border">
+                                            <i class="fa-solid fa-map-location-dot text-primary fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold text-dark fs-6">Sân Cầu Giấy Arena</h6>
+                                            <div class="small text-muted mt-1">
+                                                <span class="badge badge-soft-secondary border fw-normal" style="font-size: 0.65rem;">Sân 1</span>
+                                                <span class="ms-1 text-secondary" style="font-size: 0.75rem;">• Sân Thảm</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>
-                                    <div class="fw-medium">30 Th12, 2025</div>
-                                    <small class="text-muted">17:00 - 19:00</small>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold text-dark">17:00 - 19:00</span>
+                                        <span class="small text-muted">30 Th12, 2025</span>
+                                    </div>
                                 </td>
-                                <td class="fw-bold">100.000đ</td>
                                 <td>
-                                    <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill fw-medium">
-                                        <i class="fa fa-check-circle me-1"></i>Thành công
+                                    <div class="fw-bold text-dark">100.000đ</div>
+                                    <small class="text-success fw-bold" style="font-size: 0.7rem;"><i class="fa-solid fa-check me-1"></i>Đã TT</small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge badge-soft bg-success bg-opacity-10 text-success border border-success border-opacity-10 rounded-pill px-3">
+                                        Sắp tới
                                     </span>
                                 </td>
                                 <td class="text-end pe-4">
-                                    <button class="btn btn-light btn-sm rounded-circle shadow-sm text-primary" data-bs-toggle="tooltip" title="Xem QR Code">
-                                        <i class="fa fa-qrcode"></i>
+                                    <button class="btn btn-icon text-primary bg-primary bg-opacity-10 border-primary border-opacity-10" title="Mã QR Check-in">
+                                        <i class="fa-solid fa-qrcode"></i>
                                     </button>
                                 </td>
                             </tr>
 
                             <tr>
-                                <td class="ps-4"><span class="fw-bold text-muted">#ORD-8822</span></td>
-                                <td>
-                                    <div class="fw-bold">Sân Mỹ Đình - Sân 3</div>
+                                <td class="ps-4">
+                                    <span class="badge-id">#ORD-8822</span>
                                 </td>
                                 <td>
-                                    <div class="fw-medium">01 Th01, 2026</div>
-                                    <small class="text-muted">08:00 - 09:00</small>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light rounded p-2 me-3 border">
+                                            <i class="fa-solid fa-map-location-dot text-secondary fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold text-dark fs-6">Sân Mỹ Đình Sport</h6>
+                                            <div class="small text-muted mt-1">
+                                                <span class="badge badge-soft-secondary border fw-normal" style="font-size: 0.65rem;">Sân 3</span>
+                                                <span class="ms-1 text-secondary" style="font-size: 0.75rem;">• Sân Gỗ</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
-                                <td class="fw-bold">50.000đ</td>
                                 <td>
-                                    <span class="badge bg-warning bg-opacity-10 text-warning px-3 py-2 rounded-pill fw-medium">
-                                        <i class="fa fa-clock me-1"></i>Chờ thanh toán
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold text-dark">08:00 - 09:00</span>
+                                        <span class="small text-muted">01 Th01, 2026</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark">50.000đ</div>
+                                    <small class="text-danger fw-bold" style="font-size: 0.7rem;"><i class="fa-solid fa-clock me-1"></i>Chờ TT</small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge badge-soft bg-warning bg-opacity-10 text-warning border border-warning border-opacity-10 rounded-pill px-3">
+                                        Chờ xác nhận
                                     </span>
                                 </td>
                                 <td class="text-end pe-4">
-                                    <a href="#" class="btn btn-primary btn-sm rounded-pill px-3">Thanh toán</a>
+                                    <a href="#" class="btn btn-primary-gradient btn-sm rounded-pill px-3 fw-bold shadow-sm" style="font-size: 0.75rem;">
+                                        Thanh toán
+                                    </a>
                                 </td>
                             </tr>
+
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="badge-id text-muted">#ORD-8810</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light rounded p-2 me-3 border opacity-50">
+                                            <i class="fa-solid fa-map-location-dot text-secondary fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold text-secondary fs-6">CLB Cầu Lông 365</h6>
+                                            <div class="small text-muted mt-1">
+                                                <span class="badge badge-soft-secondary border fw-normal text-muted" style="font-size: 0.65rem;">Sân VIP</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column text-muted">
+                                        <span class="fw-bold">19:00 - 20:00</span>
+                                        <span class="small">15 Th12, 2025</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-secondary">80.000đ</div>
+                                    <small class="text-muted" style="font-size: 0.7rem;">Tiền mặt</small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge badge-soft bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-10 rounded-pill px-3">
+                                        Hoàn thành
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold" style="font-size: 0.75rem;">
+                                        Đặt lại
+                                    </button>
+                                </td>
+                            </tr>
+
                         </tbody>
                     </table>
+                </div>
+                
+                <div class="card-footer bg-white border-top-0 py-3">
+                    <nav>
+                        <ul class="pagination justify-content-center mb-0">
+                            <li class="page-item disabled"><a class="page-link border-0 text-secondary" href="#"><i class="fa-solid fa-chevron-left"></i></a></li>
+                            <li class="page-item active"><a class="page-link border-0 rounded-circle bg-primary text-white mx-1 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link border-0 text-secondary rounded-circle mx-1 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link border-0 text-secondary" href="#"><i class="fa-solid fa-chevron-right"></i></a></li>
+                        </ul>
+                    </nav>
                 </div>
             </div>
         </div>

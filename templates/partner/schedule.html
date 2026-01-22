@@ -5,200 +5,227 @@
 {% block title %}Lịch đặt sân - Badminton Pro{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 fade-in-up gap-3">
-    <div>
-        <h6 class="text-uppercase text-secondary fw-bold small ls-1 mb-1">Quản lý vận hành</h6>
-        <h2 class="fw-bold text-dark mb-0">Lịch đặt sân</h2>
-    </div>
+<div class="container-fluid px-4 py-4">
+    
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 gap-3 fade-in-up">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small text-muted">
+                    <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-secondary">Quản lý vận hành</a></li>
+                    <li class="breadcrumb-item active text-dark" aria-current="page">Lịch đặt sân</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold text-dark mb-0 ls-tight">Lịch đặt sân</h3>
+        </div>
 
-    <div class="d-flex gap-2 bg-white p-2 rounded-3 shadow-sm border">
-        <input type="date" class="form-control form-control-sport border-0 bg-light" value="{% now 'Y-m-d' %}" style="max-width: 160px;">
-        <select class="form-select form-select-sport border-0 bg-light" style="width: auto;">
-            <option value="">Tất cả sân</option>
-            {% for court in courts %}
-                <option value="{{ court.id }}">{{ court.name }}</option>
-            {% endfor %}
-        </select>
-        <button class="btn btn-primary-sport text-white px-4">
-            <i class="fa-solid fa-filter me-2"></i>Lọc
-        </button>
-    </div>
-</div>
-
-<div class="card card-dashboard border-0 h-100">
-    <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
-        <ul class="nav nav-tabs-sport">
-            <li class="nav-item">
-                <a class="nav-link active" href="javascript:void(0)" id="btn-list" onclick="switchView('list')">
-                    <i class="fa-solid fa-list-ul me-2"></i>Danh sách
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="javascript:void(0)" id="btn-timeline" onclick="switchView('timeline')">
-                    <i class="fa-solid fa-timeline me-2"></i>Timeline
-                </a>
-            </li>
-        </ul>
-
-        <div class="dropdown">
-            <button class="btn btn-light btn-sm fw-bold text-secondary" type="button" data-bs-toggle="dropdown">
-                <i class="fa-solid fa-download me-1"></i> Xuất dữ liệu
+        <div class="d-flex flex-wrap gap-2 bg-white p-2 rounded-3 shadow-sm border">
+            <input type="date" class="form-control border-0 bg-light fw-medium" 
+                   value="{% now 'Y-m-d' %}" 
+                   style="max-width: 150px; font-size: 0.9rem;">
+            
+            <select class="form-select border-0 bg-light fw-medium" style="width: auto; font-size: 0.9rem;">
+                <option value="">Tất cả sân</option>
+                {% for court in courts %}
+                    <option value="{{ court.id }}">{{ court.name }}</option>
+                {% endfor %}
+            </select>
+            
+            <button class="btn btn-pro btn-pro-primary py-1 px-3">
+                <i class="fa-solid fa-filter"></i> Lọc
             </button>
         </div>
     </div>
 
-    <div class="card-body p-0">
+    <div class="card-modern h-100 fade-in-up" style="animation-delay: 0.1s;">
         
-        <div id="view-list">
-            <div class="table-responsive">
-                <table class="table table-sport align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th class="ps-4">Thành viên</th> <th>Sân / Loại</th>
-                            <th>Khung giờ</th>
-                            <th>Thanh toán</th>
-                            <th>Trạng thái</th>
-                            <th class="text-end pe-4">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for booking in bookings %}
-                        <tr>
-                            <td class="ps-4">
-                                <div class="d-flex align-items-center">
-                                    {% if booking.user.avatar %}
-                                        <img src="{{ booking.user.avatar.url }}" class="rounded-circle me-3 border" width="45" height="45" style="object-fit: cover;">
-                                    {% else %}
-                                        <div class="avatar-circle bg-primary bg-opacity-10 text-primary me-3 border border-primary border-opacity-10">
-                                            {{ booking.user.username|slice:":1"|upper }}
+        <div class="card-header bg-white border-bottom-0 py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+            
+            <div class="nav nav-pills-custom" role="tablist">
+                <a class="nav-link active" href="javascript:void(0)" id="btn-list" onclick="switchView('list')">
+                    <i class="fa-solid fa-list-ul me-2"></i>Danh sách
+                </a>
+                <a class="nav-link" href="javascript:void(0)" id="btn-timeline" onclick="switchView('timeline')">
+                    <i class="fa-solid fa-timeline me-2"></i>Timeline
+                </a>
+            </div>
+
+            <div class="dropdown">
+                <button class="btn btn-pro btn-pro-light btn-sm text-secondary" type="button" data-bs-toggle="dropdown">
+                    <i class="fa-solid fa-download me-2"></i>Xuất dữ liệu
+                </button>
+                <ul class="dropdown-menu border-0 shadow-lg rounded-3">
+                    <li><a class="dropdown-item small" href="#">Excel (.xlsx)</a></li>
+                    <li><a class="dropdown-item small" href="#">PDF (.pdf)</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            
+            <div id="view-list">
+                <div class="table-responsive">
+                    <table class="table table-modern align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4" style="width: 25%;">Thành viên</th>
+                                <th style="width: 20%;">Sân / Loại</th>
+                                <th style="width: 20%;">Khung giờ</th>
+                                <th style="width: 15%;">Thanh toán</th>
+                                <th class="text-center" style="width: 10%;">Trạng thái</th>
+                                <th class="text-end pe-4" style="width: 10%;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in bookings %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        {% if booking.user.avatar %}
+                                            <img src="{{ booking.user.avatar.url }}" class="rounded-circle me-3 border object-fit-cover" width="40" height="40">
+                                        {% else %}
+                                            <div class="avatar-circle bg-soft-primary me-3 text-primary border border-primary border-opacity-10">
+                                                {{ booking.user.username|slice:":1"|upper }}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <div>
+                                            <h6 class="mb-0 fw-bold text-dark fs-6">
+                                                {{ booking.user.full_name|default:booking.user.username }}
+                                            </h6>
+                                            <small class="text-muted font-monospace" style="font-size: 0.75rem;">
+                                                {{ booking.user.phone|default:"---" }}
+                                            </small>
                                         </div>
-                                    {% endif %}
-                                    
-                                    <div>
-                                        <h6 class="mb-0 fw-bold text-dark">
-                                            {{ booking.user.full_name|default:booking.user.username }}
-                                        </h6>
-                                        <small class="text-muted font-monospace">
-                                            <i class="fa-solid fa-phone me-1" style="font-size: 0.7rem;"></i>{{ booking.user.phone|default:"Chưa cập nhật SĐT" }}
-                                        </small>
                                     </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="fw-bold text-dark">{{ booking.court.name }}</div>
-                                <small class="text-muted">{{ booking.court.get_court_type_display }}</small>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <i class="fa-regular fa-clock text-warning me-2"></i>
-                                    <span class="fw-bold text-dark">{{ booking.start_time|date:"H:i" }} - {{ booking.end_time|date:"H:i" }}</span>
-                                </div>
-                                <div class="small text-muted ps-4">{{ booking.date|date:"d/m/Y" }}</div>
-                            </td>
-                            <td>
-                                <div class="fw-bold text-dark">{{ booking.total_price|intcomma }}đ</div>
-                                {% if booking.is_paid %}
-                                    <span class="badge rounded-pill bg-success bg-opacity-10 text-success fw-bold px-2 py-1" style="font-size: 0.7rem;"><i class="fa-solid fa-check me-1"></i>Đã TT</span>
-                                {% else %}
-                                    <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger fw-bold px-2 py-1" style="font-size: 0.7rem;"><i class="fa-solid fa-xmark me-1"></i>Chưa TT</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if booking.status == 'pending' %} <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-3 py-2 rounded-pill">Chờ xác nhận</span>
-                                {% elif booking.status == 'confirmed' %} <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2 rounded-pill">Đã cọc</span>
-                                {% elif booking.status == 'checked_in' %} <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill">Đang đá</span>
-                                {% elif booking.status == 'cancelled' %} <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-3 py-2 rounded-pill">Đã hủy</span>
-                                {% endif %}
-                            </td>
-                            <td class="text-end pe-4">
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-white border shadow-sm rounded-circle" type="button" data-bs-toggle="dropdown" style="width: 32px; height: 32px;"><i class="fa-solid fa-ellipsis"></i></button>
-                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-3">
-                                        <li><a class="dropdown-item py-2" href="#"><i class="fa-regular fa-user me-2"></i>Xem hồ sơ</a></li> <li><a class="dropdown-item py-2" href="#"><i class="fa-regular fa-pen-to-square me-2"></i>Chỉnh sửa</a></li>
-                                        <li><a class="dropdown-item py-2 text-danger" href="#"><i class="fa-regular fa-calendar-xmark me-2"></i>Hủy lịch</a></li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr><td colspan="6" class="text-center py-5 text-muted">Không tìm thấy lịch đặt nào.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <div class="card-footer bg-white border-0 py-3">
-                <nav>
-                    <ul class="pagination pagination-sport justify-content-center mb-0">
-                        <li class="page-item disabled"><a class="page-link" href="#"><i class="fa-solid fa-chevron-left"></i></a></li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#"><i class="fa-solid fa-chevron-right"></i></a></li>
-                    </ul>
-                </nav>
-            </div>
-        </div>
-
-        <div id="view-timeline" style="display: none;">
-            
-            <div class="px-4 py-3 bg-light border-bottom d-flex align-items-center gap-3">
-                <span class="fw-bold text-secondary text-uppercase small ls-1">Chú thích:</span>
-                <div class="d-flex align-items-center"><div class="legend-box bg-white border"></div><span class="small fw-bold text-muted">Trống</span></div>
-                <div class="d-flex align-items-center"><div class="legend-box slot-booked"></div><span class="small fw-bold text-muted">Đã đặt</span></div>
-                <div class="d-flex align-items-center"><div class="legend-box slot-locked"></div><span class="small fw-bold text-muted">Đang bảo trì</span></div>
-            </div>
-
-            <div class="timeline-container rounded-0 border-0 shadow-none">
-                <table class="table-timeline">
-                    <thead>
-                        <tr>
-                            <th class="court-col-sticky text-start align-middle bg-white shadow-sm" style="z-index: 30; border-bottom: 2px solid #e2e8f0;">
-                                <i class="fa-solid fa-location-dot me-1 text-primary"></i> DANH SÁCH SÂN
-                            </th>
-                            <th>07:00</th> <th>07:30</th> <th>08:00</th> <th>08:30</th>
-                            <th>09:00</th> <th>09:30</th> <th>10:00</th> <th>10:30</th>
-                            <th>11:00</th> <th>11:30</th> <th>12:00</th> <th>12:30</th>
-                            <th>13:00</th> <th>13:30</th> <th>14:00</th> <th>14:30</th>
-                            <th>15:00</th> <th>15:30</th> <th>16:00</th> <th>16:30</th>
-                            <th>17:00</th> <th>17:30</th> <th>18:00</th> <th>18:30</th>
-                            <th>19:00</th> <th>19:30</th> <th>20:00</th> <th>20:30</th>
-                            <th>21:00</th> <th>21:30</th> <th>22:00</th> <th>22:30</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for court in courts %}
-                        <tr>
-                            <td class="court-col-sticky align-middle">
-                                <div class="fw-bold text-dark">{{ court.name }}</div>
-                                <span class="badge bg-light text-secondary border rounded-pill fw-normal" style="font-size: 0.65rem;">{{ court.get_court_type_display }}</span>
-                            </td>
-
-                            {% if forloop.first %} 
-                                <td class="time-slot slot-free" colspan="20"></td> 
-                                
-                                <td class="time-slot slot-booked align-middle text-center" colspan="3" 
-                                    title="Thành viên: Nguyễn Văn A - SĐT: 0988...">
-                                    <div class="fw-bold text-danger small text-truncate px-1">Nguyễn Văn A</div>
                                 </td>
-                                
-                                <td class="time-slot slot-free" colspan="9"></td>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ booking.court.name }}</div>
+                                    <small class="text-secondary">{{ booking.court.get_court_type_display }}</small>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="fa-regular fa-clock text-warning me-2"></i>
+                                        <span class="fw-bold text-dark">{{ booking.start_time|date:"H:i" }} - {{ booking.end_time|date:"H:i" }}</span>
+                                    </div>
+                                    <div class="small text-muted ps-4">{{ booking.date|date:"d/m/Y" }}</div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark mb-1">{{ booking.total_price|intcomma }}đ</div>
+                                    {% if booking.is_paid %}
+                                        <span class="badge badge-soft badge-soft-success py-1 px-2" style="font-size: 0.65rem;">
+                                            <i class="fa-solid fa-check me-1"></i>Đã TT
+                                        </span>
+                                    {% else %}
+                                        <span class="badge badge-soft badge-soft-danger py-1 px-2" style="font-size: 0.65rem;">
+                                            <i class="fa-solid fa-xmark me-1"></i>Chưa TT
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if booking.status == 'pending' %} 
+                                        <span class="badge badge-soft badge-soft-warning">Chờ duyệt</span>
+                                    {% elif booking.status == 'confirmed' %} 
+                                        <span class="badge badge-soft badge-soft-primary">Đã cọc</span>
+                                    {% elif booking.status == 'checked_in' %} 
+                                        <span class="badge badge-soft badge-soft-success">Đang đá</span>
+                                    {% elif booking.status == 'cancelled' %} 
+                                        <span class="badge badge-soft badge-soft-secondary">Đã hủy</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="dropdown">
+                                        <button class="btn btn-icon" type="button" data-bs-toggle="dropdown">
+                                            <i class="fa-solid fa-ellipsis"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-3">
+                                            <li><a class="dropdown-item py-2 small" href="#"><i class="fa-regular fa-eye me-2"></i>Chi tiết</a></li>
+                                            <li><a class="dropdown-item py-2 small" href="#"><i class="fa-regular fa-pen-to-square me-2"></i>Sửa giờ</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item py-2 small text-danger" href="#"><i class="fa-regular fa-trash-can me-2"></i>Hủy lịch</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="6" class="text-center py-5 text-muted">Không tìm thấy lịch đặt nào.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer bg-white border-0 py-3">
+                    </div>
+            </div>
 
-                            {% elif forloop.counter == 2 %}
-                                <td class="time-slot slot-locked align-middle text-center text-muted small" colspan="10">Bảo trì</td>
-                                <td class="time-slot slot-free" colspan="22"></td>
-                            {% else %}
-                                <td class="time-slot slot-free" colspan="32"></td>
-                            {% endif %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <div id="view-timeline" style="display: none;">
+                
+                <div class="px-4 py-3 bg-white border-bottom d-flex align-items-center gap-4">
+                    <span class="fw-bold text-secondary text-uppercase small ls-tight">Chú thích:</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="legend-box bg-white border"></div><span class="small text-secondary">Trống</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="legend-box" style="background-color: #dbeafe; border-left: 3px solid #3b82f6;"></div><span class="small text-secondary">Đã đặt</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="legend-box slot-locked"></div><span class="small text-secondary">Bảo trì</span>
+                    </div>
+                </div>
+
+                <div class="timeline-wrapper">
+                    <table class="table-timeline">
+                        <thead>
+                            <tr>
+                                <th class="court-sticky text-start align-middle shadow-sm">
+                                    <div class="text-dark fw-bold">DANH SÁCH SÂN</div>
+                                </th>
+                                <th>07:00</th> <th>07:30</th> <th>08:00</th> <th>08:30</th>
+                                <th>09:00</th> <th>09:30</th> <th>10:00</th> <th>10:30</th>
+                                <th>11:00</th> <th>11:30</th> <th>12:00</th> <th>12:30</th>
+                                <th>13:00</th> <th>13:30</th> <th>14:00</th> <th>14:30</th>
+                                <th>15:00</th> <th>15:30</th> <th>16:00</th> <th>16:30</th>
+                                <th>17:00</th> <th>17:30</th> <th>18:00</th> <th>18:30</th>
+                                <th>19:00</th> <th>19:30</th> <th>20:00</th> <th>20:30</th>
+                                <th>21:00</th> <th>21:30</th> <th>22:00</th> <th>22:30</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for court in courts %}
+                            <tr>
+                                <td class="court-sticky align-middle">
+                                    <div class="fw-bold text-dark">{{ court.name }}</div>
+                                    <span class="text-muted small">{{ court.get_court_type_display }}</span>
+                                </td>
+
+                                {% if forloop.first %} 
+                                    <td class="time-slot slot-free" colspan="20"></td> 
+                                    
+                                    <td class="time-slot slot-booked align-middle" colspan="3" 
+                                        title="Thành viên: Nguyễn Văn A">
+                                        <div class="fw-bold text-dark text-truncate px-2">Nguyễn Văn A</div>
+                                        <div class="small text-muted px-2">0988...</div>
+                                    </td>
+                                    
+                                    <td class="time-slot slot-free" colspan="9"></td>
+
+                                {% elif forloop.counter == 2 %}
+                                    <td class="time-slot slot-locked align-middle text-center small" colspan="32">
+                                        <i class="fa-solid fa-screwdriver-wrench me-1"></i>Đang bảo trì
+                                    </td>
+                                {% else %}
+                                    <td class="time-slot slot-free" colspan="32"></td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="p-3 text-center bg-white border-top">
+                    <small class="text-muted fst-italic"><i class="fa-solid fa-arrows-left-right me-1"></i>Kéo sang ngang để xem toàn bộ khung giờ</small>
+                </div>
             </div>
-            
-            <div class="p-3 text-center bg-white border-top">
-                <small class="text-muted"><i class="fa-solid fa-arrows-left-right me-1"></i>Kéo sang ngang để xem toàn bộ khung giờ</small>
-            </div>
+
         </div>
-
     </div>
 </div>
 {% endblock %}

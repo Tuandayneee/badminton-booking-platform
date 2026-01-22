@@ -1,0 +1,189 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Hợp tác cùng Badminton Pro{% endblock %}
+
+{% block content %}
+
+<section class="partner-hero-section">
+    <div class="partner-hero-bg-pattern"></div>
+    <div class="container position-relative z-2 text-center">
+        <span class="badge bg-white text-dark mb-3 px-3 py-2 fw-bold text-uppercase ls-tight rounded-pill">
+            Dành cho chủ sân
+        </span>
+        <h1 class="display-4 fw-bold mb-4">
+            Biến sân cầu lông của bạn thành <br>
+            <span class="text-primary" style="color: #60a5fa !important;">cỗ máy doanh thu</span>
+        </h1>
+        <p class="lead text-white-50 mb-5 mx-auto" style="max-width: 700px;">
+            Tham gia mạng lưới Badminton Pro để tiếp cận hàng ngàn vợt thủ, lấp đầy khung giờ trống và quản lý sân nhàn tênh với công nghệ tự động hóa.
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{% url 'register_partner' %}" class="btn btn-login-premium px-5 py-3 fs-5 shadow-lg">
+                Đăng ký Đối tác ngay
+            </a>
+            <a href="#benefits" class="btn btn-outline-light rounded-pill px-4 py-3 fw-bold">
+                Tìm hiểu lợi ích
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-white border-bottom">
+    <div class="container">
+        <div class="row text-center g-4">
+            <div class="col-md-4">
+                <div class="stat-item fade-in-up">
+                    <h3>10,000+</h3>
+                    <p class="text-secondary fw-medium">Người chơi tích cực hàng tháng</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-item fade-in-up" style="animation-delay: 0.1s;">
+                    <h3>30%</h3>
+                    <p class="text-secondary fw-medium">Tăng trưởng doanh thu trung bình</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-item fade-in-up" style="animation-delay: 0.2s;">
+                    <h3>0đ</h3>
+                    <p class="text-secondary fw-medium">Chi phí Marketing & Quảng cáo</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-body" id="benefits">
+    <div class="container py-lg-5">
+        <div class="text-center mb-5">
+            <h6 class="text-primary fw-bold text-uppercase ls-tight">Giải pháp toàn diện</h6>
+            <h2 class="fw-bold text-dark">Tại sao nên hợp tác với Badminton Pro?</h2>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4 fade-in-up">
+                <div class="benefit-card">
+                    <div class="benefit-icon-wrapper">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-3">Tối ưu doanh thu</h4>
+                    <p class="text-secondary mb-0">
+                        Hệ thống tự động đề xuất sân cho khách hàng gần bạn. Giảm thiểu tối đa tình trạng sân trống vào giờ vàng và giờ thấp điểm.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 fade-in-up" style="animation-delay: 0.1s;">
+                <div class="benefit-card">
+                    <div class="benefit-icon-wrapper">
+                        <i class="fa-regular fa-calendar-check"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-3">Quản lý lịch thông minh</h4>
+                    <p class="text-secondary mb-0">
+                        Tạm biệt sổ sách giấy tờ. Theo dõi lịch đặt sân, hủy sân, dời lịch theo thời gian thực (Real-time) ngay trên điện thoại.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 fade-in-up" style="animation-delay: 0.2s;">
+                <div class="benefit-card">
+                    <div class="benefit-icon-wrapper">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-3">Thanh toán đảm bảo</h4>
+                    <p class="text-secondary mb-0">
+                        Khách hàng thanh toán trước qua QR Code/Ví điện tử. Loại bỏ hoàn toàn rủi ro "bom hàng" (No-show). Dòng tiền về ngay lập tức.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 fade-in-up">
+                <div class="benefit-card">
+                    <div class="benefit-icon-wrapper">
+                        <i class="fa-solid fa-bullhorn"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-3">Marketing 0 đồng</h4>
+                    <p class="text-secondary mb-0">
+                        Sân của bạn sẽ xuất hiện trang trọng trên trang chủ và ứng dụng của hàng ngàn người chơi mà không tốn chi phí quảng cáo.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 fade-in-up" style="animation-delay: 0.1s;">
+                <div class="benefit-card">
+                    <div class="benefit-icon-wrapper">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-3">Báo cáo chi tiết</h4>
+                    <p class="text-secondary mb-0">
+                        Xem báo cáo doanh thu theo ngày, tuần, tháng. Phân tích hành vi khách hàng để đưa ra các gói khuyến mãi phù hợp.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 fade-in-up" style="animation-delay: 0.2s;">
+                <div class="benefit-card">
+                    <div class="benefit-icon-wrapper">
+                        <i class="fa-solid fa-headset"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-3">Hỗ trợ 24/7</h4>
+                    <p class="text-secondary mb-0">
+                        Đội ngũ kỹ thuật và chăm sóc khách hàng của Badminton Pro luôn sẵn sàng hỗ trợ bạn bất cứ khi nào gặp sự cố.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-white">
+    <div class="container py-lg-5">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold text-dark">Quy trình hợp tác đơn giản</h2>
+            <p class="text-secondary">Chỉ mất 5 phút để đưa sân của bạn lên hệ thống</p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-4">
+                <div class="step-card fade-in-up">
+                    <div class="step-number">1</div>
+                    <h5 class="fw-bold mb-3">Đăng ký tài khoản</h5>
+                    <p class="text-secondary small">Điền thông tin doanh nghiệp và người đại diện vào form đăng ký.</p>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="step-card fade-in-up" style="animation-delay: 0.1s;">
+                    <div class="step-number">2</div>
+                    <h5 class="fw-bold mb-3">Xác thực & Cấu hình</h5>
+                    <p class="text-secondary small">Đội ngũ chúng tôi sẽ xác thực thông tin. Sau đó bạn thiết lập số lượng sân và giá.</p>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="step-card fade-in-up" style="animation-delay: 0.2s;">
+                    <div class="step-number">3</div>
+                    <h5 class="fw-bold mb-3">Nhận lịch & Doanh thu</h5>
+                    <p class="text-secondary small">Hệ thống kích hoạt. Khách hàng bắt đầu đặt sân và tiền đổ về tài khoản.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-body">
+    <div class="container text-center py-4">
+        <div class="card border-0 bg-primary text-white rounded-4 overflow-hidden shadow-lg p-5 position-relative">
+            <div class="position-absolute top-0 start-0 w-100 h-100" style="background: radial-gradient(circle at 10% 20%, rgba(255,255,255,0.1) 0%, transparent 20%);"></div>
+            
+            <div class="position-relative z-2">
+                <h2 class="fw-bold mb-3 text-white">Sẵn sàng bùng nổ doanh số?</h2>
+                <p class="text-white-50 mb-4 fs-5">Đừng để sân trống thêm một giờ nào nữa. Tham gia ngay hôm nay!</p>
+                <a href="{% url 'register_partner' %}" class="btn btn-light text-primary rounded-pill px-5 py-3 fw-bold shadow-sm hover-scale">
+                    Đăng ký Đối tác miễn phí
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

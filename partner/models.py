@@ -1,18 +1,27 @@
+import datetime
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from users.models import User, PartnerProfile 
 from django.utils.translation import gettext_lazy as _
-
+import uuid
 
 class Amenity(models.Model):
     name = models.CharField(max_length=50, verbose_name="Tên tiện ích")
-    icon = models.ImageField(upload_to='amenities/', verbose_name="Icon")
+    
     def __str__(self):
         return self.name
     
 class BadmintonCenter(models.Model):
+    id = models.UUIDField(
+        primary_key=True, 
+        default=uuid.uuid4, 
+        editable=False 
+    )
+    
     partner = models.ForeignKey(PartnerProfile, on_delete=models.CASCADE, related_name='centers', verbose_name="Đối tác")
     name = models.CharField(max_length=100, verbose_name="Tên trung tâm")
+    image = models.ImageField(upload_to='center_images/', blank=True, verbose_name="Ảnh đại diện")
+   
     address = models.CharField(max_length=255, verbose_name="Địa chỉ")
     latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True, verbose_name="Vĩ độ")
     longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True, verbose_name="Kinh độ")
@@ -34,12 +43,28 @@ class CenterImage(models.Model):
     
 
 class Court(models.Model):
+    class TypeCourt(models.TextChoices):
+        WOODEN = 'wooden', 'Sàn gỗ'
+        CARPET = 'carpet', 'Sàn thảm'
     center = models.ForeignKey(BadmintonCenter, on_delete=models.CASCADE, related_name='courts')
     name = models.CharField(max_length=50, verbose_name="Tên sân") 
+    type_court = models.CharField(max_length=20, choices=TypeCourt.choices,default=TypeCourt.WOODEN,  verbose_name="Loại sân")
     base_price_per_hour = models.DecimalField(max_digits=10, decimal_places=0, verbose_name="Giá cơ bản/giờ")
+    golden_price_per_hour = models.DecimalField(max_digits=10, decimal_places=0, verbose_name="Giá giờ vàng/giờ", null=True, blank=True)
+    golden_start_time = models.TimeField(verbose_name="Bắt đầu giờ vàng", null=True, blank=True)
+    golden_end_time = models.TimeField(verbose_name="Kết thúc giờ vàng", null=True, blank=True)  
     is_active = models.BooleanField(default=True, verbose_name="Đang hoạt động")
     def __str__(self):
         return f"{self.center.name} - {self.name}"
+    def get_price_at_time(self, check_time_str):
+        """Hàm tính giá tiền dựa vào giờ"""
+        if not self.golden_price_per_hour or not self.golden_start_time:
+            return self.base_price_per_hour
+        check_time = datetime.datetime.strptime(check_time_str, "%H:%M").time()
+        if self.golden_start_time <= check_time < self.golden_end_time:
+            return self.golden_price_per_hour
+            
+        return self.base_price_per_hour
 class PriceRule(models.Model):
     center = models.ForeignKey(BadmintonCenter, on_delete=models.CASCADE, related_name='price_rules')
     name = models.CharField(max_length=100, verbose_name="Tên khung giờ")
@@ -49,48 +74,7 @@ class PriceRule(models.Model):
     price_per_hour = models.DecimalField(max_digits=10, decimal_places=0, verbose_name="Giá/giờ")
     priority = models.IntegerField(default=1, verbose_name="Độ ưu tiên")
     
-class Booking(models.Model):
-    STATUS_CHOICES = [
-        ('pending', 'Chờ thanh toán'),
-        ('confirmed', 'Đã đặt cọc/Thanh toán'),
-        ('checked_in', 'Đã nhận sân '),
-        ('completed', 'Hoàn thành'),
-    ]
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings', verbose_name="Người dùng")
-    court = models.ForeignKey(Court, on_delete=models.CASCADE, related_name='bookings', verbose_name="Sân")
-    date = models.DateField(verbose_name="Ngày đặt sân")
-    start_time = models.TimeField(verbose_name="Giờ bắt đầu")
-    end_time = models.TimeField(verbose_name="Giờ kết thúc")
-    total_price = models.DecimalField(max_digits=12, decimal_places=0, verbose_name="Tổng tiền")
-    is_paid = models.BooleanField(default=False, verbose_name="Đã thanh toán")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    note = models.TextField(blank=True, verbose_name="Ghi chú")
-    booking_code = models.CharField(max_length=12, unique=True, verbose_name="Mã check-in")
-    created_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        indexes = [
-            models.Index(fields=['date', 'status']), # Tối ưu tìm kiếm lịch trống
-            models.Index(fields=['booking_code']), # Tối ưu quét QR
-        ]
-
-class FixedSchedule(models.Model):
-    """
-    Lịch cố định 
-    """
-    center = models.ForeignKey(BadmintonCenter, on_delete=models.CASCADE)
-    court = models.ForeignKey(Court, on_delete=models.CASCADE)
-    customer_name = models.CharField(max_length=100, verbose_name="Tên chủ nhóm")
-    customer_phone = models.CharField(max_length=20, verbose_name="SĐT chủ nhóm")
-    start_time = models.TimeField()
-    end_time = models.TimeField()
-    days_of_week = models.JSONField(verbose_name="Các thứ trong tuần (VD: [1,3,5])")
-    
-    start_date = models.DateField(verbose_name="Ngày bắt đầu gói")
-    end_date = models.DateField(verbose_name="Ngày kết thúc gói")
-    
-    is_active = models.BooleanField(default=True)
-    note = models.TextField(blank=True)
 
 class Product(models.Model):
     """

@@ -4,146 +4,248 @@
 
 {% block title %}Đăng nhập - Badminton Pro{% endblock %}
 
-{% block content %}
-<div class="login-wrapper">
-    <div class="banner-side" style="background: linear-gradient(rgba(13, 110, 253, 0.7), rgba(13, 110, 253, 0.5)), url('{% static 'images/banner.jpg' %}');">
-        <div class="banner-text fade-in-up">
-            <h1>Badminton Pro</h1>
-            <p>Hệ thống đặt sân cầu lông số #1 Việt Nam.<br>Cháy hết mình cùng đam mê!</p>
+{% block navbar %}{% endblock %} {% block footer %}{% endblock %} {% block content %}
+<div class="auth-split-screen">
+    
+    <div class="d-none d-lg-flex col-lg-7 auth-visual-side" 
+         style="background-image: url('{% static 'images/banner.jpg' %}'); background-size: cover; background-position: center;">
+        
+        <div class="auth-visual-content">
+            <a href="{% url 'home' %}" class="d-flex align-items-center gap-2 text-white text-decoration-none">
+                <i class="fa-solid fa-shuttlecock fs-4 text-white-50"></i>
+                <span class="fw-bold fs-4">Badminton Pro</span>
+            </a>
+        </div>
+
+        <div class="auth-visual-content">
+            <h1 class="display-4 fw-bold mb-3">Kết nối đam mê,<br>Nâng tầm sức khỏe.</h1>
+            <p class="text-white-50 fs-5 mb-5" style="max-width: 500px;">
+                Nền tảng đặt sân cầu lông hiện đại, tiện lợi và uy tín nhất Việt Nam.
+            </p>
+            
+            <div class="d-flex gap-3">
+                <div class="glass-card">
+                    <div class="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center p-2">
+                        <i class="fa-solid fa-user-group text-white"></i>
+                    </div>
+                    <div>
+                        <div class="h5 fw-bold mb-0">10k+</div>
+                        <small class="text-white-50">Vợt thủ</small>
+                    </div>
+                </div>
+                <div class="glass-card">
+                    <div class="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center p-2">
+                        <i class="fa-solid fa-star text-warning"></i>
+                    </div>
+                    <div>
+                        <div class="h5 fw-bold mb-0">4.9/5</div>
+                        <small class="text-white-50">Đánh giá</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-visual-content small text-white-50">
+            &copy; 2025 Badminton Pro Platform.
         </div>
     </div>
 
-    <div class="form-side">
-        <div class="form-content fade-in-up {% if register_form.errors %}hidden{% endif %}" id="loginBox">
-            <a href="{% url 'home' %}" class="brand-logo"><i class="fas fa-shuttlecock"></i> Badminton Pro</a>
-            <h2 class="fw-bold mb-2">Chào mừng trở lại!</h2>
+    <div class="col-12 col-lg-5 auth-form-side">
+        <div class="auth-form-wrapper fade-in-up">
             
-            <form method="POST" action="{% url 'login' %}">
-                {% csrf_token %}
-                
-                {% if login_form.non_field_errors %}
-                    <div class="alert alert-danger">
-                        {{ login_form.non_field_errors }}
+            <div class="d-lg-none text-center mb-4">
+                <h3 class="fw-bold text-dark"><i class="fa-solid fa-shuttlecock text-primary me-2"></i>Badminton Pro</h3>
+            </div>
+
+            <div id="loginBox" class="{% if register_form.errors %}hidden{% endif %}">
+                <div class="mb-4">
+                    <h2 class="fw-bold text-dark mb-1">Chào mừng trở lại!</h2>
+                    <p class="text-secondary small">Vui lòng nhập thông tin để đăng nhập.</p>
+                </div>
+
+                <form method="POST" action="{% url 'login' %}">
+                    {% csrf_token %}
+                    
+                    {% if login_form.non_field_errors %}
+                        <div class="alert alert-danger py-2 small mb-3 border-0 bg-danger bg-opacity-10 text-danger rounded-3">
+                            <i class="fa-solid fa-circle-exclamation me-2"></i>{{ login_form.non_field_errors|striptags }}
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label class="form-label">Tên đăng nhập</label>
+                        <div class="input-group-unified">
+                            <span class="input-group-text"><i class="fa-regular fa-user"></i></span>
+                            {{ login_form.username }} 
+                        </div>
+                        <div class="text-danger small mt-1">{{ login_form.username.errors.0 }}</div>
                     </div>
-                {% endif %}
 
-                <div class="mb-3">
-                    <label class="form-label fw-medium">Tên đăng nhập</label>
-                    {{ login_form.username }} 
-                    <div class="text-danger small">{{ login_form.username.errors }}</div>
+                    <div class="mb-2">
+                        <label class="form-label">Mật khẩu</label>
+                        <div class="input-group-unified">
+                            <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                            {{ login_form.password }}
+                        </div>
+                        <div class="text-danger small mt-1">{{ login_form.password.errors.0 }}</div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="rememberMe">
+                            <label class="form-check-label small text-secondary" for="rememberMe">Ghi nhớ</label>
+                        </div>
+                        <a href="#" class="text-decoration-none small fw-bold text-primary">Quên mật khẩu?</a>
+                    </div>
+
+                    <button type="submit" name="btn_login" class="btn btn-login-premium w-100 mb-4">
+                        Đăng nhập
+                    </button>
+                </form>
+
+                <div class="position-relative text-center mb-4">
+                    <hr class="text-secondary opacity-25">
+                    <span class="position-absolute top-50 start-50 translate-middle bg-white px-2 small text-muted fw-medium">Hoặc tiếp tục với</span>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label fw-medium">Mật khẩu</label>
-                    {{ login_form.password }}
-                    <div class="text-danger small">{{ login_form.password.errors }}</div>
+                <div class="row g-2 mb-4">
+                    <div class="col-6">
+                        <form action="{% provider_login_url 'google' %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-social-flat">
+                                <img src="https://cdn-icons-png.flaticon.com/512/300/300221.png" width="18"> Google
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-6">
+                        <form action="{% provider_login_url 'github' %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-social-flat">
+                                <i class="fa-brands fa-github fs-5"></i> GitHub
+                            </button>
+                        </form>
+                    </div>
                 </div>
+
+                <p class="text-center text-secondary mb-0 small">
+                    Chưa có tài khoản? 
+                    <a href="javascript:void(0)" onclick="switchAuthMode('register')" class="fw-bold text-dark text-decoration-underline">Đăng ký ngay</a>
+                </p>
+            </div>
+
+            <div id="registerBox" class="{% if not register_form.errors %}hidden{% endif %}">
+                <div class="mb-4">
+                    <h2 class="fw-bold text-dark mb-1">Tạo tài khoản</h2>
+                    <p class="text-secondary small">Trải nghiệm đặt sân nhanh chóng & tiện lợi.</p>
+                </div>
+
+                <form method="POST" action="{% url 'register' %}">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label">Tên đăng nhập</label>
+                        <div class="input-group-unified">
+                            <span class="input-group-text"><i class="fa-regular fa-user"></i></span>
+                            {{ register_form.username }}
+                        </div>
+                        <div class="text-danger small mt-1">{{ register_form.username.errors.0 }}</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <div class="input-group-unified">
+                            <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
+                            {{ register_form.email }}
+                        </div>
+                        <div class="text-danger small mt-1">{{ register_form.email.errors.0 }}</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Số điện thoại</label>
+                        <div class="input-group-unified">
+                            <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+                            {{ register_form.phone_number }}
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Mật khẩu</label>
+                            <div class="input-group-unified">
+                                {{ register_form.password }}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Nhập lại</label>
+                            <div class="input-group-unified">
+                                {{ register_form.confirm_password }}
+                            </div>
+                        </div>
+                        <div class="col-12 text-danger small">
+                            {{ register_form.password.errors.0 }}
+                            {{ register_form.confirm_password.errors.0 }}
+                        </div>
+                    </div>
+
+                    <button type="submit" name="btn_register" class="btn btn-submit w-100 rounded-3 mb-4">
+                        Đăng ký thành viên
+                    </button>
+                </form>
+
+                <p class="text-center text-secondary mb-0 small">
+                    Đã có tài khoản? 
+                    <a href="javascript:void(0)" onclick="switchAuthMode('login')" class="fw-bold text-dark text-decoration-underline">Đăng nhập</a>
+                </p>
                 
-                <button type="submit" name="btn_login" class="btn btn-primary w-100 mb-3">Đăng nhập</button>
-            </form> 
-            <div class="text-center mb-3">
-                <div class="d-flex align-items-center justify-content-center mb-3">
-                    <hr class="flex-grow-1 mx-2 text-muted">
-                    <span class="small text-muted">Hoặc đăng nhập bằng</span>
-                    <hr class="flex-grow-1 mx-2 text-muted">
-                </div>
-                
-                <div class="d-flex gap-2">
-                   <form action="{% provider_login_url 'google' %}" method="post" class="w-50">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-dark w-100 fw-medium d-flex align-items-center justify-content-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="me-2">
-                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                                <path fill="none" d="M1 1h22v22H1z"/>
-                            </svg>
-                            Google
-                        </button>
-                    </form>
-
-                    <form action="{% provider_login_url 'github' %}" method="post" class="w-50">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-dark w-100 fw-medium d-flex align-items-center justify-content-center">
-                            <i class="fab fa-github me-2"></i>GitHub
-                        </button>
-                    </form>
+                <div class="text-center mt-4 pt-4 border-top">
+                    <a href="{% url 'register_partner' %}" class="text-decoration-none small text-muted hover-primary">
+                        <i class="fa-solid fa-briefcase me-1"></i> Đăng ký làm Đối tác (Chủ sân)
+                    </a>
                 </div>
             </div>
-            
-            <div class="text-center mb-4">
-                <span class="text-muted">Chưa có tài khoản? </span>
-                <a href="javascript:void(0)" onclick="toggleForm()" class="fw-bold text-primary text-decoration-none">Đăng ký khách hàng</a>
-            </div>
 
-            <div class="text-center pt-3 border-top">
-                <p class="small text-muted mb-1">Bạn là chủ sân cầu lông?</p>
-                <a href="{% url 'register_partner' %}" class="btn btn-outline-success w-100 fw-bold">
-                    <i class="fa-solid fa-handshake me-2"></i>Đăng ký làm Đối tác
-                </a>
-            </div>
-        </div>
-
-        <div class="form-content fade-in-up {% if not register_form.errors %}hidden{% endif %}" id="registerBox">
-            <a href="{% url 'home' %}" class="brand-logo"><i class="fas fa-shuttlecock"></i> Badminton Pro</a>
-            <h2 class="fw-bold mb-2">Tạo tài khoản khách</h2>
-            
-            <form method="POST" action="{% url 'register' %}">
-                {% csrf_token %}
-
-                {% if register_form.non_field_errors %}
-                    <div class="alert alert-danger">{{ register_form.non_field_errors }}</div>
-                {% endif %}
-
-                <div class="mb-3">
-                    <label class="form-label fw-medium">Tên đăng nhập</label>
-                    {{ register_form.username }}
-                    <div class="text-danger small">{{ register_form.username.errors }}</div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-medium">Email</label>
-                    {{ register_form.email }}
-                    <div class="text-danger small">{{ register_form.email.errors }}</div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-medium">Số điện thoại</label>
-                    {{ register_form.phone_number }}
-                    <div class="text-danger small">{{ register_form.phone_number.errors }}</div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-medium">Mật khẩu</label>
-                    {{ register_form.password }}
-                    <div class="text-danger small">{{ register_form.password.errors }}</div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-medium">Nhập lại mật khẩu</label>
-                    {{ register_form.confirm_password }}
-                    <div class="text-danger small">{{ register_form.confirm_password.errors }}</div>
-                </div>
-
-                <button type="submit" name="btn_register" class="btn btn-primary w-100 mb-3">Đăng ký</button>
-            </form>
-            
-
-            <div class="text-center mb-4">
-                <span class="text-muted">Đã có tài khoản? </span>
-                <a href="javascript:void(0)" onclick="toggleForm()" class="fw-bold text-primary text-decoration-none">Đăng nhập</a>
-            </div>
-
-            <div class="text-center pt-3 border-top">
-                <p class="small text-muted mb-1">Bạn muốn hợp tác kinh doanh?</p>
-                <a href="{% url 'register_partner' %}" class="fw-bold text-success text-decoration-none">
-                    <i class="fa-solid fa-arrow-right me-1"></i>Đăng ký dành cho Chủ sân
-                </a>
-            </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<script src="{% static 'js/user/login_register.js' %}"></script>
+{% block extra_js %}
+<script>
+    // Hàm chuyển đổi Login <-> Register
+    function switchAuthMode(mode) {
+        const loginBox = document.getElementById('loginBox');
+        const registerBox = document.getElementById('registerBox');
+        const wrapper = document.querySelector('.auth-form-wrapper');
+
+        // Hiệu ứng fade nhẹ
+        wrapper.style.opacity = '0';
+        wrapper.style.transform = 'translateY(10px)';
+
+        setTimeout(() => {
+            if (mode === 'register') {
+                loginBox.classList.add('hidden');
+                registerBox.classList.remove('hidden');
+            } else {
+                registerBox.classList.add('hidden');
+                loginBox.classList.remove('hidden');
+            }
+            // Hiện lại
+            wrapper.style.opacity = '1';
+            wrapper.style.transform = 'translateY(0)';
+        }, 200);
+    }
+
+    // Tự động thêm class Bootstrap cho input Django
+    document.addEventListener("DOMContentLoaded", function() {
+        const inputs = document.querySelectorAll('.auth-form-wrapper input:not([type="checkbox"]):not([type="hidden"])');
+        inputs.forEach(input => {
+            input.classList.add('form-control'); // Class chuẩn của CSS mình viết
+            input.style.backgroundColor = 'transparent'; // Để hiện màu nền của group
+            
+            // Xóa style mặc định của Django widget nếu có
+            input.style.border = 'none';
+            input.style.boxShadow = 'none';
+        });
+    });
+</script>
 {% endblock %}
