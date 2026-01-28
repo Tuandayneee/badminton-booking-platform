@@ -111,6 +111,7 @@
                 {% csrf_token %}
                 <input type="hidden" name="booking_data" id="bookingDataInput">
                 <input type="hidden" name="selected_date" id="selectedDateInput">
+                <input type="hidden" name="center_id" value="{{ center.id }}">
 
                 <button type="button" onclick="submitBooking()" class="btn btn-login-premium px-5 py-3 rounded-pill shadow-lg">
                     Tiếp theo <i class="fa-solid fa-arrow-right ms-2"></i>

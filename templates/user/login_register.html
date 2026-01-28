@@ -150,7 +150,14 @@
                         </div>
                         <div class="text-danger small mt-1">{{ register_form.username.errors.0 }}</div>
                     </div>
-
+                    <div class="mb-3">
+                        <label class="form-label">Họ và tên</label>
+                        <div class="input-group-unified">
+                            <span class="input-group-text"><i class="fa-regular fa-user"></i></span>
+                            {{ register_form.full_name }}
+                        </div>
+                        <div class="text-danger small mt-1">{{ register_form.full_name.errors.0 }}</div>
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">Email</label>
                         <div class="input-group-unified">
@@ -211,13 +218,12 @@
 
 {% block extra_js %}
 <script>
-    // Hàm chuyển đổi Login <-> Register
+    // Hàm chuyển đổi Login <-> Register (Giữ nguyên của bạn)
     function switchAuthMode(mode) {
         const loginBox = document.getElementById('loginBox');
         const registerBox = document.getElementById('registerBox');
         const wrapper = document.querySelector('.auth-form-wrapper');
 
-        // Hiệu ứng fade nhẹ
         wrapper.style.opacity = '0';
         wrapper.style.transform = 'translateY(10px)';
 
@@ -229,22 +235,31 @@
                 registerBox.classList.add('hidden');
                 loginBox.classList.remove('hidden');
             }
-            // Hiện lại
             wrapper.style.opacity = '1';
             wrapper.style.transform = 'translateY(0)';
         }, 200);
     }
 
-    // Tự động thêm class Bootstrap cho input Django
     document.addEventListener("DOMContentLoaded", function() {
+        // Chọn tất cả input trừ checkbox và hidden
         const inputs = document.querySelectorAll('.auth-form-wrapper input:not([type="checkbox"]):not([type="hidden"])');
+        
         inputs.forEach(input => {
-            input.classList.add('form-control'); // Class chuẩn của CSS mình viết
-            input.style.backgroundColor = 'transparent'; // Để hiện màu nền của group
+            // 1. Thêm class form-control chuẩn Bootstrap
+            input.classList.add('form-control');
             
-            // Xóa style mặc định của Django widget nếu có
-            input.style.border = 'none';
-            input.style.boxShadow = 'none';
+            // 2. Xử lý logic Focus để làm sáng viền bao ngoài (UX quan trọng)
+            const parentGroup = input.closest('.input-group-unified');
+            
+            if (parentGroup) {
+                input.addEventListener('focus', () => {
+                    parentGroup.classList.add('focused');
+                });
+                
+                input.addEventListener('blur', () => {
+                    parentGroup.classList.remove('focused');
+                });
+            }
         });
     });
 </script>

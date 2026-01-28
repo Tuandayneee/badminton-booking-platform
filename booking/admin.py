@@ -1,8 +1,9 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from django.utils import timezone
 from django.contrib.humanize.templatetags.humanize import intcomma
-from .models import FixedSchedule, Booking
-
+from .models import FixedSchedule, Booking, Transaction
+from .services import process_approve_transaction
 @admin.register(FixedSchedule)
 class FixedScheduleAdmin(admin.ModelAdmin):
     list_display = (
@@ -68,7 +69,7 @@ class FixedScheduleAdmin(admin.ModelAdmin):
 class BookingAdmin(admin.ModelAdmin):
     list_display = (
         'booking_code', 
-        'user_info', 
+        'customer_info',
         'court', 
         'date', 
         'time_range', 
@@ -77,17 +78,20 @@ class BookingAdmin(admin.ModelAdmin):
         'is_fixed_schedule'
     )
     list_filter = ('status', 'date', 'court', 'created_at')
-    search_fields = ('booking_code', 'user__username', 'user__email', 'user__phone', 'court__name')
+    search_fields = ('booking_code', 'customer__name', 'customer__phone', 'court__name')
     readonly_fields = ('booking_code', 'created_at')
     ordering = ('-created_at',)
-    date_hierarchy = 'date' # Thêm thanh điều hướng nhanh theo ngày tháng năm trên đầu
+    date_hierarchy = 'date'
 
     fieldsets = (
         ('Thông tin chung', {
             'fields': ('booking_code', 'status', 'created_at')
         }),
+        ('Khách hàng', {
+            'fields': ('customer', 'user')
+        }),
         ('Chi tiết đặt sân', {
-            'fields': ('user', 'court', 'fixed_schedule', 'date')
+            'fields': ('court', 'fixed_schedule', 'date')
         }),
         ('Thời gian & Chi phí', {
             'fields': (('start_time', 'end_time'), 'total_price')
@@ -97,9 +101,11 @@ class BookingAdmin(admin.ModelAdmin):
         }),
     )
 
-    def user_info(self, obj):
-        return obj.user.username
-    user_info.short_description = "Khách hàng"
+    def customer_info(self, obj):
+        if obj.customer:
+            return f"{obj.customer.name} - {obj.customer.phone}"
+        return "---"
+    customer_info.short_description = "Khách hàng"
 
     def time_range(self, obj):
         return f"{obj.start_time.strftime('%H:%M')} - {obj.end_time.strftime('%H:%M')}"
@@ -132,3 +138,26 @@ class BookingAdmin(admin.ModelAdmin):
             obj.get_status_display()
         )
     status_badge.short_description = "Trạng thái"
+
+
+@admin.register(Transaction)
+class TransactionAdmin(admin.ModelAdmin):
+    list_display = ('booking_group_code', 'user', 'amount', 'transaction_reference', 'is_verified', 'timestamp')
+    list_filter = ('is_verified', 'timestamp')
+    search_fields = ('booking_group_code', 'transaction_reference', 'user__phone_number')
+    
+    actions = ['approve_transactions_action']
+    def save_model(self, request, obj, form, change):
+        if 'is_verified' in form.changed_data and obj.is_verified:
+            process_approve_transaction(obj, request.user)
+        
+        # Gọi hàm save gốc để lưu vào DB
+        super().save_model(request, obj, form, change)
+    @admin.action(description='Duyệt thanh toán (Xác nhận tiền đã về)')
+    def approve_transactions_action(self, request, queryset):
+        count = 0
+        for trans in queryset:
+            if process_approve_transaction(trans, request.user):
+                count += 1
+                
+        self.message_user(request, f"Đã duyệt thành công {count} giao dịch.")

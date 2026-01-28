@@ -198,28 +198,37 @@ a:hover {
 .input-group-unified {
   display: flex;
   align-items: center;
-  background-color: #f8fafc; /* Nền input hơi xám nhẹ */
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background-color: #f9fafb;
+  transition: all 0.2s ease-in-out;
+  padding: 0.25rem 0.5rem;
+  overflow: hidden;
 }
-
+.input-group-unified.focused {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
+  background-color: #fff;
+}
 .input-group-unified .input-group-text {
-  background-color: transparent;
+  background: transparent;
   border: none;
-  color: var(--text-muted);
+  color: #6c757d;
+  padding-right: 10px;
 }
 
 .input-group-unified .form-control {
-  border: none;
-  box-shadow: none;
-  padding: 0.85rem 0.85rem 0.85rem 0;
-  font-size: 0.95rem;
-  color: var(--text-main);
-  background-color: transparent;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding-left: 0;
   font-weight: 500;
+  color: #212529;
 }
-
+.input-group-unified .form-control:focus {
+  box-shadow: none;
+  outline: none;
+}
 /* Focus: Viền đen/xám đậm thay vì xanh */
 .input-group-unified:focus-within {
   border-color: var(--brand-secondary);
@@ -895,4 +904,146 @@ a:hover {
   color: white;
   border-radius: 12px;
   padding: 1.5rem;
+}
+
+/* =========================================
+   12. PAYMENT PAGE - BADMINTON PRO STYLE
+   ========================================= */
+
+/* Header Card: Đổi sang Gradient Xanh Đen (Navy) cho đồng bộ với Web */
+.payment-header-card {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); /* Slate 900 */
+  color: white;
+  border-radius: 1rem;
+  padding: 2.5rem 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  /* Bóng đổ mượt hơn */
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Các hàng thông tin (Icon + Text) */
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.info-icon {
+  width: 48px;
+  height: 48px;
+  /* Đổi nền xanh lá thành nền xám xanh nhạt cho sang trọng */
+  background-color: #f1f5f9;
+  color: #475569;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+/* Hover vào dòng nào thì icon sáng màu Xanh Dương nhẹ */
+.info-row:hover .info-icon {
+  background-color: #e0f2fe;
+  color: #0284c7;
+}
+
+/* Riêng icon tiền thì hover màu Vàng/Cam */
+.info-icon:has(.fa-money-bill-wave),
+.info-row:hover .info-icon:has(.fa-money-bill-wave) {
+  background-color: #fffbeb;
+  color: #d97706;
+}
+
+/* Thẻ ngân hàng & QR Code */
+.bank-card-container {
+  background-color: #ffffff;
+  border: 2px solid #f1f5f9;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.bank-card-container:hover {
+  border-color: #00b14f; /* Hover mới hiện xanh lá (Banking style) */
+  box-shadow: 0 10px 30px -5px rgba(0, 177, 79, 0.15);
+  transform: translateY(-2px);
+  background-color: #f0fdf4;
+}
+
+.qr-img {
+  width: 100%;
+  max-width: 140px;
+  border-radius: 0.75rem;
+  border: 1px solid #dee2e6;
+  padding: 5px;
+  background: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* Nút Copy */
+.copy-btn {
+  cursor: pointer;
+  color: #94a3b8;
+  transition: all 0.2s;
+  padding: 8px;
+  border-radius: 50%;
+}
+
+.copy-btn:hover {
+  color: #00b14f;
+  background-color: rgba(0, 177, 79, 0.1);
+}
+
+/* Đồng hồ đếm ngược - Style Digital Vàng trên nền tối */
+.timer-badge {
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+  color: #fcd34d; /* Vàng sáng */
+  padding: 0.5rem 1.25rem;
+  border-radius: 50px;
+  font-weight: 700;
+  font-family: "Courier New", monospace;
+  font-size: 1.25rem;
+  display: inline-block;
+  border: 1px solid rgba(252, 211, 77, 0.3);
+  margin-top: 10px;
+}
+
+/* Thanh Bottom Bar (Sticky Mobile) */
+.bottom-bar-sticky {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding: 1rem;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+  z-index: 100;
+  margin-top: 2rem;
+  border-top: 1px solid #eee;
+}
+
+/* Trên PC */
+@media (min-width: 992px) {
+  .bottom-bar-sticky {
+    position: static;
+    box-shadow: none;
+    border-top: none;
+    padding: 0;
+    background: transparent;
+  }
 }

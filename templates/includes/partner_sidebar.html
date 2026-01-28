@@ -17,13 +17,7 @@
                 </a>
             </li>
 
-            <li class="nav-item">
-                <a class="nav-link-pro {% if 'schedule' in request.resolver_match.url_name %}active{% endif %}" 
-                   href="{% url 'schedule_management' %}">
-                    <i class="fa-regular fa-calendar-check me-3"></i>
-                    <span>Lịch đặt sân</span>
-                </a>
-            </li>
+            
 
             <li class="nav-item">
                 <a class="nav-link-pro {% if 'center' in request.resolver_match.url_name or 'court' in request.resolver_match.url_name %}active{% endif %}" 
@@ -33,19 +27,21 @@
                 </a>
             </li>
 
-            <li class="nav-item">
-                <a class="nav-link-pro {% if 'customer' in request.resolver_match.url_name %}active{% endif %}" 
-                   href="{% url 'customer_management' %}">
-                    <i class="fa-solid fa-users me-3"></i>
-                    <span>Khách hàng</span>
-                </a>
-            </li>
+            
 
             <li class="nav-item">
                 <a class="nav-link-pro {% if 'revenue' in request.resolver_match.url_name %}active{% endif %}" 
                    href="{% url 'revenue_management' %}">
                     <i class="fa-solid fa-chart-line me-3"></i>
                     <span>Báo cáo</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link-pro {% if 'transaction' in request.resolver_match.url_name %}active{% endif %}" 
+                   href="{% url 'partner_transactions' %}">
+                    <i class="fa-solid fa-money-bill-transfer me-3"></i>
+                    <span>Giao dịch</span>
                 </a>
             </li>
         </ul>

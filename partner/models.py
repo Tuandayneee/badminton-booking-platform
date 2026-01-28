@@ -106,3 +106,16 @@ class ServiceOrderItem(models.Model):
     quantity = models.IntegerField(default=1, verbose_name="Số lượng")
     price_at_time = models.DecimalField(max_digits=10, decimal_places=0, verbose_name="Giá lúc bán")
 
+class Customer(models.Model):
+    """
+    Khách hàng đặt sân
+    """
+    center = models.ForeignKey(BadmintonCenter, on_delete=models.CASCADE, related_name='customers')
+    name = models.CharField(max_length=50, verbose_name="Tên khách hàng")
+    email = models.EmailField(max_length=50, verbose_name="Email")
+    phone = models.CharField(max_length=15, verbose_name="Số điện thoại")
+    total_visits = models.IntegerField(default=0, verbose_name="Tổng số lần đến")
+    total_spent = models.DecimalField(max_digits=15, decimal_places=0, default=0, verbose_name="Tổng chi tiêu")
+    last_booking = models.DateTimeField(null=True, blank=True, verbose_name="Lần đặt sân gần nhất")
+    def __str__(self):
+        return f"{self.name} - {self.phone}"

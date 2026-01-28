@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .header { background-color: #0d6efd; color: white; padding: 15px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { padding: 20px; }
+        .info-box { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px dashed #ddd; padding-bottom: 5px; }
+        .total { font-size: 1.2em; font-weight: bold; color: #d63384; text-align: right; margin-top: 10px; }
+        .footer { font-size: 0.8em; text-align: center; color: #777; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>XÁC NHẬN ĐẶT SÂN THÀNH CÔNG</h2>
+        </div>
+        <div class="content">
+            <p>Xin chào,</p>
+            <p>Cảm ơn bạn đã tin tưởng và đặt sân tại <strong>BadmintonPro</strong>. Đơn hàng của bạn đã được xác nhận.</p>
+            
+            <div class="info-box">
+                <div class="info-row">
+                    <strong>Mã đặt sân:</strong> <span>{{ booking_code }}</span>
+                </div>
+                <div class="info-row">
+                    <strong>Cơ sở:</strong> <span>{{ center_name }}</span>
+                </div>
+                <div class="info-row">
+                    <strong>Sân:</strong> <span>{{ court_name }}</span>
+                </div>
+                <div class="info-row">
+                    <strong>Khung giờ:</strong> <span>{{ time_slots }}</span>
+                </div>
+                <div class="total">
+                    Tổng tiền: {{ total_price }} đ
+                </div>
+            </div>
+
+            <p>Vui lòng đến sân sớm 10 phút để check-in. Nếu cần hỗ trợ, vui lòng liên hệ: <strong>{{ support_phone }}</strong>.</p>
+            
+            <p>Chúc bạn có những set cầu rực lửa! 🔥</p>
+        </div>
+        <div class="footer">
+            &copy; 2026 BadmintonPro System. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

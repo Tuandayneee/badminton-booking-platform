@@ -8,6 +8,7 @@ class User(AbstractUser):
         PARTNER = 'partner', 'Đối tác'
         ADMIN = 'admin', 'Quản trị viên'
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.CUSTOMER)
+    full_name = models.CharField(max_length=150, blank=True)
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     
@@ -31,14 +32,14 @@ class CustomerProfile(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.get_rank_display()}"
     def update_rank(self):
-        if self.points >= 1000:
-            self.rank = self.Rank.DIAMOND
-        elif self.points >= 500:
-            self.rank = self.Rank.GOLD
-        elif self.points >= 200:
-            self.rank = self.Rank.SILVER
+        if self.points >= 500:
+            self.rank = self.Ranking.DIAMOND
+        elif self.points >= 250:
+            self.rank = self.Ranking.GOLD
+        elif self.points >= 120:
+            self.rank = self.Ranking.SILVER
         else:
-            self.rank = self.Rank.BRONZE
+            self.rank = self.Ranking.BRONZE
         self.save()
 
 

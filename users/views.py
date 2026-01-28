@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
-from users.models import PartnerProfile, User
+from users.models import PartnerProfile, User, CustomerProfile
 from users.forms import PartnerRegistrationForm, RegistrationForm
 from users.forms import LoginForm
 from django.db import transaction
@@ -37,24 +37,38 @@ def logout_view(request):
 
 
 def register_view(request):
-    register_form = RegistrationForm()
-    login_form = LoginForm()
-    if request.method == 'POST':
-        register_form = RegistrationForm(request.POST)
-        if register_form.is_valid():
-            data = register_form.cleaned_data
-            User.objects.create_user(
-                username=data['username'],
-                password=data['password'],
-                email=data['email'],
-                phone_number=data['phone_number'],
-                
-            )
-            messages.success(request, "Đăng ký thành công! Vui lòng đăng nhập.")
-            return redirect('register')
-        else:
-            messages.error(request, "Vui lòng kiểm tra lại thông tin.")
     
+    register_form = RegistrationForm(request.POST or None)
+    login_form = LoginForm() 
+
+    if request.method == 'POST':
+        
+        if 'btn_register' in request.POST:
+            if register_form.is_valid():
+                data = register_form.cleaned_data
+                try:
+                    
+                    with transaction.atomic():
+                        
+                        user = User.objects.create_user(
+                            username=data['username'],
+                            email=data['email'],
+                            password=data['password'],
+                            full_name=data['full_name'],
+                            phone_number=data['phone_number'],
+                            role=User.Role.CUSTOMER
+                        )
+                        
+                        
+                        
+                    messages.success(request, "Đăng ký thành công! Vui lòng đăng nhập.")
+                    return redirect('login') 
+
+                except Exception as e:
+                    messages.error(request, f"Lỗi hệ thống: {str(e)}")
+            else:
+                messages.error(request, "Vui lòng kiểm tra lại thông tin nhập liệu.")
+
     context = {
         'register_form': register_form,
         'login_form': login_form
@@ -75,6 +89,7 @@ def register_partner(request):
                     
                     user = User.objects.create_user(
                         username=data['username'],
+                        full_name=data['username'],
                         email=data['email'],
                         password=data['password'],
                         phone_number=data['phone_number'],

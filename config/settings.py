@@ -202,3 +202,30 @@ ACCOUNT_ADAPTER = 'users.adapters.MyAccountAdapter'
 
 TIME_ZONE = 'Asia/Ho_Chi_Minh'  
 USE_TZ = True
+
+
+
+
+#Redis for Celery
+CELERY_BROKER_URL = 'redis://redis:6379/0'  
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+CELERY_TIMEZONE = 'Asia/Ho_Chi_Minh'
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'letuan16112004@gmail.com'
+EMAIL_HOST_PASSWORD = 'jljo ebef mcpv ogme'
+DEFAULT_FROM_EMAIL = 'Badminton Pro <noreply@badmintonpro.vn>'
+
+
+
+
+CELERY_BEAT_SCHEDULE = {
+    'cleanup-expired-bookings-every-1-minute': {
+        'task': 'booking.tasks.cancel_expired_bookings', 
+        'schedule': 60.0,
+    },
+}

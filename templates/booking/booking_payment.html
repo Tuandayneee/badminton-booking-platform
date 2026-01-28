@@ -1,0 +1,210 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Thanh toán đơn hàng #{{ group_code }}{% endblock %}
+
+{# --- Link file CSS riêng ở đây --- #}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/booking_payment.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 700px;">
+    
+    <div class="payment-header-card fade-in-up">
+        <div class="mb-2"><i class="fa-regular fa-clock fs-1"></i></div>
+        <h3 class="fw-bold">Chờ thanh toán</h3>
+        <p class="opacity-75 mb-3">Vui lòng hoàn tất chuyển khoản trong thời gian giữ sân</p>
+        <div class="timer-badge shadow-sm" id="countdown">--:--</div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 h-100 fade-in-up" style="animation-delay: 0.1s;">
+                <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        <i class="fa-solid fa-receipt text-primary me-2"></i>Thông tin đơn hàng
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="info-row">
+                        <div class="info-icon"><i class="fa-regular fa-user"></i></div>
+                        <div>
+                            <small class="text-muted d-block text-uppercase" style="font-size: 0.75rem;">Người đặt</small>
+                            <div class="fw-bold">{{ user.full_name|default:user.username }}</div>
+                            <div class="small text-secondary">{{ user.phone_number }}</div>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-icon"><i class="fa-solid fa-location-dot"></i></div>
+                        <div>
+                            <small class="text-muted d-block text-uppercase" style="font-size: 0.75rem;">Địa điểm</small>
+                            <div class="fw-bold">{{ first_booking.court.center.name }}</div>
+                            <div class="small text-secondary">{{ first_booking.court.center.address }}</div>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-icon"><i class="fa-regular fa-calendar-check"></i></div>
+                        <div class="w-100">
+                            <small class="text-muted d-block text-uppercase" style="font-size: 0.75rem;">Chi tiết lịch</small>
+                            <div class="fw-bold text-primary">{{ first_booking.date|date:"d/m/Y" }}</div>
+                            <ul class="list-unstyled mb-0 mt-1 bg-light p-2 rounded-3 small">
+                                {% for booking in bookings %}
+                                <li class="d-flex justify-content-between py-1 border-bottom border-light">
+                                    <span>{{ booking.court.name }}</span>
+                                    <span class="fw-bold">{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="info-row border-0">
+                        <div class="info-icon bg-warning bg-opacity-10 text-warning"><i class="fa-solid fa-money-bill-wave"></i></div>
+                        <div>
+                            <small class="text-muted d-block text-uppercase" style="font-size: 0.75rem;">Tổng thanh toán</small>
+                            <div class="fw-bold fs-4 text-dark">{{ total_price|intcomma }} đ</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 h-100 fade-in-up" style="animation-delay: 0.2s;">
+                <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        <i class="fa-solid fa-qrcode text-success me-2"></i>Chuyển khoản ngân hàng
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    
+                    <div class="bank-card-container d-flex flex-column flex-md-row align-items-center gap-4">
+                        <div class="flex-grow-1 w-100">
+                            <div class="mb-3">
+                                <small class="text-muted text-uppercase" style="font-size: 0.7rem;">Ngân hàng</small>
+                                <div class="fw-bold fs-5">{{ bank_info.bank_name }}</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <small class="text-muted text-uppercase" style="font-size: 0.7rem;">Số tài khoản</small>
+                                <div class="d-flex align-items-center bg-white border rounded px-2 py-1 shadow-sm" style="width: fit-content;">
+                                    <span class="fw-bold fs-5 me-2 text-primary ls-1" id="accountNo">{{ bank_info.account_no }}</span>
+                                    <i class="fa-regular fa-copy copy-btn fs-5" onclick="copyToClipboard('{{ bank_info.account_no }}')" title="Sao chép" data-bs-toggle="tooltip"></i>
+                                </div>
+                            </div>
+
+                            <div class="mb-0">
+                                <small class="text-muted text-uppercase" style="font-size: 0.7rem;">Chủ tài khoản</small>
+                                <div class="fw-bold text-uppercase">{{ bank_info.account_name }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <img src="{{ qr_url }}" alt="QR Code" class="qr-img shadow-sm">
+                            <div class="small text-muted mt-2 fst-italic">Quét để thanh toán nhanh</div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-success bg-opacity-10 border-success border-opacity-25 mt-3 d-flex align-items-center gap-3 mb-0">
+                        <i class="fa-solid fa-circle-check fs-4 text-success"></i>
+                        <div class="small text-dark">
+                            Nội dung chuyển khoản: <strong class="text-success mx-1">THANHTOAN {{ group_code }}</strong>
+                            <br>(Hệ thống sẽ tự động xác nhận khi nhận được tiền)
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <div class="bottom-bar-sticky fade-in-up" style="animation-delay: 0.3s;">
+        <form method="POST" action="{% url 'booking_success_confirm' group_code %}">
+            {% csrf_token %}
+            
+            <div class="container" style="max-width: 600px;">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted text-uppercase">Xác thực giao dịch</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-receipt text-muted"></i></span>
+                        <input type="text" 
+                            name="transaction_code" 
+                            class="form-control border-start-0 ps-0" 
+                            placeholder="Nhập mã giao dịch (VD: FT233...)" 
+                            required>
+                    </div>
+                    <div class="form-text small">
+                        <i class="fa-solid fa-circle-info me-1"></i>
+                        Nhập mã giao dịch trên app ngân hàng của bạn để chúng tôi duyệt nhanh hơn.
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-login-premium py-3 rounded-pill fw-bold fs-6 shadow text-uppercase">
+                        <i class="fa-solid fa-paper-plane me-2"></i> Gửi xác nhận thanh toán
+                    </button>
+                    <a href="{% url 'home' %}" class="btn btn-light py-3 rounded-pill fw-bold text-secondary">
+                        Quay về trang chủ
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            alert('Đã sao chép số tài khoản: ' + text);
+        }, function(err) {
+            console.error('Lỗi sao chép: ', err);
+        });
+    }
+
+    // Hàm đếm ngược
+    function startTimer(duration, display) {
+        var timer = duration, minutes, seconds;
+        updateDisplay(timer, display);
+
+        var interval = setInterval(function () {
+            if (--timer < 0) {
+                clearInterval(interval);
+                display.textContent = "00:00";
+                display.classList.add('bg-danger', 'text-white'); 
+                
+                alert("Đơn hàng đã hết thời gian giữ chỗ! Vui lòng đặt lại.");
+                window.location.reload();
+                return;
+            }
+            updateDisplay(timer, display);
+        }, 1000);
+    }
+    function updateDisplay(timer, display) {
+        var minutes = parseInt(timer / 60, 10);
+        var seconds = parseInt(timer % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        display.textContent = minutes + ":" + seconds;
+    }
+    window.onload = function () {
+        var timeLeft = {{ time_left|default:0 }};
+        var display = document.querySelector('#countdown');
+        if (timeLeft <= 0) {
+             display.textContent = "00:00";
+             alert("Đơn hàng đã hết hạn!");
+             window.location.href = "{% url 'home' %}";
+             return;
+        }
+        startTimer(timeLeft, display);
+    };
+</script>
+{% endblock %}

@@ -2,7 +2,7 @@
 {% load static %}
 {% load humanize %}
 
-{% block title %}Lịch đặt sân - Badminton Pro{% endblock %}
+{% block title %}Lịch đặt sân - {{ center.name }}{% endblock %}
 
 {% block content %}
 <div class="container-fluid px-4 py-4">
@@ -11,42 +11,40 @@
         <div>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-1 small text-muted">
-                    <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-secondary">Quản lý vận hành</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'centers_management' %}" class="text-decoration-none text-secondary">Quản lý cơ sở</a></li>
+                    <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-secondary">{{ center.name }}</a></li>
                     <li class="breadcrumb-item active text-dark" aria-current="page">Lịch đặt sân</li>
                 </ol>
             </nav>
-            <h3 class="fw-bold text-dark mb-0 ls-tight">Lịch đặt sân</h3>
+            <h3 class="fw-bold text-dark mb-0 ls-tight">Lịch đặt sân: {{ center.name }}</h3>
         </div>
 
-        <div class="d-flex flex-wrap gap-2 bg-white p-2 rounded-3 shadow-sm border">
-            <input type="date" class="form-control border-0 bg-light fw-medium" 
-                   value="{% now 'Y-m-d' %}" 
+        <form method="GET" class="d-flex flex-wrap gap-2 bg-white p-2 rounded-3 shadow-sm border">
+            <input type="date" name="date" class="form-control border-0 bg-light fw-medium" 
+                   value="{{ request.GET.date|default:today_date }}" 
                    style="max-width: 150px; font-size: 0.9rem;">
             
-            <select class="form-select border-0 bg-light fw-medium" style="width: auto; font-size: 0.9rem;">
-                <option value="">Tất cả sân</option>
+            <select name="court_id" class="form-select border-0 bg-light fw-medium" style="width: auto; font-size: 0.9rem;">
+                <option value="">Tất cả sân con</option>
                 {% for court in courts %}
-                    <option value="{{ court.id }}">{{ court.name }}</option>
+                    <option value="{{ court.id }}" {% if request.GET.court_id|add:"0" == court.id %}selected{% endif %}>
+                        {{ court.name }}
+                    </option>
                 {% endfor %}
             </select>
             
-            <button class="btn btn-pro btn-pro-primary py-1 px-3">
+            <button type="submit" class="btn btn-pro btn-pro-primary py-1 px-3">
                 <i class="fa-solid fa-filter"></i> Lọc
             </button>
-        </div>
+        </form>
     </div>
 
     <div class="card-modern h-100 fade-in-up" style="animation-delay: 0.1s;">
         
-        <div class="card-header bg-white border-bottom-0 py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
-            
-            <div class="nav nav-pills-custom" role="tablist">
-                <a class="nav-link active" href="javascript:void(0)" id="btn-list" onclick="switchView('list')">
-                    <i class="fa-solid fa-list-ul me-2"></i>Danh sách
-                </a>
-                <a class="nav-link" href="javascript:void(0)" id="btn-timeline" onclick="switchView('timeline')">
-                    <i class="fa-solid fa-timeline me-2"></i>Timeline
-                </a>
+        <div class="card-header bg-white border-bottom py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="d-flex align-items-center gap-2">
+                <h6 class="mb-0 fw-bold text-dark">Danh sách đặt sân</h6>
+                <span class="badge badge-soft badge-soft-secondary">{{ bookings.count }}</span>
             </div>
 
             <div class="dropdown">
@@ -61,194 +59,108 @@
         </div>
 
         <div class="card-body p-0">
-            
-            <div id="view-list">
-                <div class="table-responsive">
-                    <table class="table table-modern align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th class="ps-4" style="width: 25%;">Thành viên</th>
-                                <th style="width: 20%;">Sân / Loại</th>
-                                <th style="width: 20%;">Khung giờ</th>
-                                <th style="width: 15%;">Thanh toán</th>
-                                <th class="text-center" style="width: 10%;">Trạng thái</th>
-                                <th class="text-end pe-4" style="width: 10%;"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for booking in bookings %}
-                            <tr>
-                                <td class="ps-4">
-                                    <div class="d-flex align-items-center">
-                                        {% if booking.user.avatar %}
-                                            <img src="{{ booking.user.avatar.url }}" class="rounded-circle me-3 border object-fit-cover" width="40" height="40">
-                                        {% else %}
-                                            <div class="avatar-circle bg-soft-primary me-3 text-primary border border-primary border-opacity-10">
-                                                {{ booking.user.username|slice:":1"|upper }}
-                                            </div>
-                                        {% endif %}
-                                        
-                                        <div>
-                                            <h6 class="mb-0 fw-bold text-dark fs-6">
-                                                {{ booking.user.full_name|default:booking.user.username }}
-                                            </h6>
-                                            <small class="text-muted font-monospace" style="font-size: 0.75rem;">
-                                                {{ booking.user.phone|default:"---" }}
-                                            </small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="fw-bold text-dark">{{ booking.court.name }}</div>
-                                    <small class="text-secondary">{{ booking.court.get_court_type_display }}</small>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center mb-1">
-                                        <i class="fa-regular fa-clock text-warning me-2"></i>
-                                        <span class="fw-bold text-dark">{{ booking.start_time|date:"H:i" }} - {{ booking.end_time|date:"H:i" }}</span>
-                                    </div>
-                                    <div class="small text-muted ps-4">{{ booking.date|date:"d/m/Y" }}</div>
-                                </td>
-                                <td>
-                                    <div class="fw-bold text-dark mb-1">{{ booking.total_price|intcomma }}đ</div>
-                                    {% if booking.is_paid %}
-                                        <span class="badge badge-soft badge-soft-success py-1 px-2" style="font-size: 0.65rem;">
-                                            <i class="fa-solid fa-check me-1"></i>Đã TT
-                                        </span>
+            <div class="table-responsive">
+                <table class="table table-modern align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4" style="width: 25%;">Thành viên</th>
+                            <th style="width: 20%;">Sân / Loại</th>
+                            <th style="width: 20%;">Khung giờ</th>
+                            <th style="width: 15%;">Thanh toán</th>
+                            <th class="text-center" style="width: 10%;">Trạng thái</th>
+                            <th class="text-end pe-4" style="width: 10%;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in schedule_list %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    {% if item.user.avatar %}
+                                        <img src="{{ item.user.avatar.url }}" class="rounded-circle me-3 border object-fit-cover" width="40" height="40">
                                     {% else %}
-                                        <span class="badge badge-soft badge-soft-danger py-1 px-2" style="font-size: 0.65rem;">
-                                            <i class="fa-solid fa-xmark me-1"></i>Chưa TT
-                                        </span>
+                                        <div class="avatar-circle bg-soft-primary me-3 text-primary border border-primary border-opacity-10">
+                                            {{ item.user.username|slice:":1"|upper }}
+                                        </div>
                                     {% endif %}
-                                </td>
-                                <td class="text-center">
-                                    {% if booking.status == 'pending' %} 
-                                        <span class="badge badge-soft badge-soft-warning">Chờ duyệt</span>
-                                    {% elif booking.status == 'confirmed' %} 
-                                        <span class="badge badge-soft badge-soft-primary">Đã cọc</span>
-                                    {% elif booking.status == 'checked_in' %} 
-                                        <span class="badge badge-soft badge-soft-success">Đang đá</span>
-                                    {% elif booking.status == 'cancelled' %} 
-                                        <span class="badge badge-soft badge-soft-secondary">Đã hủy</span>
-                                    {% endif %}
-                                </td>
-                                <td class="text-end pe-4">
-                                    <div class="dropdown">
-                                        <button class="btn btn-icon" type="button" data-bs-toggle="dropdown">
-                                            <i class="fa-solid fa-ellipsis"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-3">
-                                            <li><a class="dropdown-item py-2 small" href="#"><i class="fa-regular fa-eye me-2"></i>Chi tiết</a></li>
-                                            <li><a class="dropdown-item py-2 small" href="#"><i class="fa-regular fa-pen-to-square me-2"></i>Sửa giờ</a></li>
-                                            <li><hr class="dropdown-divider"></li>
-                                            <li><a class="dropdown-item py-2 small text-danger" href="#"><i class="fa-regular fa-trash-can me-2"></i>Hủy lịch</a></li>
-                                        </ul>
+                                    
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-dark fs-6">
+                                            {{ item.user.full_name|default:item.user.username }}
+                                        </h6>
+                                        <small class="text-muted font-monospace" style="font-size: 0.75rem;">
+                                            {{ item.user.phone|default:"---" }}
+                                        </small>
                                     </div>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr><td colspan="6" class="text-center py-5 text-muted">Không tìm thấy lịch đặt nào.</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <div class="card-footer bg-white border-0 py-3">
-                    </div>
-            </div>
+                                </div>
+                            </td>
 
-            <div id="view-timeline" style="display: none;">
-                
-                <div class="px-4 py-3 bg-white border-bottom d-flex align-items-center gap-4">
-                    <span class="fw-bold text-secondary text-uppercase small ls-tight">Chú thích:</span>
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="legend-box bg-white border"></div><span class="small text-secondary">Trống</span>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="legend-box" style="background-color: #dbeafe; border-left: 3px solid #3b82f6;"></div><span class="small text-secondary">Đã đặt</span>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="legend-box slot-locked"></div><span class="small text-secondary">Bảo trì</span>
-                    </div>
-                </div>
+                            <td>
+                                <div class="fw-bold text-dark">
+                                    {{ item.court_names|join:", " }}
+                                </div>
+                                <small class="text-secondary">{{ item.slots_count }} slot (30p)</small>
+                            </td>
 
-                <div class="timeline-wrapper">
-                    <table class="table-timeline">
-                        <thead>
-                            <tr>
-                                <th class="court-sticky text-start align-middle shadow-sm">
-                                    <div class="text-dark fw-bold">DANH SÁCH SÂN</div>
-                                </th>
-                                <th>07:00</th> <th>07:30</th> <th>08:00</th> <th>08:30</th>
-                                <th>09:00</th> <th>09:30</th> <th>10:00</th> <th>10:30</th>
-                                <th>11:00</th> <th>11:30</th> <th>12:00</th> <th>12:30</th>
-                                <th>13:00</th> <th>13:30</th> <th>14:00</th> <th>14:30</th>
-                                <th>15:00</th> <th>15:30</th> <th>16:00</th> <th>16:30</th>
-                                <th>17:00</th> <th>17:30</th> <th>18:00</th> <th>18:30</th>
-                                <th>19:00</th> <th>19:30</th> <th>20:00</th> <th>20:30</th>
-                                <th>21:00</th> <th>21:30</th> <th>22:00</th> <th>22:30</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for court in courts %}
-                            <tr>
-                                <td class="court-sticky align-middle">
-                                    <div class="fw-bold text-dark">{{ court.name }}</div>
-                                    <span class="text-muted small">{{ court.get_court_type_display }}</span>
-                                </td>
+                            <td>
+                                <div class="d-flex align-items-center mb-1">
+                                    <i class="fa-regular fa-clock text-warning me-2"></i>
+                                    <span class="fw-bold text-dark" style="font-size: 1.1rem;">
+                                        {{ item.start_time|date:"H:i" }} - {{ item.end_time|date:"H:i" }}
+                                    </span>
+                                </div>
+                                <div class="small text-muted ps-4">{{ filter_date|date:"d/m/Y" }}</div>
+                            </td>
 
-                                {% if forloop.first %} 
-                                    <td class="time-slot slot-free" colspan="20"></td> 
-                                    
-                                    <td class="time-slot slot-booked align-middle" colspan="3" 
-                                        title="Thành viên: Nguyễn Văn A">
-                                        <div class="fw-bold text-dark text-truncate px-2">Nguyễn Văn A</div>
-                                        <div class="small text-muted px-2">0988...</div>
-                                    </td>
-                                    
-                                    <td class="time-slot slot-free" colspan="9"></td>
-
-                                {% elif forloop.counter == 2 %}
-                                    <td class="time-slot slot-locked align-middle text-center small" colspan="32">
-                                        <i class="fa-solid fa-screwdriver-wrench me-1"></i>Đang bảo trì
-                                    </td>
+                            <td>
+                                <div class="fw-bold text-dark mb-1">{{ item.total_price|intcomma }}đ</div>
+                                {% if item.is_paid %}
+                                    <span class="badge badge-soft badge-soft-success py-1 px-2" style="font-size: 0.65rem;">
+                                        <i class="fa-solid fa-check me-1"></i>Đã TT
+                                    </span>
                                 {% else %}
-                                    <td class="time-slot slot-free" colspan="32"></td>
+                                    <span class="badge badge-soft badge-soft-danger py-1 px-2" style="font-size: 0.65rem;">
+                                        <i class="fa-solid fa-xmark me-1"></i>Chưa TT
+                                    </span>
                                 {% endif %}
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div class="p-3 text-center bg-white border-top">
-                    <small class="text-muted fst-italic"><i class="fa-solid fa-arrows-left-right me-1"></i>Kéo sang ngang để xem toàn bộ khung giờ</small>
-                </div>
-            </div>
+                            </td>
 
+                            <td class="text-center">
+                                {% if item.status == 'pending' %} 
+                                    <span class="badge badge-soft badge-soft-warning">Chờ duyệt</span>
+                                {% elif item.status == 'confirmed' %} 
+                                    <span class="badge badge-soft badge-soft-primary">Đã cọc</span>
+                                {% elif item.status == 'checked_in' %} 
+                                    <span class="badge badge-soft badge-soft-success">Đang đá</span>
+                                {% elif item.status == 'cancelled' %} 
+                                    <span class="badge badge-soft badge-soft-secondary">Đã hủy</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="text-end pe-4">
+                                <div class="dropdown">
+                                    <button class="btn btn-icon" type="button" data-bs-toggle="dropdown">
+                                        <i class="fa-solid fa-ellipsis"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-3">
+                                        <li><h6 class="dropdown-header small text-muted">Mã: {{ item.group_code }}</h6></li>
+                                        <li><a class="dropdown-item py-2 small" href="#"><i class="fa-regular fa-eye me-2"></i>Chi tiết đơn</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item py-2 small text-danger" href="#"><i class="fa-regular fa-trash-can me-2"></i>Hủy đơn này</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" class="text-center py-5 text-muted">Không tìm thấy lịch đặt nào cho bộ lọc này.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
+        
+        <div class="card-footer bg-white border-0 py-3">
+            </div>
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    function switchView(viewName) {
-        const viewList = document.getElementById('view-list');
-        const viewTimeline = document.getElementById('view-timeline');
-        const btnList = document.getElementById('btn-list');
-        const btnTimeline = document.getElementById('btn-timeline');
-
-        if (viewName === 'list') {
-            viewList.style.display = 'block';
-            viewTimeline.style.display = 'none';
-            btnList.classList.add('active');
-            btnTimeline.classList.remove('active');
-        } else {
-            viewList.style.display = 'none';
-            viewTimeline.style.display = 'block';
-            btnList.classList.remove('active');
-            btnTimeline.classList.add('active');
-        }
-    }
-</script>
 {% endblock %}

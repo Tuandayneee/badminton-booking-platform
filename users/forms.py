@@ -3,10 +3,17 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate
 from users.models import PartnerProfile, User
 import re
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 class RegistrationForm(forms.Form):
     username = forms.CharField(
         min_length=8, max_length=150, required=True,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nhập username'})
+    )
+    full_name = forms.CharField(
+        max_length=150, required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Họ và tên'})
     )
     email = forms.EmailField(
         required=True,
@@ -24,22 +31,21 @@ class RegistrationForm(forms.Form):
         min_length=8, required=True,
         widget=forms.PasswordInput(attrs={
             'class': 'form-control', 'placeholder': '••••••••',
-           
             'pattern': '(?=.*\\d)(?=.*[A-Z])(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}',
-            'title': 'Mật khẩu phải có ít nhất 8 ký tự, gồm: 1 chữ hoa, 1 số và 1 ký tự đặc biệt'
+            'title': 'Mật khẩu tối thiểu 8 ký tự, gồm chữ hoa, số và ký tự đặc biệt'
         })
     )
     confirm_password = forms.CharField(
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': '••••••••'})
     )
 
-    # --- CÁC HÀM VALIDATION DÙNG CHUNG ---
     def clean(self):
         cleaned_data = super().clean()
         password = cleaned_data.get("password")
         confirm_password = cleaned_data.get("confirm_password")
+
         if password and confirm_password and password != confirm_password:
-               self.add_error('confirm_password', "Mật khẩu nhập lại không khớp!")
+            self.add_error('confirm_password', "Mật khẩu nhập lại không khớp!")
         return cleaned_data
 
     def clean_username(self):
@@ -47,35 +53,48 @@ class RegistrationForm(forms.Form):
         if User.objects.filter(username=username).exists():
             raise ValidationError("Tên tài khoản đã tồn tại.")
         return username
+    
+    def clean_full_name(self):
+        full_name = self.cleaned_data.get('full_name')
+        if re.search(r'\d', full_name): 
+             raise ValidationError("Họ tên không được chứa số.")
+        invalid_chars = set('!@#$%^&*()+=[]{}|\\;:"<>,.?/')
+        if any(char in invalid_chars for char in full_name):
+            raise ValidationError("Họ tên chứa ký tự không hợp lệ.")
+            
+        return full_name.strip()
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if User.objects.filter(email=email).exists():
-            raise ValidationError("Email đã được sử dụng.")
+            raise ValidationError("Email này đã được đăng ký.")
         return email
 
     def clean_phone_number(self):
         phone_number = self.cleaned_data.get('phone_number')
         if phone_number:
             phone_number = phone_number.strip()
+            
         if not re.match(r'^0\d{9}$', phone_number):
-            raise ValidationError("Số điện thoại không hợp lệ (10 số, bắt đầu bằng 0).")
+            raise ValidationError("Số điện thoại phải gồm 10 số và bắt đầu bằng số 0.")
+            
         if User.objects.filter(phone_number=phone_number).exists():
-            raise ValidationError("Số điện thoại đã được sử dụng.")
+            raise ValidationError("Số điện thoại này đã được sử dụng.")
         return phone_number
 
     def clean_password(self):
         password = self.cleaned_data.get('password')
         if not password: return password
-        # Logic check độ mạnh mật khẩu (Backend)
+        
         if len(password) < 8:
-            raise ValidationError("Mật khẩu phải có ít nhất 8 ký tự.")
+            raise ValidationError("Mật khẩu quá ngắn.")
         if not re.search(r'[A-Z]', password):
-            raise ValidationError("Mật khẩu phải chứa ít nhất 1 chữ viết hoa.")
+            raise ValidationError("Thiếu chữ cái viết hoa.")
         if not re.search(r'\d', password):
-            raise ValidationError("Mật khẩu phải chứa ít nhất 1 chữ số.")
+            raise ValidationError("Thiếu chữ số.")
         if not re.search(r'[@$!%*?&#^+=_\-]', password):
-            raise ValidationError("Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt.")
+            raise ValidationError("Thiếu ký tự đặc biệt.")
+            
         return password
 
 
