@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate
 from users.models import PartnerProfile, User
 import re
 from django.contrib.auth import get_user_model
-
+from users.utils import get_bank
 User = get_user_model()
 class RegistrationForm(forms.Form):
     username = forms.CharField(
@@ -99,30 +99,56 @@ class RegistrationForm(forms.Form):
 
 
 class PartnerRegistrationForm(RegistrationForm):
-    
-    
-    name_company = forms.CharField(
-        max_length=200, required=True,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Tên đơn vị kinh doanh'})
+
+    bank_bin = forms.CharField(widget=forms.HiddenInput(), required=False)
+    bank_name = forms.ChoiceField(
+        choices=[], 
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-select', 'id': 'select_bank_name'})
     )
-    address_company = forms.CharField(
+    bank_account_number = forms.CharField(
         max_length=255, required=True,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Địa chỉ kinh doanh'})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Số tài khoản ngân hàng'})
+    )
+    bank_account_owner = forms.CharField(
+        max_length=100, required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Tên chủ tài khoản ngân hàng'})
     )
     contact_person = forms.CharField(
         max_length=100, required=True,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Họ và tên người đại diện'})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Người đại diện liên hệ'})
     )
     
     
-    
-   
-    def clean_name_company(self):
-        name = self.cleaned_data.get('name_company')
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         
-        if PartnerProfile.objects.filter(business_name=name).exists():
-            raise ValidationError("Tên đơn vị kinh doanh này đã được đăng ký.")
-        return name
+        
+        if 'full_name' in self.fields:
+            del self.fields['full_name']
+        banks = get_bank()
+        try:
+            bank_choices = [('', '--- Chọn ngân hàng thụ hưởng ---')] + \
+                           [(b['shortName'], f"{b['shortName']} - {b['name']}") for b in banks]
+        except TypeError:
+            bank_choices = [('', 'Lỗi tải danh sách ngân hàng')]
+
+        self.fields['bank_name'].choices = bank_choices
+   
+    def clean(self):
+        cleaned_data = super().clean()
+        name = cleaned_data.get('bank_name')
+        number = cleaned_data.get('bank_account_number')
+        owner = cleaned_data.get('bank_account_owner')
+        if name and number and owner:
+            if PartnerProfile.objects.filter(
+                bank_name=name, 
+                bank_account_number=number, 
+                bank_account_owner=owner
+            ).exists():
+                self.add_error('bank_account_number', "Tài khoản ngân hàng này đã được đăng ký bởi đối tác khác.")
+        
+        return cleaned_data
 
 
 class LoginForm(forms.Form):
@@ -140,6 +166,13 @@ class LoginForm(forms.Form):
         password = cleaned_data.get("password")
         if username and password:
             user = authenticate(username=username, password=password)
+            if not user:
+                try:
+                    staff_user = User.objects.get(phone_number=username, role='staff')
+                    user = authenticate(username=staff_user.username, password=password)
+                except User.DoesNotExist:
+                    pass
+            
             if not user:
                 self.add_error(None, "Tài khoản hoặc mật khẩu không đúng.")
             else:

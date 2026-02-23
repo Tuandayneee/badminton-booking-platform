@@ -39,7 +39,7 @@ class CenterImage(models.Model):
     image = models.ImageField(upload_to='center_images/', verbose_name="Hình ảnh trung tâm")
     is_thumbnail = models.BooleanField(default=False, verbose_name="Ảnh đại diện")
     def __str__(self):
-        return f"Image for {self.center.name}"
+        return f"Ảnh của {self.center.name}"
     
 
 class Court(models.Model):

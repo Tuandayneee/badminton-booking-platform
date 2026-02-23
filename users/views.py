@@ -6,7 +6,10 @@ from django.contrib.auth.forms import PasswordChangeForm
 from users.models import PartnerProfile, User, CustomerProfile
 from users.forms import PartnerRegistrationForm, RegistrationForm
 from users.forms import LoginForm
+
 from django.db import transaction
+
+from users.utils import get_bank
 def login_view(request):
     login_form = LoginForm()
     register_form = RegistrationForm()
@@ -20,6 +23,10 @@ def login_view(request):
                 messages.success(request, f"Chào mừng {user.username} quay lại!")
                 return redirect('home')
             elif user.role == User.Role.PARTNER:
+                PartnerProfile.objects.get(user=user)
+                if not user.partner_profile.is_verified:
+                    messages.warning(request, "Tài khoản của bạn chưa được xác minh. Vui lòng chờ quản trị viên liên hệ.")
+                    return redirect('login')
                 login(request, user)
                 messages.success(request, f"Chào mừng Đối tác {user.username} quay lại!")
                 return redirect('partner_dashboard')
@@ -76,10 +83,10 @@ def register_view(request):
     return render(request, 'user/login_register.html', context)
 
 def register_partner(request):
+    bank_list = get_bank()  
+    
     if request.method == 'POST':
-        
         partner_form = PartnerRegistrationForm(request.POST)
-        
         if partner_form.is_valid():
             data = partner_form.cleaned_data
             
@@ -97,18 +104,15 @@ def register_partner(request):
                     )
                     
                     PartnerProfile.objects.create(
-                        user=user,
-                        business_name=data['name_company'],      
-                        business_address=data['address_company'], 
-                        contact_person=data['contact_person'],
-                        
-                        
-                        bank_name=data.get('bank_name', ''),
-                        bank_account_number=data.get('bank_account_number', ''),
-                        bank_account_owner=data.get('bank_account_owner', '')
+                        user=user, 
+                        bank_name = data['bank_name'] ,
+                        bank_bin = data['bank_bin'],
+                        bank_account_number=data.get('bank_account_number'),
+                        bank_account_owner=data.get('bank_account_owner'),
+                        contact_person = data.get('contact_person') 
                     )
 
-                messages.success(request, "Đăng ký đối tác thành công! Vui lòng đăng nhập.")
+                messages.success(request, "Yêu cầu của bạn đã được gửi. Vui lòng đợi admin liên hệ.")
                 return redirect('login') 
             
             except Exception as e:
@@ -119,7 +123,7 @@ def register_partner(request):
         partner_form = PartnerRegistrationForm()
 
     
-    return render(request, 'partner/register_partner.html', {'partner_form': partner_form})
+    return render(request, 'partner/register_partner.html', {'partner_form': partner_form, 'bank_list': bank_list})
 
 
 def login_social_account(request):

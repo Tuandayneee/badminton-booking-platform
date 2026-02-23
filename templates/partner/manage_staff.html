@@ -1,0 +1,375 @@
+{% extends 'base/base_partner.html' %}
+{% load static %}
+
+{% block title %}Quản lý Nhân viên - {{ center.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3 fade-in-up">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small text-muted">
+                    <li class="breadcrumb-item"><a href="{% url 'centers_management' %}" class="text-decoration-none text-secondary">Hệ thống sân</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'centers_management' %}" class="text-decoration-none text-secondary">{{ center.name }}</a></li>
+                    <li class="breadcrumb-item active text-dark" aria-current="page">Nhân viên</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold text-dark mb-0 ls-tight">
+                <i class="fa-solid fa-user-tie text-primary me-2"></i>Quản lý Nhân viên
+            </h3>
+        </div>
+        
+        <div class="d-flex gap-2">
+            <a href="{% url 'centers_management' %}" class="btn btn-pro btn-pro-light">
+                <i class="fa-solid fa-arrow-left me-2 text-secondary"></i>Quay lại
+            </a>
+            <button class="btn btn-pro btn-pro-primary" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#staffModal"
+                    data-mode="add">
+                <i class="fa-solid fa-user-plus me-1"></i>Thêm Nhân viên
+            </button>
+        </div>
+    </div>
+
+    <!-- Thống kê nhanh -->
+    <div class="row g-3 mb-4 fade-in-up" style="animation-delay: 0.05s;">
+        <div class="col-md-4">
+            <div class="card-modern p-3">
+                <div class="d-flex align-items-center">
+                    <div class="icon-shape bg-soft-primary me-3">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div>
+                        <div class="text-secondary small fw-bold">Tổng nhân viên</div>
+                        <div class="fs-4 fw-bold text-dark">{{ staff_list.count }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-modern p-3">
+                <div class="d-flex align-items-center">
+                    <div class="icon-shape bg-soft-success me-3">
+                        <i class="fa-solid fa-user-check"></i>
+                    </div>
+                    <div>
+                        <div class="text-secondary small fw-bold">Đang làm việc</div>
+                        {% with active_count=0 %}
+                        <div class="fs-4 fw-bold text-dark">
+                            {% for s in staff_list %}{% if s.is_active %}{% with ''|add:'' as counter %}{% endwith %}{% endif %}{% endfor %}
+                            {{ staff_list|length }}
+                        </div>
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-modern p-3">
+                <div class="d-flex align-items-center">
+                    <div class="icon-shape bg-soft-warning me-3">
+                        <i class="fa-solid fa-building"></i>
+                    </div>
+                    <div>
+                        <div class="text-secondary small fw-bold">Trung tâm</div>
+                        <div class="fs-5 fw-bold text-dark text-truncate" style="max-width: 180px;">{{ center.name }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bảng danh sách nhân viên -->
+    <div class="card-modern fade-in-up" style="animation-delay: 0.1s;">
+        <div class="table-responsive">
+            <table class="table table-modern">
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">#</th>
+                        <th style="width: 25%;">Nhân viên</th>
+                        <th style="width: 20%;">Liên hệ</th>
+                        <th style="width: 20%;">Chức vụ</th>
+                        <th class="text-center" style="width: 10%;">Trạng thái</th>
+                        <th class="text-end" style="width: 20%;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for staff in staff_list %}
+                    <tr>
+                        <td class="text-secondary fw-medium">{{ forloop.counter }}</td>
+                        
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-circle bg-primary bg-opacity-10 text-primary me-3">
+                                    {{ staff.user.full_name|default:staff.user.username|make_list|first|upper }}
+                                </div>
+                                <div>
+                                    <span class="fw-semibold text-dark d-block">{{ staff.user.full_name|default:staff.user.username }}</span>
+                                    <span class="text-muted small">@{{ staff.user.username }}</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="small">
+                                    <i class="fa-regular fa-envelope text-muted me-1"></i>
+                                    {{ staff.user.email|default:"—" }}
+                                </span>
+                                <span class="small text-muted">
+                                    <i class="fa-solid fa-phone text-muted me-1"></i>
+                                    {{ staff.user.phone_number|default:"—" }}
+                                </span>
+                            </div>
+                        </td>
+
+                        <td>
+                            <span class="badge badge-soft badge-soft-dark">{{ staff.position|default:"Nhân viên" }}</span>
+                        </td>
+
+                        <td class="text-center">
+                            {% if staff.is_active %}
+                                <span class="badge badge-soft badge-soft-success">
+                                    <span class="badge-dot"></span> Hoạt động
+                                </span>
+                            {% else %}
+                                <span class="badge badge-soft badge-soft-secondary">
+                                    <span class="badge-dot"></span> Nghỉ việc
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end">
+                            <button class="btn btn-icon me-1"
+                                title="Chỉnh sửa"
+                                data-bs-toggle="modal" 
+                                data-bs-target="#staffEditModal"
+                                data-action="{% url 'edit_staff_member' staff.id %}"
+                                data-fullname="{{ staff.user.full_name }}"
+                                data-email="{{ staff.user.email }}"
+                                data-phone="{{ staff.user.phone_number|default:'' }}"
+                                data-position="{{ staff.position }}"
+                                data-active="{{ staff.is_active|yesno:'true,false' }}">
+                                <i class="fa-regular fa-pen-to-square"></i>
+                            </button>
+                            
+                            <button class="btn btn-icon delete text-danger"
+                                    title="Xóa nhân viên"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#deleteStaffModal"
+                                    data-staff-name="{{ staff.user.full_name|default:staff.user.username }}"
+                                    data-action="{% url 'delete_staff_member' staff.id %}">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="d-flex flex-column align-items-center">
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                                    <i class="fa-solid fa-user-slash fs-4 text-muted opacity-50"></i>
+                                </div>
+                                <h6 class="fw-bold text-dark">Chưa có nhân viên nào</h6>
+                                <p class="text-secondary small mb-3">Hãy thêm nhân viên đầu tiên để quản lý cơ sở.</p>
+                                <button class="btn btn-pro btn-pro-primary btn-sm"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#staffModal"
+                                        data-mode="add">
+                                    <i class="fa-solid fa-user-plus me-1"></i>Thêm nhân viên ngay
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm Nhân viên -->
+<div class="modal fade" id="staffModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    <i class="fa-solid fa-user-plus text-primary me-2"></i>THÊM NHÂN VIÊN MỚI
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <form method="POST" action="{% url 'add_staff_to_center' center.id %}" class="needs-validation">
+                    {% csrf_token %}
+                    
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-secondary">Số điện thoại (Tài khoản) <span class="text-danger">*</span></label>
+                            {{ staff_form.phone_number }}
+                            <div class="form-text small text-muted">SĐT sẽ dùng làm tên đăng nhập</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-secondary">Email <span class="text-danger">*</span></label>
+                            {{ staff_form.email }}
+                            <div class="form-text small text-muted">Mật khẩu sẽ gửi về email này</div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-secondary">Họ và tên</label>
+                            {{ staff_form.full_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-secondary">Chức vụ</label>
+                            {{ staff_form.position }}
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 border mb-4">
+                        <div class="d-flex align-items-start">
+                            <i class="fa-solid fa-circle-info text-primary me-2 mt-1"></i>
+                            <div class="small text-muted">
+                                Nhân viên sẽ được gán vào <strong class="text-dark">{{ center.name }}</strong>.<br>
+                                Mật khẩu sẽ được tạo tự động và gửi về email nhân viên.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary py-2 fw-bold">
+                            <i class="fa-solid fa-user-plus me-2"></i>Thêm Nhân Viên
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Sửa Nhân viên -->
+<div class="modal fade" id="staffEditModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    <i class="fa-regular fa-pen-to-square text-primary me-2"></i>CẬP NHẬT THÔNG TIN
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <form method="POST" id="editStaffForm" class="needs-validation">
+                    {% csrf_token %}
+                    
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-secondary">Họ và tên</label>
+                            <input type="text" name="full_name" id="editFullName" class="form-control" placeholder="Nguyễn Văn A">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-secondary">Email</label>
+                            <input type="email" name="email" id="editEmail" class="form-control" placeholder="example@gmail.com">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-secondary">Số điện thoại</label>
+                            <input type="text" name="phone_number" id="editPhone" class="form-control" placeholder="0901234567">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-secondary">Chức vụ</label>
+                            <input type="text" name="position" id="editPosition" class="form-control" placeholder="Nhân viên">
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-3 mb-4 border">
+                        <div>
+                            <span class="fw-bold text-dark d-block small">Trạng thái làm việc</span>
+                            <span class="small text-muted" style="font-size: 0.75rem;">Nhân viên có đang làm việc không?</span>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_active" id="editActive" checked>
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary py-2 fw-bold">
+                            <i class="fa-solid fa-save me-2"></i>Lưu Thay Đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Xóa Nhân viên -->
+<div class="modal fade" id="deleteStaffModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3 text-warning">
+                    <div class="bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 60px; height: 60px;">
+                        <i class="fa-solid fa-triangle-exclamation fa-2x"></i>
+                    </div>
+                </div>
+                
+                <h6 class="fw-bold mb-2 text-dark">Xóa nhân viên?</h6>
+                <p class="small text-muted mb-4">
+                    Bạn có chắc muốn xóa <strong id="deleteStaffName" class="text-dark">...</strong>?<br>
+                    Tài khoản nhân viên sẽ bị vô hiệu hóa.
+                </p>
+                
+                <div class="d-flex justify-content-center gap-2">
+                    <button type="button" class="btn btn-light btn-sm fw-bold px-3" data-bs-dismiss="modal">Hủy bỏ</button>
+                    
+                    <form id="deleteStaffForm" method="POST" action="">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm fw-bold px-3">
+                            <i class="fa-solid fa-trash-can me-1"></i>Xóa ngay
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // === Edit Modal ===
+        const editModal = document.getElementById('staffEditModal');
+        const editForm = document.getElementById('editStaffForm');
+        
+        if (editModal) {
+            editModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                editForm.action = button.getAttribute('data-action');
+                document.getElementById('editFullName').value = button.getAttribute('data-fullname') || '';
+                document.getElementById('editEmail').value = button.getAttribute('data-email') || '';
+                document.getElementById('editPhone').value = button.getAttribute('data-phone') || '';
+                document.getElementById('editPosition').value = button.getAttribute('data-position') || '';
+                document.getElementById('editActive').checked = button.getAttribute('data-active') === 'true';
+            });
+        }
+
+        // === Delete Modal ===
+        const deleteModal = document.getElementById('deleteStaffModal');
+        const deleteForm = document.getElementById('deleteStaffForm');
+        const deleteStaffName = document.getElementById('deleteStaffName');
+
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                deleteStaffName.textContent = button.getAttribute('data-staff-name');
+                deleteForm.action = button.getAttribute('data-action');
+            });
+        }
+    });
+</script>
+{% endblock %}

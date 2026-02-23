@@ -160,12 +160,39 @@
 
 {% block extra_js %}
 <script>
+    // ===== CẤU HÌNH =====
+    const CANCEL_URL = "{% url 'cancel_booking_on_leave' group_code %}";
+    let bookingCancelled = false;
+    let formSubmitting = false;  // Flag để track khi form đang submit
+
+    // ===== FUNCTIONS =====
     function copyToClipboard(text) {
         navigator.clipboard.writeText(text).then(function() {
             alert('Đã sao chép số tài khoản: ' + text);
         }, function(err) {
             console.error('Lỗi sao chép: ', err);
         });
+    }
+
+    // Hàm hủy booking - gọi API backend
+    function cancelBooking() {
+        if (bookingCancelled || formSubmitting) return;
+        
+        bookingCancelled = true;
+        
+        // Sử dụng sendBeacon để đảm bảo request được gửi khi tab đóng
+        if (navigator.sendBeacon) {
+            const data = new FormData();
+            navigator.sendBeacon(CANCEL_URL, data);
+            console.log('[BookingPro] Đã hủy đặt sân thành công');
+        } else {
+            // Fallback cho browser cũ
+            fetch(CANCEL_URL, {
+                method: 'POST',
+                keepalive: true,
+                credentials: 'same-origin'
+            }).catch(err => console.log('[BookingPro] Lỗi hủy đặt sân:', err));
+        }
     }
 
     // Hàm đếm ngược
@@ -179,13 +206,17 @@
                 display.textContent = "00:00";
                 display.classList.add('bg-danger', 'text-white'); 
                 
+                // Hủy booking khi hết giờ
+                cancelBooking();
+                
                 alert("Đơn hàng đã hết thời gian giữ chỗ! Vui lòng đặt lại.");
-                window.location.reload();
+                window.location.href = "{% url 'home' %}";
                 return;
             }
             updateDisplay(timer, display);
         }, 1000);
     }
+
     function updateDisplay(timer, display) {
         var minutes = parseInt(timer / 60, 10);
         var seconds = parseInt(timer % 60, 10);
@@ -195,11 +226,50 @@
 
         display.textContent = minutes + ":" + seconds;
     }
+
+    // ===== EVENT LISTENERS =====
+    
+    // 1. Page Visibility API - KHÔNG sử dụng nữa vì gây cancel sai khi user mở tab mới
+    // Chỉ cancel khi user thực sự đóng tab hoặc rời trang
+    /*
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'hidden') {
+            cancelBooking();
+        }
+    });
+    */
+
+    // 2. beforeunload - Phát hiện khi user đóng tab/refresh
+    window.addEventListener('beforeunload', function(e) {
+        if (!formSubmitting) {
+            cancelBooking();
+        }
+    });
+
+    // 3. pagehide - Backup cho mobile browser
+    window.addEventListener('pagehide', function(e) {
+        if (!formSubmitting) {
+            cancelBooking();
+        }
+    });
+
+    // 4. Track form submit để không hủy booking khi user submit thanh toán
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function() {
+                formSubmitting = true;  
+            });
+        }
+    });
+
+    // ===== INIT =====
     window.onload = function () {
         var timeLeft = {{ time_left|default:0 }};
         var display = document.querySelector('#countdown');
         if (timeLeft <= 0) {
              display.textContent = "00:00";
+             cancelBooking();
              alert("Đơn hàng đã hết hạn!");
              window.location.href = "{% url 'home' %}";
              return;

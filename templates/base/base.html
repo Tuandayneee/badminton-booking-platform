@@ -41,8 +41,8 @@
                             </li>
 
                         {% else %}
-                            <li class="nav-item"><a class="nav-link" href="#">Sân bãi</a></li>
-                            <li class="nav-item"><a class="nav-link" href="#">Bảng giá</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'home' %}#courts">Sân bãi</a></li>
+                            
                             
                             {% if user.role == 'customer' %}
                                 <li class="nav-item d-none d-lg-block">
@@ -83,8 +83,7 @@
                         </li>
 
                     {% else %}
-                        <li class="nav-item"><a class="nav-link" href="#">Sân bãi</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Bảng giá</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'home' %}#courts">Sân bãi</a></li>
                         <li class="nav-item ms-lg-2">
                             <a href="{% url 'login' %}" class="btn btn-primary-gradient rounded-pill px-4 py-2 fw-bold shadow-sm">
                                 <i class="fa-regular fa-user me-2"></i>Đăng nhập
@@ -157,7 +156,6 @@
     {% block extra_js %}{% endblock %}
     
     <script>
-        // Cấu hình SweetAlert2 Toast đẹp hơn
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end', 

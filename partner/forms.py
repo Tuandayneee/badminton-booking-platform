@@ -82,3 +82,43 @@ class CourtForm(forms.ModelForm):
             'golden_end_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input', 'id': 'courtActive'}),
         }
+
+
+class StaffForm(forms.Form):
+    """Form thêm/sửa nhân viên cho center"""
+    phone_number = forms.CharField(
+        max_length=15,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '0901234567'
+        }),
+        label="Số điện thoại (dùng làm tài khoản)"
+    )
+    full_name = forms.CharField(
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Nguyễn Văn A'
+        }),
+        label="Họ và tên"
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'example@gmail.com'
+        }),
+        label="Email"
+    )
+    
+    
+    position = forms.CharField(
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ví dụ: Nhân viên bán hàng, Quản lý sân...'
+        }),
+        label="Chức vụ",
+        initial="Nhân viên"
+    )

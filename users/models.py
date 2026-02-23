@@ -7,6 +7,7 @@ class User(AbstractUser):
         CUSTOMER = 'customer', 'Khách hàng'
         PARTNER = 'partner', 'Đối tác'
         ADMIN = 'admin', 'Quản trị viên'
+        STAFF = 'staff', 'Nhân viên'
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.CUSTOMER)
     full_name = models.CharField(max_length=150, blank=True)
     email = models.EmailField(unique=True)
@@ -45,10 +46,9 @@ class CustomerProfile(models.Model):
 
 class PartnerProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='partner_profile')
-    business_name = models.CharField(max_length=200, verbose_name="Tên đơn vị kinh doanh")
-    business_address = models.CharField(max_length=255, verbose_name="Địa chỉ kinh doanh")
     
     bank_name = models.CharField(max_length=100, blank=True, verbose_name="Tên ngân hàng")
+    bank_bin = models.CharField(max_length=20, blank=True, verbose_name="Mã BIN ngân hàng")
     bank_account_number = models.CharField(max_length=30, blank=True, verbose_name="Số tài khoản")
     bank_account_owner = models.CharField(max_length=100, blank=True, verbose_name="Tên chủ tài khoản")
     contact_person = models.CharField(max_length=100, verbose_name="Người đại diện", default="")
@@ -56,9 +56,28 @@ class PartnerProfile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Partner: {self.business_name} ({self.user.username})"
+        name_display = self.contact_person if self.contact_person else self.user.username
+        return f"Đối tác: {name_display}"
     
 
+class StaffProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='staff_profile')
+    center = models.ForeignKey('partner.BadmintonCenter', on_delete=models.CASCADE, related_name='staff_members', verbose_name="Trung tâm", null=True, blank=True)
+    position = models.CharField(max_length=100, blank=True, verbose_name="Chức vụ", default="Nhân viên")
+    is_active = models.BooleanField(default=True, verbose_name="Đang làm việc")
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+    def __str__(self):
+        center_name = self.center.name if self.center else "Chưa phân công"
+        return f"Nhân viên: {self.user.username} - {center_name}"
+    
+
+@receiver(post_save, sender=User)
+def create_staff_profile(sender, instance, created, **kwargs):
+    if created and instance.role == User.Role.STAFF:
+        StaffProfile.objects.create(user=instance)
+
+        
 @receiver(post_save, sender=User)
 def create_customer_profile(sender, instance, created, **kwargs):
     if created and instance.role == User.Role.CUSTOMER:

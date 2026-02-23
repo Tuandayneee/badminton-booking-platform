@@ -2,165 +2,186 @@
 {% load static %}
 {% load humanize %}
 
-{% block title %}Lịch đặt sân - {{ center.name }}{% endblock %}
+{% block title %}Lịch sử đặt sân - {{ center.name }}{% endblock %}
 
 {% block content %}
-<div class="container-fluid px-4 py-4">
+<div class="container-fluid px-4 py-4 bg-light" style="min-height: 100vh;">
     
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 gap-3 fade-in-up">
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-1 small text-muted">
-                    <li class="breadcrumb-item"><a href="{% url 'centers_management' %}" class="text-decoration-none text-secondary">Quản lý cơ sở</a></li>
-                    <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-secondary">{{ center.name }}</a></li>
-                    <li class="breadcrumb-item active text-dark" aria-current="page">Lịch đặt sân</li>
-                </ol>
-            </nav>
-            <h3 class="fw-bold text-dark mb-0 ls-tight">Lịch đặt sân: {{ center.name }}</h3>
+            <h4 class="fw-bold text-dark mb-1">Lịch sử đặt sân</h4>
+            <p class="text-muted small mb-0">Quản lý các đơn đặt sân tại {{ center.name }}</p>
         </div>
-
-        <form method="GET" class="d-flex flex-wrap gap-2 bg-white p-2 rounded-3 shadow-sm border">
-            <input type="date" name="date" class="form-control border-0 bg-light fw-medium" 
-                   value="{{ request.GET.date|default:today_date }}" 
-                   style="max-width: 150px; font-size: 0.9rem;">
-            
-            <select name="court_id" class="form-select border-0 bg-light fw-medium" style="width: auto; font-size: 0.9rem;">
-                <option value="">Tất cả sân con</option>
-                {% for court in courts %}
-                    <option value="{{ court.id }}" {% if request.GET.court_id|add:"0" == court.id %}selected{% endif %}>
-                        {{ court.name }}
-                    </option>
-                {% endfor %}
-            </select>
-            
-            <button type="submit" class="btn btn-pro btn-pro-primary py-1 px-3">
-                <i class="fa-solid fa-filter"></i> Lọc
-            </button>
-        </form>
+        <div class="d-flex gap-3">
+            <div class="card-clean px-3 py-2 d-flex align-items-center gap-3">
+                <div class="avatar-sm bg-primary bg-opacity-10 text-primary"><i class="fa-solid fa-sack-dollar"></i></div>
+                <div>
+                    <div class="small text-muted fw-bold">Doanh thu (đã duyệt)</div>
+                    <div class="fw-bold text-dark">{{ total_revenue|stringformat:"d"|intcomma }}đ</div>
+                </div>
+            </div>
+            <div class="card-clean px-3 py-2 d-flex align-items-center gap-3">
+                <div class="avatar-sm bg-success bg-opacity-10 text-success"><i class="fa-solid fa-receipt"></i></div>
+                <div>
+                    <div class="small text-muted fw-bold">Giao dịch</div>
+                    <div class="fw-bold text-dark">{{ transactions|length }}</div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="card-modern h-100 fade-in-up" style="animation-delay: 0.1s;">
+    <div class="card-clean">
         
-        <div class="card-header bg-white border-bottom py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
-            <div class="d-flex align-items-center gap-2">
-                <h6 class="mb-0 fw-bold text-dark">Danh sách đặt sân</h6>
-                <span class="badge badge-soft badge-soft-secondary">{{ bookings.count }}</span>
-            </div>
+        <div class="p-3 border-bottom d-flex flex-wrap gap-2 justify-content-between align-items-center">
+            
+            <form method="GET" class="d-flex flex-wrap gap-2 align-items-center flex-grow-1">
+                <div class="position-relative" style="min-width: 250px;">
+                    <i class="fa-solid fa-magnifying-glass position-absolute top-50 start-0 translate-middle-y ms-3 text-muted small"></i>
+                    <input type="text" name="keyword" class="form-control ps-5 border-light bg-light text-dark" 
+                           placeholder="Tìm mã giao dịch, mã đơn, số tiền..." value="{{ request.GET.keyword|default:'' }}">
+                </div>
 
-            <div class="dropdown">
-                <button class="btn btn-pro btn-pro-light btn-sm text-secondary" type="button" data-bs-toggle="dropdown">
-                    <i class="fa-solid fa-download me-2"></i>Xuất dữ liệu
-                </button>
-                <ul class="dropdown-menu border-0 shadow-lg rounded-3">
-                    <li><a class="dropdown-item small" href="#">Excel (.xlsx)</a></li>
-                    <li><a class="dropdown-item small" href="#">PDF (.pdf)</a></li>
-                </ul>
-            </div>
+                <select name="status" class="form-select border-light bg-light text-secondary" style="width: auto;">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="unverified" {% if request.GET.status == 'unverified' %}selected{% endif %}>Chờ duyệt</option>
+                    <option value="verified" {% if request.GET.status == 'verified' %}selected{% endif %}>Đã duyệt</option>
+                </select>
+
+                <button type="submit" class="btn btn-dark btn-sm px-3 ms-1">Lọc</button>
+                <a href="{% url 'booking_court_history' center.id %}" class="btn btn-light btn-sm px-3 border"><i class="fa-solid fa-rotate"></i></a>
+            </form>
+
+            <button class="btn btn-outline-secondary btn-sm px-3 border-0">
+                <i class="fa-solid fa-file-export me-1"></i> Xuất Excel
+            </button>
         </div>
 
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-modern align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th class="ps-4" style="width: 25%;">Thành viên</th>
-                            <th style="width: 20%;">Sân / Loại</th>
-                            <th style="width: 20%;">Khung giờ</th>
-                            <th style="width: 15%;">Thanh toán</th>
-                            <th class="text-center" style="width: 10%;">Trạng thái</th>
-                            <th class="text-end pe-4" style="width: 10%;"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in schedule_list %}
-                        <tr>
-                            <td class="ps-4">
-                                <div class="d-flex align-items-center">
-                                    {% if item.user.avatar %}
-                                        <img src="{{ item.user.avatar.url }}" class="rounded-circle me-3 border object-fit-cover" width="40" height="40">
+        <div class="table-responsive">
+            <table class="table table-clean w-100 mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Mã Giao Dịch</th>
+                        <th>Khách Hàng</th>
+                        <th>Chi Tiết Sân</th>
+                        <th>Số Tiền</th>
+                        <th>Trạng Thái</th>
+                        <th class="text-end pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for trans in transactions %}
+                    <tr>
+                        <td class="ps-4">
+                            <span class="fw-bold text-dark">{{ trans.transaction_reference|default:trans.booking_group_code }}</span>
+                            <div class="small text-muted mt-1">{{ trans.timestamp|date:"d/m/Y H:i" }}</div>
+                        </td>
+
+                        <td>
+                            <div class="d-flex align-items-center">
+                                {% if trans.user %}
+                                    {% if trans.user.avatar %}
+                                        <img src="{{ trans.user.avatar.url }}" class="avatar-sm me-3 rounded-circle object-fit-cover">
                                     {% else %}
-                                        <div class="avatar-circle bg-soft-primary me-3 text-primary border border-primary border-opacity-10">
-                                            {{ item.user.username|slice:":1"|upper }}
+                                        <div class="avatar-sm bg-primary bg-opacity-10 text-primary me-3 rounded-circle">
+                                            {{ trans.user.username|slice:":1"|upper }}
                                         </div>
                                     {% endif %}
-                                    
                                     <div>
-                                        <h6 class="mb-0 fw-bold text-dark fs-6">
-                                            {{ item.user.full_name|default:item.user.username }}
-                                        </h6>
-                                        <small class="text-muted font-monospace" style="font-size: 0.75rem;">
-                                            {{ item.user.phone|default:"---" }}
-                                        </small>
+                                        <div class="fw-bold text-dark">{{ trans.user.full_name|default:trans.user.username }}</div>
+                                        <div class="small text-muted">{{ trans.user.phone_number|default:"App User" }}</div>
                                     </div>
-                                </div>
-                            </td>
-
-                            <td>
-                                <div class="fw-bold text-dark">
-                                    {{ item.court_names|join:", " }}
-                                </div>
-                                <small class="text-secondary">{{ item.slots_count }} slot (30p)</small>
-                            </td>
-
-                            <td>
-                                <div class="d-flex align-items-center mb-1">
-                                    <i class="fa-regular fa-clock text-warning me-2"></i>
-                                    <span class="fw-bold text-dark" style="font-size: 1.1rem;">
-                                        {{ item.start_time|date:"H:i" }} - {{ item.end_time|date:"H:i" }}
-                                    </span>
-                                </div>
-                                <div class="small text-muted ps-4">{{ filter_date|date:"d/m/Y" }}</div>
-                            </td>
-
-                            <td>
-                                <div class="fw-bold text-dark mb-1">{{ item.total_price|intcomma }}đ</div>
-                                {% if item.is_paid %}
-                                    <span class="badge badge-soft badge-soft-success py-1 px-2" style="font-size: 0.65rem;">
-                                        <i class="fa-solid fa-check me-1"></i>Đã TT
-                                    </span>
                                 {% else %}
-                                    <span class="badge badge-soft badge-soft-danger py-1 px-2" style="font-size: 0.65rem;">
-                                        <i class="fa-solid fa-xmark me-1"></i>Chưa TT
-                                    </span>
+                                    <div class="avatar-sm bg-secondary bg-opacity-10 text-secondary me-3 rounded-circle">
+                                        <i class="fa-solid fa-user"></i>
+                                    </div>
+                                    <div class="text-muted">Không xác định</div>
                                 {% endif %}
-                            </td>
+                            </div>
+                        </td>
 
-                            <td class="text-center">
-                                {% if item.status == 'pending' %} 
-                                    <span class="badge badge-soft badge-soft-warning">Chờ duyệt</span>
-                                {% elif item.status == 'confirmed' %} 
-                                    <span class="badge badge-soft badge-soft-primary">Đã cọc</span>
-                                {% elif item.status == 'checked_in' %} 
-                                    <span class="badge badge-soft badge-soft-success">Đang đá</span>
-                                {% elif item.status == 'cancelled' %} 
-                                    <span class="badge badge-soft badge-soft-secondary">Đã hủy</span>
+                        <td>
+                            {% if trans.related_bookings %}
+                                {% for b in trans.related_bookings %}
+                                    <div class="{% if not forloop.first %}mt-1{% endif %}">
+                                        <span class="text-dark fw-medium">{{ b.court.name }}</span>
+                                        <span class="small text-muted ms-1">
+                                            <i class="fa-regular fa-calendar me-1"></i>{{ b.date|date:"d/m" }}
+                                            <i class="fa-regular fa-clock ms-2 me-1"></i>{{ b.start_time|time:"H:i" }} - {{ b.end_time|time:"H:i" }}
+                                        </span>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-muted small">{{ trans.booking_group_code }}</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <div class="fw-bold text-dark">{{ trans.amount|stringformat:"d"|intcomma }}đ</div>
+                            <div class="small text-muted mt-1">
+                                {% if trans.related_bookings %}
+                                    {{ trans.related_bookings|length }} slot
                                 {% endif %}
-                            </td>
+                            </div>
+                        </td>
 
-                            <td class="text-end pe-4">
+                        <td>
+                            {% if trans.is_verified %}
+                                <span class="badge badge-soft-success rounded-pill">
+                                    <i class="fa-solid fa-circle-check me-1"></i>Đã duyệt
+                                </span>
+                                {% if trans.verified_by %}
+                                    <div class="small text-muted mt-1">bởi {{ trans.verified_by.username }}</div>
+                                {% endif %}
+                            {% else %}
+                                <span class="badge badge-soft-warning rounded-pill">
+                                    <i class="fa-regular fa-clock me-1"></i>Chờ duyệt
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end pe-4">
+                            <div class="d-flex justify-content-end gap-2">
+                                {% if not trans.is_verified %}
+                                    <form method="POST" action="{% url 'partner_approve_transaction' trans.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                        <button type="submit" class="btn btn-success btn-sm px-3" 
+                                                onclick="return confirm('Xác nhận duyệt giao dịch {{ trans.transaction_reference }}?')">
+                                            <i class="fa-solid fa-check me-1"></i>Duyệt
+                                        </button>
+                                    </form>
+                                {% endif %}
                                 <div class="dropdown">
-                                    <button class="btn btn-icon" type="button" data-bs-toggle="dropdown">
-                                        <i class="fa-solid fa-ellipsis"></i>
+                                    <button class="btn btn-light btn-sm border rounded-circle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fa-solid fa-ellipsis text-secondary"></i>
                                     </button>
-                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-3">
-                                        <li><h6 class="dropdown-header small text-muted">Mã: {{ item.group_code }}</h6></li>
-                                        <li><a class="dropdown-item py-2 small" href="#"><i class="fa-regular fa-eye me-2"></i>Chi tiết đơn</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item py-2 small text-danger" href="#"><i class="fa-regular fa-trash-can me-2"></i>Hủy đơn này</a></li>
+                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-3">
+                                        <li><a class="dropdown-item py-2 small" href="#"><i class="fa-regular fa-eye me-2 text-muted"></i>Xem chi tiết</a></li>
+                                        {% if not trans.is_verified %}
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item py-2 small text-danger" href="#"><i class="fa-solid fa-ban me-2"></i>Từ chối</a></li>
+                                        {% endif %}
                                     </ul>
                                 </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr><td colspan="6" class="text-center py-5 text-muted">Không tìm thấy lịch đặt nào cho bộ lọc này.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="text-muted opacity-50 mb-2"><i class="fa-regular fa-folder-open fa-2x"></i></div>
+                            <p class="text-muted small mb-0">Chưa có giao dịch nào.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
         
-        <div class="card-footer bg-white border-0 py-3">
-            </div>
+        <div class="d-flex justify-content-between align-items-center p-3 border-top">
+            <small class="text-muted">Hiển thị {{ transactions|length }} giao dịch.</small>
+        </div>
+
     </div>
 </div>
 {% endblock %}

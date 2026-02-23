@@ -45,41 +45,36 @@
                         Tìm sân nhanh
                     </h4>
                     
-                    <form action="#" method="GET">
+                    <form id="fast-search-form">
                         <div class="mb-3">
                             <label class="form-label">Ngày chơi</label>
                             <div class="input-group-unified">
                                 <span class="input-group-text"><i class="fa-regular fa-calendar"></i></span>
-                                <input type="date" class="form-control" value="{% now 'Y-m-d' %}">
+                                <input type="date" id="input-date" class="form-control" value="{% now 'Y-m-d' %}" required>
                             </div>
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">Khu vực</label>
+                            <label class="form-label">Khu vực (Hà Nội)</label>
                             <div class="input-group-unified">
                                 <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
-                                <select class="form-select form-control">
-                                    <option selected>Tất cả khu vực</option>
-                                    <option>Cầu Giấy</option>
-                                    <option>Thanh Xuân</option>
-                                    <option>Mỹ Đình</option>
-                                </select>
+                                <select id="input-address" class="form-select form-control">
+                                    <option value="" selected>Tất cả khu vực</option>
+                                    </select>
                             </div>
                         </div>
                         
                         <div class="mb-4">
-                            <label class="form-label">Khung giờ</label>
+                            <label class="form-label">Giờ bắt đầu</label>
                             <div class="input-group-unified">
                                 <span class="input-group-text"><i class="fa-regular fa-clock"></i></span>
-                                <select class="form-select form-control">
-                                    <option selected>17:00 - 18:00</option>
-                                    <option>18:00 - 19:00</option>
-                                    <option>19:00 - 20:00</option>
-                                </select>
+                                <input type="time" id="input-time" class="form-control" value="17:00" step="1800" required>
                             </div>
+                            <div class="form-text small text-muted">*Tìm sân trống trong vòng 1h kể từ giờ chọn.</div>
                         </div>
                         
-                        <button type="submit" class="btn btn-login-premium w-100 py-3 shadow-sm">
+                        <button type="submit" id="btn-search" class="btn btn-login-premium w-100 py-3 shadow-sm">
+                            <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
                             Tìm kiếm ngay
                         </button>
                     </form>
@@ -134,7 +129,7 @@
             <a href="#" class="btn btn-outline-secondary rounded-pill px-4 fw-bold small">Xem tất cả <i class="fa-solid fa-arrow-right ms-2"></i></a>
         </div>
 
-        <div class="row g-4">
+        <div class="row g-4" id="courts-container">
             
             {% for center in centers %}
                 <div class="col-md-6 col-lg-4">
@@ -143,7 +138,7 @@
                             {% if center.image %}
                                 <img src="{{ center.image.url }}" class="court-img-top" alt="{{ center.name }}">
                             {% else %}
-                                <img src="https://via.placeholder.com/600x400" class="court-img-top" alt="No Image">
+                                <img src="https://placehold.co/600x400/e2e8f0/64748b?text=No+Image" class="court-img-top" alt="No Image">
                             {% endif %}
 
                             {% if center.is_active %}
@@ -226,4 +221,157 @@
         </div>
     </div>
 </section>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.getElementById('fast-search-form');
+    const courtsContainer = document.getElementById('courts-container');
+    const btnSearch = document.getElementById('btn-search');
+    const spinner = btnSearch.querySelector('.spinner-border');
+    const addressSelect = document.getElementById('input-address');
+
+    // Cấu hình URL FastAPI
+    const BASE_API_URL = "http://localhost:8001/api/v1";
+
+    // --- 1. HÀM LOAD QUẬN/HUYỆN ---
+    async function loadDistricts() {
+        try {
+            const response = await fetch(`${BASE_API_URL}/districts/`);
+            if (!response.ok) return;
+            
+            const districts = await response.json();
+            
+            // Xóa các option cũ (trừ option đầu tiên)
+            while (addressSelect.options.length > 1) {
+                addressSelect.remove(1);
+            }
+
+            // Thêm option mới
+            districts.forEach(district => {
+                const option = document.createElement('option');
+                option.value = district;
+                option.textContent = district;
+                addressSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error("Lỗi tải danh sách quận:", error);
+        }
+    }
+
+    // Gọi hàm load quận ngay khi trang tải xong
+    loadDistricts();
+
+    // --- 2. XỬ LÝ TÌM KIẾM ---
+    searchForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Lấy dữ liệu
+        const date = document.getElementById('input-date').value;
+        const address = addressSelect.value;
+        const inputTime = document.getElementById('input-time').value; // Dạng "17:30"
+
+        if (!inputTime) {
+            alert("Vui lòng chọn giờ chơi!");
+            return;
+        }
+
+        // Logic tính giờ kết thúc (Mặc định tìm slot 1 tiếng)
+        // VD: Khách chọn 17:30 -> Tìm sân trống từ 17:30 đến 18:30
+        const startTime = inputTime;
+        let [hours, minutes] = inputTime.split(':').map(Number);
+        
+        // Cộng thêm 1 giờ
+        let endHours = hours + 1;
+        let endMinutes = minutes;
+        
+        // Format lại thành chuỗi HH:MM
+        const endTime = `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
+
+        // Hiệu ứng Loading
+        btnSearch.disabled = true;
+        spinner.classList.remove('d-none');
+        btnSearch.childNodes[2].textContent = " Đang tìm...";
+        
+        try {
+            // Tạo URL tìm kiếm
+            const url = new URL(`${BASE_API_URL}/search/`);
+            url.searchParams.append('date', date);
+            url.searchParams.append('start_time', startTime);
+            url.searchParams.append('end_time', endTime); // Gửi end_time tự tính
+            if (address) url.searchParams.append('address', address);
+
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Lỗi kết nối server');
+            
+            const centers = await response.json();
+            renderCourts(centers);
+            
+            // Cuộn xuống kết quả
+            document.getElementById('courts').scrollIntoView({ behavior: 'smooth' });
+
+        } catch (error) {
+            console.error(error);
+            alert('Có lỗi xảy ra. Vui lòng kiểm tra kết nối FastAPI!');
+        } finally {
+            btnSearch.disabled = false;
+            spinner.classList.add('d-none');
+            btnSearch.childNodes[2].textContent = "Tìm kiếm ngay";
+        }
+    });
+
+    // Hàm render giữ nguyên như cũ
+    function renderCourts(centers) {
+        // ... (Copy lại hàm renderCourts ở câu trả lời trước vào đây) ...
+        // Logic render HTML không thay đổi
+        if (centers.length === 0) {
+            courtsContainer.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <div class="text-muted opacity-50 mb-3"><i class="fa-regular fa-face-frown-open fa-3x"></i></div>
+                    <h5 class="text-muted">Không tìm thấy sân trống</h5>
+                    <p class="small text-secondary">Thử đổi giờ hoặc khu vực khác xem sao nhé!</p>
+                </div>`;
+            return;
+        }
+
+        let html = '';
+        centers.forEach(center => {
+            const priceFormatted = new Intl.NumberFormat('vi-VN').format(center.lowest_price);
+            const imgUrl = center.image ? center.image : 'https://placehold.co/600x400/e2e8f0/64748b?text=No+Image';
+            const availableCount = center.available_courts.length;
+
+            html += `
+            <div class="col-md-6 col-lg-4 fade-in-up">
+                <div class="card court-card h-100">
+                    <div class="court-img-wrapper">
+                        <img src="${imgUrl}" class="court-img-top" alt="${center.name}" onerror="this.src='https://placehold.co/600x400/e2e8f0/64748b?text=No+Image'">
+                        <div class="court-badge court-badge-type" style="background: rgba(16, 185, 129, 0.9);">
+                            <i class="fa-solid fa-bolt me-1"></i>Còn ${availableCount} sân
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold text-dark mb-1">${center.name}</h6>
+                        <p class="text-secondary small mb-3">
+                            <i class="fa-solid fa-location-dot me-1 text-danger"></i> ${center.address}
+                        </p>
+                        
+                        <div class="d-flex align-items-center justify-content-between pt-3 border-top border-light">
+                            <div>
+                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.65rem;">Giá từ</small>
+                                <span class="fw-bold text-primary fs-5">${priceFormatted}đ</span>
+                                <small class="text-muted">/h</small>
+                            </div>
+                            
+                            <a href="/booking/timeline/${center.id}/" class="btn btn-sm btn-login-premium rounded-pill px-4">
+                                Đặt ngay
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        });
+        courtsContainer.innerHTML = html;
+    }
+    
+});
+</script>
 {% endblock %}

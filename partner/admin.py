@@ -43,7 +43,7 @@ class AmenityAdmin(admin.ModelAdmin):
 @admin.register(BadmintonCenter)
 class BadmintonCenterAdmin(admin.ModelAdmin):
     list_display = ('name', 'partner', 'open_time', 'close_time', 'is_active', 'created_at')
-    list_filter = ('is_active', 'partner__business_name')
+    list_filter = ('is_active', 'partner__user__username')
     search_fields = ('name', 'address', 'partner__user__username')
     inlines = [CenterImageInline, PriceRuleInline] 
     filter_horizontal = ('amenities',)

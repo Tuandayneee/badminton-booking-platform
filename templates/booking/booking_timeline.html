@@ -12,7 +12,6 @@
         <div class="d-flex gap-2">
             <div class="input-group-unified bg-white shadow-sm" style="width: auto;">
                 <span class="input-group-text pe-2"><i class="fa-regular fa-calendar"></i></span>
-                
                 <input type="date" 
                        id="bookingDate" 
                        class="form-control fw-bold border-0" 
@@ -34,12 +33,16 @@
             <span class="text-secondary">Đã đặt</span>
         </div>
         <div class="d-flex align-items-center gap-2">
+            <div class="rounded" style="width: 20px; height: 20px; background-color: #fef3c7;"></div>
+            <span class="text-secondary">Đang giữ chỗ</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
             <div class="rounded" style="width: 20px; height: 20px; background-color: var(--brand-accent);"></div>
             <span class="text-secondary fw-bold">Đang chọn</span>
         </div>
         <div class="d-flex align-items-center gap-2">
             <div class="rounded" style="width: 20px; height: 20px; background-color: #6d6d6e;"></div>
-            <span class="text-secondary fw-bold">Khóa</span>
+            <span class="text-secondary fw-bold">Đã qua giờ</span>
         </div>
     </div>
 
@@ -71,9 +74,15 @@
                         data-court-name="{{ item.court_obj.name }}"
                         data-time="{{ slot.time }}"
                         data-price="{{ slot.price }}"
+                        
+                        {# --- GIỮ NGUYÊN PHẦN LOGIC KHÓA SÂN THEO THỜI GIAN CỦA BẠN TẠI ĐÂY --- #}
                         {% if slot.status == 'booked' %}
                             title="Đã có người đặt"
                             style="cursor: not-allowed; background-color: #fee2e2;"
+                            
+                        {% elif slot.status == 'locked' %}
+                            title="Đang có người giữ chỗ"
+                            style="cursor: not-allowed; background-color: #fef3c7;"
                             
                         {% elif slot.status == 'expired' or slot.status == 'completed' %}
                             title="Đã qua thời gian đặt"
@@ -82,6 +91,7 @@
                         {% else %}
                             title="Sân trống: {{ slot.time }}"
                             onclick="toggleSlot(this)"
+                            style="cursor: pointer;"
                         {% endif %}
                     >
                         {% if slot.is_golden and slot.status == 'free' %}
@@ -113,7 +123,8 @@
                 <input type="hidden" name="selected_date" id="selectedDateInput">
                 <input type="hidden" name="center_id" value="{{ center.id }}">
 
-                <button type="button" onclick="submitBooking()" class="btn btn-login-premium px-5 py-3 rounded-pill shadow-lg">
+                <button type="button" id="btnSubmit" onclick="submitBooking()" class="btn btn-login-premium px-5 py-3 rounded-pill shadow-lg">
+                    <span class="spinner-border spinner-border-sm d-none me-2"></span>
                     Tiếp theo <i class="fa-solid fa-arrow-right ms-2"></i>
                 </button>
             </form>
@@ -124,7 +135,11 @@
 <script>
     let selectedSlots = []; 
     let total = 0;
+    
+    // Lấy ID user từ Django Template (Quan trọng cho FastAPI)
+    const userId = "{{ request.user.id }}"; 
 
+    // 1. Hàm chọn/bỏ chọn ô (Giữ nguyên logic của bạn)
     function toggleSlot(element) {
         const courtId = element.getAttribute('data-court-id');
         const courtName = element.getAttribute('data-court-name');
@@ -154,17 +169,100 @@
         document.getElementById('totalHours').innerText = '(' + totalHours + 'h)';
     }
 
-    function submitBooking() {
+    // 2. Hàm Submit mới (Gọi FastAPI Lock trước khi gửi)
+    async function submitBooking() {
+        // Kiểm tra user đăng nhập
+        if (!userId || userId === "None") {
+            alert("Vui lòng đăng nhập để đặt sân!");
+            window.location.href = "/login/";
+            return;
+        }
+
+        // Kiểm tra đã chọn slot chưa
         if (selectedSlots.length === 0) {
             alert("Vui lòng chọn ít nhất một khung giờ!");
             return;
         }
-        const dateValue = document.getElementById('bookingDate').value;
-        document.getElementById('selectedDateInput').value = dateValue;
 
-        const jsonString = JSON.stringify(selectedSlots);
-        document.getElementById('bookingDataInput').value = jsonString;
-        document.getElementById('bookingForm').submit();
+        // Hiệu ứng Loading cho nút
+        const btn = document.getElementById('btnSubmit');
+        const spinner = btn.querySelector('.spinner-border');
+        btn.disabled = true;
+        spinner.classList.remove('d-none');
+
+        const dateValue = document.getElementById('bookingDate').value;
+
+        // --- GỌI FASTAPI ĐỂ KHÓA HÀNG LOẠT ---
+        // Map từng slot thành các request fetch song song
+        const lockPromises = selectedSlots.map(slot => {
+            return fetch('http://localhost:8001/api/v1/lock-slot/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    court_id: parseInt(slot.court_id),
+                    date: dateValue,
+                    start_time: slot.time,
+                    end_time: slot.time, // Gửi cho đủ model, FastAPI không dùng
+                    user_id: parseInt(userId)
+                })
+            }).then(async res => {
+                try {
+                    const data = await res.json();
+                    return { 
+                        ok: res.ok, 
+                        detail: data.detail || (res.ok ? 'Thành công' : 'Lỗi không xác định'), 
+                        time: slot.time, 
+                        court: slot.court_name 
+                    };
+                } catch (jsonErr) {
+                    // Response không phải JSON (500 error hoặc server không phản hồi đúng)
+                    return { 
+                        ok: false, 
+                        detail: `Lỗi server (HTTP ${res.status})`, 
+                        time: slot.time, 
+                        court: slot.court_name 
+                    };
+                }
+            }).catch(err => {
+                // Network error - FastAPI không chạy hoặc không kết nối được
+                return { 
+                    ok: false, 
+                    detail: 'Không thể kết nối server đặt sân. Vui lòng kiểm tra FastAPI đang chạy!', 
+                    time: slot.time, 
+                    court: slot.court_name 
+                };
+            });
+        });
+
+        try {
+            // Chờ tất cả request hoàn thành
+            const results = await Promise.all(lockPromises);
+            
+            // Lọc ra các slot bị lỗi (bị người khác khóa trước)
+            const failedLocks = results.filter(r => !r.ok);
+
+            if (failedLocks.length > 0) {
+                let msg = "Rất tiếc, các khung giờ sau vừa bị người khác đặt:\n";
+                failedLocks.forEach(f => msg += `- Sân ${f.court} (${f.time}): ${f.detail}\n`);
+                msg += "\nVui lòng bỏ chọn các ô màu đỏ và thử lại.";
+                
+                alert(msg);
+                location.reload(); // Tải lại trang để cập nhật trạng thái mới nhất
+                return;
+            }
+
+            // --- NẾU TẤT CẢ THÀNH CÔNG -> SUBMIT FORM SANG DJANGO ---
+            document.getElementById('selectedDateInput').value = dateValue;
+            // Chuyển object selectedSlots thành JSON string để gửi đi
+            document.getElementById('bookingDataInput').value = JSON.stringify(selectedSlots);
+            document.getElementById('bookingForm').submit();
+
+        } catch (e) {
+            console.error(e);
+            alert("Lỗi kết nối đến server đặt sân. Vui lòng thử lại!");
+            btn.disabled = false;
+            spinner.classList.add('d-none');
+        }
     }
 </script>
 {% endblock %}

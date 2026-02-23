@@ -75,35 +75,57 @@
                 </div>
 
                 <div class="col-md-6">
-                    <h5 class="section-title">2. Hồ sơ Doanh nghiệp</h5>
+                    <h5 class="section-title">2. Thông tin ngân hàng</h5>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted text-uppercase">Tên Sân / Đơn vị</label>
+                        <label class="form-label small fw-bold text-muted text-uppercase">Ngân hàng thụ hưởng</label>
                         <div class="input-group-unified">
                             <span class="input-group-text"><i class="fa-solid fa-building"></i></span>
-                            <input type="text" name="name_company" class="form-control" placeholder="VD: Sân Cầu Lông Tuấn Sport" required value="{{ partner_form.name_company.value|default:'' }}">
+                            
+                            <select name="bank_name" class="form-select" id="id_bank_name" onchange="updateBankBin(this)" required>
+                                <option value="" data-bin="">--- Chọn ngân hàng ---</option>
+                                
+                                {% for bank in bank_list %}
+                                    <option value="{{ bank.shortName }}" 
+                                            data-bin="{{ bank.bin }}" 
+                                            {% if partner_form.bank_name.value == bank.shortName %}selected{% endif %}>
+                                        {{ bank.shortName }} - {{ bank.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+
+                            {{ partner_form.bank_bin }} 
                         </div>
-                        <div class="text-danger small mt-1">{{ partner_form.name_company.errors.0 }}</div>
+                        <div class="text-danger small mt-1">{{ partner_form.bank_name.errors.0 }}</div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted text-uppercase">Địa chỉ kinh doanh</label>
+                        <label class="form-label small fw-bold text-muted text-uppercase">Số tài khoản ngân hàng</label>
                         <div class="input-group-unified">
                             <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
-                            <input type="text" name="address_company" class="form-control" placeholder="Số nhà, đường, phường/xã..." required value="{{ partner_form.address_company.value|default:'' }}">
+                            <input type="text" name="bank_account_number" class="form-control" placeholder="Số tài khoản ngân hàng" required value="{{ partner_form.bank_account_number.value|default:'' }}">
                         </div>
-                        <div class="text-danger small mt-1">{{ partner_form.address_company.errors.0 }}</div>
+                        <div class="text-danger small mt-1">{{ partner_form.bank_account_number.errors.0 }}</div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted text-uppercase">Người đại diện</label>
+                        <label class="form-label small fw-bold text-muted text-uppercase">Tên chủ tài khoản ngân hàng</label>
                         <div class="input-group-unified">
                             <span class="input-group-text"><i class="fa-solid fa-id-card-partner-register"></i></span>
-                            <input type="text" name="contact_person" class="form-control" placeholder="Họ và tên quản lý" required value="{{ partner_form.contact_person.value|default:'' }}">
+                            <input type="text" name="bank_account_owner" class="form-control" placeholder="Tên chủ tài khoản ngân hàng" required value="{{ partner_form.bank_account_owner.value|default:'' }}">
+                        </div>
+                        <div class="text-danger small mt-1">{{ partner_form.bank_account_owner.errors.0 }}</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Tên người đại diện liên hệ</label>
+                        <div class="input-group-unified">
+                            <span class="input-group-text"><i class="fa-solid fa-id-card-partner-register"></i></span>
+                            <input type="text" name="contact_person" class="form-control" placeholder="Tên người đại diện liên hệ" required value="{{ partner_form.contact_person.value|default:'' }}">
                         </div>
                         <div class="text-danger small mt-1">{{ partner_form.contact_person.errors.0 }}</div>
                     </div>
-                    
+
                     <div class="alert alert-light border small mt-4">
                         <i class="fa-solid fa-circle-info text-primary me-1"></i> 
                         Thông tin doanh nghiệp sẽ được xác thực trước khi sân của bạn được hiển thị.
@@ -126,5 +148,15 @@
         </form>
     </div>
 </div>
-
+<script>
+    function updateBankBin(selectElement) {
+        var selectedOption = selectElement.options[selectElement.selectedIndex];
+        var binCode = selectedOption.getAttribute('data-bin');
+        var hiddenInput = document.getElementById('id_bank_bin');
+        if (hiddenInput) {
+            hiddenInput.value = binCode;
+            console.log("Selected Bank:", selectElement.value, " - BIN:", binCode);
+        }
+    }
+</script>
 {% endblock %}
