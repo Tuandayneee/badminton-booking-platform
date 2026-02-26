@@ -94,9 +94,19 @@ class ServiceOrder(models.Model):
     """
     Hóa đơn dịch vụ (Mua nước, thuê đồ).
     """
+    class PaymentMethod(models.TextChoices):
+        CASH = 'cash', 'Tiền mặt'
+        TRANSFER = 'transfer', 'Chuyển khoản'
+
     center = models.ForeignKey(BadmintonCenter, on_delete=models.CASCADE)
     staff_name = models.CharField(max_length=100, verbose_name="Nhân viên bán")
     total_amount = models.DecimalField(max_digits=12, decimal_places=0, verbose_name="Tổng tiền hàng")
+    payment_method = models.CharField(
+        max_length=20, 
+        choices=PaymentMethod.choices, 
+        default=PaymentMethod.CASH, 
+        verbose_name="Phương thức thanh toán"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
 class ServiceOrderItem(models.Model):
@@ -108,8 +118,15 @@ class ServiceOrderItem(models.Model):
 
 class Customer(models.Model):
     """
-    Khách hàng đặt sân
+    Khách hàng đặt sân (per-center tracking)
     """
+    user = models.ForeignKey(
+        'users.User',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='center_customers',
+        verbose_name="Tài khoản"
+    )
     center = models.ForeignKey(BadmintonCenter, on_delete=models.CASCADE, related_name='customers')
     name = models.CharField(max_length=50, verbose_name="Tên khách hàng")
     email = models.EmailField(max_length=50, verbose_name="Email")

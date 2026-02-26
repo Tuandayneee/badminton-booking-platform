@@ -7,33 +7,45 @@
 {% block content %}
 <div class="container-fluid px-4 py-4">
     
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center pb-2 mb-4 gap-3">
+    <!-- HEADER -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center pb-2 mb-4 gap-2 fade-in-up">
         <div>
             <h3 class="fw-bold text-dark mb-0 ls-tight">Dashboard</h3>
-            <p class="text-secondary small mb-0">Xin chào, <span class="fw-bold text-dark">{{ user.username }}</span>! Hôm nay bạn có 3 lịch mới.</p>
+            <p class="text-secondary small mb-0">Xin chào, <span class="fw-bold text-dark">{{ user.full_name|default:user.username }}</span>! Tổng quan hoạt động hôm nay.</p>
         </div>
         
-        <div class="d-flex gap-2">
-            <button type="button" class="btn btn-pro btn-pro-light shadow-sm text-secondary">
-                <i class="fa-solid fa-filter"></i> Lọc
-            </button>
-            <button type="button" class="btn btn-pro btn-pro-primary shadow-sm">
-                <i class="fa-solid fa-plus"></i> Tạo Lịch Nhanh
-            </button>
+        <div class="d-flex gap-2 flex-shrink-0">
+            <a href="{% url 'partner_transactions' %}" class="btn btn-pro btn-pro-light shadow-sm text-secondary">
+                <i class="fa-solid fa-credit-card"></i> Giao dịch
+            </a>
+            <a href="{% url 'revenue_management' %}" class="btn btn-pro btn-pro-primary shadow-sm">
+                <i class="fa-solid fa-chart-line"></i> Doanh thu
+            </a>
         </div>
     </div>
 
-    <div class="row g-4 mb-4">
+    <!-- STAT CARDS -->
+    <div class="row g-4 mb-4 fade-in-up" style="animation-delay: 0.05s;">
         <div class="col-xl-3 col-md-6">
             <div class="card-modern stat-card h-100 p-4 border-start border-4 border-primary">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <p class="text-secondary mb-1 small text-uppercase fw-bold ls-tight">Doanh thu ngày</p>
-                        <h3 class="mb-0 fw-bold text-dark">2.500.000<small class="fs-6 text-muted ms-1">đ</small></h3>
+                        <h3 class="mb-0 fw-bold text-dark">{{ total_today_revenue|intcomma }}<small class="fs-6 text-muted ms-1">đ</small></h3>
                         <div class="mt-2">
+                            {% if revenue_change > 0 %}
                             <span class="badge badge-soft badge-soft-success">
-                                <i class="fa-solid fa-arrow-up me-1"></i> 12.5%
+                                <i class="fa-solid fa-arrow-up me-1"></i>{{ revenue_change }}%
                             </span>
+                            {% elif revenue_change < 0 %}
+                            <span class="badge badge-soft badge-soft-danger">
+                                <i class="fa-solid fa-arrow-down me-1"></i>{{ revenue_change }}%
+                            </span>
+                            {% else %}
+                            <span class="badge badge-soft badge-soft-secondary">
+                                <i class="fa-solid fa-minus me-1"></i>0%
+                            </span>
+                            {% endif %}
                             <span class="small text-muted ms-1">so với hôm qua</span>
                         </div>
                     </div>
@@ -48,12 +60,10 @@
             <div class="card-modern stat-card h-100 p-4 border-start border-4 border-success">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <p class="text-secondary mb-1 small text-uppercase fw-bold ls-tight">Lịch đặt mới</p>
-                        <h3 class="mb-0 fw-bold text-dark">12 <small class="fs-6 text-muted ms-1">lượt</small></h3>
-                        <div class="mt-2">
-                            <span class="badge badge-soft badge-soft-success">
-                                <span class="badge-dot"></span> Đã xác nhận
-                            </span>
+                        <p class="text-secondary mb-1 small text-uppercase fw-bold ls-tight">Lịch đặt hôm nay</p>
+                        <h3 class="mb-0 fw-bold text-dark">{{ today_bookings_count }} <small class="fs-6 text-muted ms-1">lượt</small></h3>
+                        <div class="mt-2 text-muted small">
+                            Ngày {{ today|date:"d/m/Y" }}
                         </div>
                     </div>
                     <div class="icon-shape bg-soft-success">
@@ -67,10 +77,10 @@
             <div class="card-modern stat-card h-100 p-4 border-start border-4 border-warning">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <p class="text-secondary mb-1 small text-uppercase fw-bold ls-tight">Sân trống</p>
-                        <h3 class="mb-0 fw-bold text-dark">3 <small class="fs-6 text-muted ms-1">sân</small></h3>
+                        <p class="text-secondary mb-1 small text-uppercase fw-bold ls-tight">Tổng sân</p>
+                        <h3 class="mb-0 fw-bold text-dark">{{ total_courts }} <small class="fs-6 text-muted ms-1">sân</small></h3>
                         <div class="mt-2 text-muted small">
-                            Tổng số: <span class="fw-bold text-dark">8 sân</span>
+                            {{ centers|length }} trung tâm
                         </div>
                     </div>
                     <div class="icon-shape bg-soft-warning">
@@ -84,89 +94,187 @@
             <div class="card-modern stat-card h-100 p-4 border-start border-4 border-danger">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <p class="text-secondary mb-1 small text-uppercase fw-bold ls-tight">Khách Check-in</p>
-                        <h3 class="mb-0 fw-bold text-dark">2 <small class="fs-6 text-muted ms-1">khách</small></h3>
+                        <p class="text-secondary mb-1 small text-uppercase fw-bold ls-tight">Chờ xác nhận</p>
+                        <h3 class="mb-0 fw-bold text-dark">{{ pending_transactions }} <small class="fs-6 text-muted ms-1">giao dịch</small></h3>
                         <div class="mt-2">
+                            {% if pending_transactions > 0 %}
                             <span class="badge badge-soft badge-soft-danger">
                                 <span class="badge-dot"></span> Cần xử lý
                             </span>
+                            {% else %}
+                            <span class="badge badge-soft badge-soft-success">
+                                <span class="badge-dot"></span> Đã xử lý hết
+                            </span>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="icon-shape bg-soft-danger">
-                        <i class="fa-solid fa-users"></i>
+                        <i class="fa-solid fa-clock-rotate-left"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row g-4">
+    <!-- CHART + UPCOMING -->
+    <div class="row g-4 fade-in-up" style="animation-delay: 0.1s;">
+        <!-- Biểu đồ doanh thu 7 ngày -->
         <div class="col-lg-8">
             <div class="card-modern h-100">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-                    <h6 class="mb-0 fw-bold text-dark">Doanh thu tuần này</h6>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-pro-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            7 ngày qua
-                        </button>
-                        <ul class="dropdown-menu border-0 shadow-sm">
-                            <li><a class="dropdown-item small" href="#">Tuần này</a></li>
-                            <li><a class="dropdown-item small" href="#">Tháng này</a></li>
-                        </ul>
-                    </div>
+                <div class="d-flex justify-content-between align-items-center py-3 px-4" style="border-bottom: 1px solid var(--border-color);">
+                    <h6 class="mb-0 fw-bold text-dark">
+                        <i class="fa-solid fa-chart-area me-2" style="color: var(--accent-color);"></i>Doanh thu 7 ngày qua
+                    </h6>
+                    <a href="{% url 'revenue_management' %}" class="text-decoration-none fw-bold small" style="color: var(--accent-color);">
+                        Xem chi tiết <i class="fa-solid fa-arrow-right ms-1"></i>
+                    </a>
                 </div>
-                <div class="card-body">
-                    <canvas id="revenueChart" height="300"></canvas>
+                <div class="p-4" style="height: 320px;">
+                    <canvas id="revenueChart"></canvas>
                 </div>
             </div>
         </div>
 
+        <!-- Lịch sắp tới -->
         <div class="col-lg-4">
             <div class="card-modern h-100">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-                    <h6 class="mb-0 fw-bold text-dark">Sắp tới giờ</h6>
-                    <a href="#" class="text-decoration-none fw-bold small" style="color: var(--accent-color);">Xem tất cả</a>
+                <div class="d-flex justify-content-between align-items-center py-3 px-4" style="border-bottom: 1px solid var(--border-color);">
+                    <h6 class="mb-0 fw-bold text-dark">
+                        <i class="fa-regular fa-calendar me-2" style="color: var(--accent-color);"></i>Lịch hôm nay
+                    </h6>
+                    <span class="badge badge-soft badge-soft-secondary">{{ upcoming_bookings|length }}</span>
                 </div>
                 <div class="list-group list-group-flush">
-                    
-                    <div class="list-group-item list-group-item-action border-0 d-flex align-items-center py-3 px-4">
-                        <div class="avatar-circle bg-soft-primary me-3">NA</div>
-                        <div class="flex-grow-1">
-                            <h6 class="mb-0 fw-bold text-dark fs-6">Nguyễn Văn A</h6>
-                            <div class="small text-muted mt-1 d-flex align-items-center gap-2">
-                                <span><i class="fa-regular fa-clock text-warning"></i> 17:00</span>
-                                <span class="badge badge-soft badge-soft-secondary py-1 px-2" style="font-size: 0.65rem;">Sân 1</span>
+                    {% if upcoming_bookings %}
+                        {% for booking in upcoming_bookings %}
+                        <div class="list-group-item list-group-item-action border-0 d-flex align-items-center py-3 px-4">
+                            <div class="avatar-circle bg-soft-{% cycle 'primary' 'success' 'warning' 'info' 'danger' %} me-3">
+                                {{ booking.user.username|make_list|first|upper }}{{ booking.user.username|make_list|last|upper }}
                             </div>
-                        </div>
-                        <span class="badge badge-soft badge-soft-secondary">Chưa đến</span>
-                    </div>
-
-                    <div class="list-group-item list-group-item-action border-0 d-flex align-items-center py-3 px-4">
-                        <div class="avatar-circle bg-soft-success me-3">TB</div>
-                        <div class="flex-grow-1">
-                            <h6 class="mb-0 fw-bold text-dark fs-6">Trần Thị B</h6>
-                            <div class="small text-muted mt-1 d-flex align-items-center gap-2">
-                                <span><i class="fa-regular fa-clock text-warning"></i> 18:00</span>
-                                <span class="badge badge-soft badge-soft-secondary py-1 px-2" style="font-size: 0.65rem;">Sân 3</span>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0 fw-bold text-dark fs-6">
+                                    {% if booking.customer %}
+                                        {{ booking.customer.name }}
+                                    {% else %}
+                                        {{ booking.user.full_name|default:booking.user.username }}
+                                    {% endif %}
+                                </h6>
+                                <div class="small text-muted mt-1 d-flex align-items-center gap-2">
+                                    <span><i class="fa-regular fa-clock text-warning"></i> {{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</span>
+                                    <span class="badge badge-soft badge-soft-secondary py-1 px-2" style="font-size: 0.65rem;">{{ booking.court.name }}</span>
+                                </div>
                             </div>
+                            {% if booking.status == 'confirmed' or booking.status == 'completed' %}
+                                <span class="badge badge-soft badge-soft-success">Đã TT</span>
+                            {% elif booking.status == 'waiting_verify' %}
+                                <span class="badge badge-soft badge-soft-warning">Chờ TT</span>
+                            {% else %}
+                                <span class="badge badge-soft badge-soft-secondary">Chờ</span>
+                            {% endif %}
                         </div>
-                        <span class="badge badge-soft badge-soft-success">Đã cọc</span>
-                    </div>
-
-                    <div class="list-group-item list-group-item-action border-0 d-flex align-items-center py-3 px-4">
-                        <div class="avatar-circle bg-soft-info me-3">LH</div>
-                        <div class="flex-grow-1">
-                            <h6 class="mb-0 fw-bold text-dark fs-6">Lê Hoàng</h6>
-                            <div class="small text-muted mt-1 d-flex align-items-center gap-2">
-                                <span><i class="fa-regular fa-clock text-warning"></i> 19:30</span>
-                                <span class="badge badge-soft badge-soft-secondary py-1 px-2" style="font-size: 0.65rem;">Sân VIP</span>
-                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fa-regular fa-calendar-xmark fa-2x text-muted opacity-50 mb-2"></i>
+                            <p class="text-muted small mb-0">Chưa có lịch đặt sân hôm nay.</p>
                         </div>
-                        <span class="badge badge-soft badge-soft-primary">Thanh toán</span>
-                    </div>
-
+                    {% endif %}
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- TỶ TRỌNG THANH TOÁN (TIỀN MẶT VS CHUYỂN KHOẢN) -->
+    <div class="row g-4 mt-2 fade-in-up" style="animation-delay: 0.12s;">
+        <div class="col-12">
+            <div class="card-modern h-100">
+                <div class="row g-0 h-100">
+                    <div class="col-md-5 border-end border-light d-flex flex-column">
+                        <div class="p-4 flex-grow-1 d-flex flex-column align-items-center justify-content-center">
+                            <h6 class="fw-bold text-dark w-100 mb-4 text-center">
+                                <i class="fa-solid fa-chart-pie me-2" style="color: var(--accent-color);"></i>Tỷ trọng thanh toán tháng này
+                            </h6>
+                            <div style="height: 200px; width: 100%; position: relative;">
+                                <canvas id="paymentMethodChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-7 d-flex align-items-center p-4">
+                        <div class="w-100">
+                            <div class="row text-center g-4">
+                                <div class="col-6 border-end border-light">
+                                    <div class="mb-3">
+                                        <i class="fa-solid fa-money-bill-wave fa-2x text-success" style="opacity: 0.8;"></i>
+                                    </div>
+                                    <h6 class="text-secondary small fw-bold text-uppercase tracking-wider mb-2">Tiền mặt</h6>
+                                    <h3 class="fw-bold text-success mb-1">{{ total_cash_month|intcomma }}đ</h3>
+                                    <span class="badge badge-soft badge-soft-success fw-bold rounded-pill px-3 py-1 mt-2">
+                                        Tại quầy & Đặt sân
+                                    </span>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <i class="fa-solid fa-building-columns fa-2x text-primary" style="opacity: 0.8;"></i>
+                                    </div>
+                                    <h6 class="text-secondary small fw-bold text-uppercase tracking-wider mb-2">Chuyển khoản</h6>
+                                    <h3 class="fw-bold text-primary mb-1">{{ total_transfer_month|intcomma }}đ</h3>
+                                    <span class="badge badge-soft badge-soft-primary fw-bold rounded-pill px-3 py-1 mt-2">
+                                        Hệ thống Đặt sân
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUICK LINKS -->
+    <div class="row g-3 mt-1 fade-in-up" style="animation-delay: 0.15s;">
+        <div class="col-6 col-lg-3">
+            <a href="{% url 'centers_management' %}" class="text-decoration-none">
+                <div class="card-modern p-3 p-md-4 text-center h-100 stat-card">
+                    <div class="icon-shape bg-soft-primary mx-auto mb-2">
+                        <i class="fa-solid fa-building"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1 small">Trung tâm</h6>
+                    <p class="text-muted small mb-0" style="font-size: 0.75rem;">Quản lý sân & lịch</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-lg-3">
+            <a href="{% url 'partner_transactions' %}" class="text-decoration-none">
+                <div class="card-modern p-3 p-md-4 text-center h-100 stat-card">
+                    <div class="icon-shape bg-soft-success mx-auto mb-2">
+                        <i class="fa-solid fa-credit-card"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1 small">Giao dịch</h6>
+                    <p class="text-muted small mb-0" style="font-size: 0.75rem;">Xác nhận thanh toán</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-lg-3">
+            <a href="{% url 'service_orders' %}" class="text-decoration-none">
+                <div class="card-modern p-3 p-md-4 text-center h-100 stat-card">
+                    <div class="icon-shape bg-soft-warning mx-auto mb-2">
+                        <i class="fa-solid fa-file-invoice"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1 small">Hóa đơn DV</h6>
+                    <p class="text-muted small mb-0" style="font-size: 0.75rem;">Hóa đơn dịch vụ</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-lg-3">
+            <a href="{% url 'revenue_management' %}" class="text-decoration-none">
+                <div class="card-modern p-3 p-md-4 text-center h-100 stat-card">
+                    <div class="icon-shape bg-soft-danger mx-auto mb-2">
+                        <i class="fa-solid fa-chart-pie"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1 small">Doanh thu</h6>
+                    <p class="text-muted small mb-0" style="font-size: 0.75rem;">Báo cáo tổng hợp</p>
+                </div>
+            </a>
         </div>
     </div>
 </div>
@@ -177,25 +285,28 @@
     document.addEventListener("DOMContentLoaded", function() {
         const ctx = document.getElementById('revenueChart').getContext('2d');
         
-        // Tạo gradient màu xanh dương (khớp với theme)
-        let gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.2)'); // Màu accent (#3b82f6) mờ
+        let gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.15)');
         gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+
+        const chartLabels = {{ chart_labels|safe }};
+        const chartData = {{ chart_data|safe }};
 
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+                labels: chartLabels,
                 datasets: [{
                     label: 'Doanh thu (VNĐ)',
-                    data: [1500000, 2200000, 1800000, 2400000, 2100000, 3500000, 4200000],
+                    data: chartData,
                     backgroundColor: gradient,
-                    borderColor: '#3b82f6', // Màu accent chủ đạo
-                    borderWidth: 2,
+                    borderColor: '#3b82f6',
+                    borderWidth: 2.5,
                     pointBackgroundColor: '#fff',
                     pointBorderColor: '#3b82f6',
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
                     fill: true,
                     tension: 0.4
                 }]
@@ -206,12 +317,17 @@
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: '#0f172a', // Màu primary background
+                        backgroundColor: '#0f172a',
                         titleColor: '#fff',
                         bodyColor: '#fff',
-                        padding: 10,
+                        padding: 12,
                         cornerRadius: 8,
-                        displayColors: false
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return new Intl.NumberFormat('vi-VN').format(context.raw) + 'đ';
+                            }
+                        }
                     }
                 },
                 scales: {
@@ -223,7 +339,12 @@
                         },
                         ticks: {
                             font: { size: 11, family: "'Segoe UI', sans-serif" },
-                            color: '#64748b'
+                            color: '#64748b',
+                            callback: function(value) {
+                                if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M';
+                                if (value >= 1000) return (value / 1000) + 'K';
+                                return value;
+                            }
                         }
                     },
                     x: {
@@ -236,6 +357,74 @@
                 }
             }
         });
+        // Biểu đồ Phương thức thanh toán (Doughnut)
+        const paymentCtx = document.getElementById('paymentMethodChart').getContext('2d');
+        const cashValue = {{ total_cash_month|default:0 }};
+        const transferValue = {{ total_transfer_month|default:0 }};
+
+        if (cashValue === 0 && transferValue === 0) {
+            new Chart(paymentCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Chưa có dữ liệu'],
+                    datasets: [{
+                        data: [1],
+                        backgroundColor: ['#e2e8f0'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: { tooltip: { enabled: false }, legend: { display: false } }
+                }
+            });
+        } else {
+            new Chart(paymentCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Tiền mặt', 'Chuyển khoản'],
+                    datasets: [{
+                        data: [cashValue, transferValue],
+                        backgroundColor: ['#10b981', '#3b82f6'],
+                        hoverBackgroundColor: ['#059669', '#2563eb'],
+                        borderWidth: 0,
+                        hoverOffset: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '72%',
+                    plugins: {
+                        legend: { 
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: { family: "'Nunito', sans-serif", size: 12, weight: 'bold' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const total = cashValue + transferValue;
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return ` ${context.label}: ${new Intl.NumberFormat('vi-VN').format(value)}đ (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
     });
 </script>
 {% endblock %}

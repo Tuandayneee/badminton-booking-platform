@@ -13,3 +13,6 @@ pyjwt
 cryptography
 celery==5.3.6
 redis==5.0.1
+python-dotenv>=1.0.0
+gunicorn>=21.2.0
+whitenoise>=6.5.0

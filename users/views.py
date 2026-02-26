@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
 from users.models import PartnerProfile, User, CustomerProfile
 from users.forms import PartnerRegistrationForm, RegistrationForm
 from users.forms import LoginForm
+from booking.models import Booking
+from django.db.models import Sum, Count
 
 from django.db import transaction
 
@@ -30,6 +32,10 @@ def login_view(request):
                 login(request, user)
                 messages.success(request, f"Chào mừng Đối tác {user.username} quay lại!")
                 return redirect('partner_dashboard')
+            elif user.role == User.Role.STAFF:
+                login(request, user)
+                messages.success(request, f"Chào mừng Nhân viên {user.full_name or user.username}!")
+                return redirect('pos_sales')
         else:
             messages.warning(request, "Tài khoản hoặc mật khẩu không đúng.")
     context = {
@@ -129,3 +135,116 @@ def register_partner(request):
 def login_social_account(request):
     
     return redirect('home')
+
+
+@login_required
+def change_password(request):
+    """Đổi mật khẩu cho tất cả role"""
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, "Đổi mật khẩu thành công!")
+            if user.role == User.Role.PARTNER:
+                return redirect('partner_dashboard')
+            elif user.role == User.Role.STAFF:
+                return redirect('pos_sales')
+            else:
+                return redirect('home')
+        else:
+            messages.error(request, "Vui lòng kiểm tra lại thông tin.")
+    else:
+        form = PasswordChangeForm(request.user)
+
+    
+    if request.user.role == User.Role.PARTNER:
+        template = 'partner/change_password.html'
+    else:
+        template = 'user/change_password.html'
+
+    return render(request, template, {'form': form})
+
+
+@login_required
+def customer_profile(request):
+    """Hồ sơ cá nhân của customer"""
+    user = request.user
+    
+    if request.method == 'POST':
+        full_name = request.POST.get('full_name', '').strip()
+        email = request.POST.get('email', '').strip()
+        phone_number = request.POST.get('phone_number', '').strip()
+        
+        if full_name:
+            user.full_name = full_name
+        if email:
+            if User.objects.filter(email=email).exclude(pk=user.pk).exists():
+                messages.error(request, "Email này đã được sử dụng.")
+            else:
+                user.email = email
+        if phone_number:
+            user.phone_number = phone_number
+        
+        user.save()
+        messages.success(request, "Cập nhật hồ sơ thành công!")
+        return redirect('customer_profile')
+    
+    bookings = Booking.objects.filter(user=user)
+    stats = bookings.aggregate(
+        total_bookings=Count('id'),
+        total_spent=Sum('total_price'),
+    )
+    completed_count = bookings.filter(status=Booking.Status.COMPLETED).count()
+    
+    try:
+        profile = user.customer_profile
+    except CustomerProfile.DoesNotExist:
+        profile = CustomerProfile.objects.create(user=user)
+    
+    context = {
+        'profile': profile,
+        'total_bookings': stats['total_bookings'] or 0,
+        'total_spent': stats['total_spent'] or 0,
+        'completed_count': completed_count,
+    }
+    return render(request, 'user/profile.html', context)
+
+
+@login_required
+def customer_booking_history(request):
+    """Lịch sử đặt sân của customer"""
+    user = request.user
+    tab = request.GET.get('tab', 'all')
+    
+    bookings = Booking.objects.filter(user=user).select_related(
+        'court', 'court__center'
+    ).order_by('-date', '-start_time')
+    
+    if tab == 'upcoming':
+        bookings = bookings.filter(status__in=[
+            Booking.Status.PENDING, 
+            Booking.Status.WAITING_VERIFY,
+            Booking.Status.CONFIRMED
+        ])
+    elif tab == 'completed':
+        bookings = bookings.filter(status=Booking.Status.COMPLETED)
+    elif tab == 'cancelled':
+        bookings = bookings.filter(status=Booking.Status.ADMIN_CANCELLED)
+    
+    all_bookings = Booking.objects.filter(user=user)
+    tab_counts = {
+        'all': all_bookings.count(),
+        'upcoming': all_bookings.filter(status__in=[
+            Booking.Status.PENDING, Booking.Status.WAITING_VERIFY, Booking.Status.CONFIRMED
+        ]).count(),
+        'completed': all_bookings.filter(status=Booking.Status.COMPLETED).count(),
+        'cancelled': all_bookings.filter(status=Booking.Status.ADMIN_CANCELLED).count(),
+    }
+    
+    context = {
+        'bookings': bookings,
+        'current_tab': tab,
+        'tab_counts': tab_counts,
+    }
+    return render(request, 'user/booking_history.html', context)

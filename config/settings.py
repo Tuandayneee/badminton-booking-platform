@@ -12,20 +12,23 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
+# Load .env file
+load_dotenv(BASE_DIR / '.env')
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-k*dy$kiauqg!&2=j2yn-&vj%lo2i0aaw!75gh#gr$#9fl8l!zp'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key-change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:8000,http://127.0.0.1:8000').split(',')
 
 
 # Application definition
@@ -43,6 +46,7 @@ INSTALLED_APPS = [
     'booking',
     'home',
     'partner',
+    'staffs',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -53,6 +57,7 @@ INSTALLED_APPS = [
 SITE_ID = 1
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -87,32 +92,16 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-import os
-
-# Kiểm tra xem có đang chạy trong Docker không (dựa vào biến môi trường trong docker-compose)
-if os.environ.get('DB_HOST'):
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('DB_NAME', 'badminton_db'),
-            'USER': os.environ.get('DB_USER', 'postgres'),
-            'PASSWORD': os.environ.get('DB_PASS', '123456'),
-            'HOST': os.environ.get('DB_HOST', 'db'), # 'db' là tên service trong docker-compose
-            'PORT': '5432',
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME', 'badminton_db'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASS', ''),
+        'HOST': os.environ.get('DB_HOST', 'db'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
-else:
-    
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'badminton_db',  
-            'USER': 'postgres',      
-            'PASSWORD': '123456',   
-            'HOST': 'localhost',     
-            'PORT': '5432',          
-        }
-    }
+}
 
 
 
@@ -142,7 +131,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Ho_Chi_Minh'
 
 USE_I18N = True
 
@@ -157,6 +146,7 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')    
 PHONENUMBER_DEFAULT_REGION = "VN"
@@ -171,8 +161,7 @@ SOCIALACCOUNT_PROVIDERS = {
         ],
         'AUTH_PARAMS': {
             'access_type': 'online',
-        },
-        'OAUTH_PKCE_ENABLED': True,
+        }
     },
     'github': {
         'SCOPE': [
@@ -182,6 +171,14 @@ SOCIALACCOUNT_PROVIDERS = {
         ],
     }
 }
+
+# Chỉ thêm APP config khi có credentials
+if os.environ.get('GOOGLE_CLIENT_ID'):
+    SOCIALACCOUNT_PROVIDERS['google']['APP'] = {
+        'client_id': os.environ.get('GOOGLE_CLIENT_ID'),
+        'secret': os.environ.get('GOOGLE_CLIENT_SECRET'),
+        'key': ''
+    }
 SOCIALACCOUNT_AUTO_SIGNUP = True
 
 ACCOUNT_PASSWORD_REQUIRED = False 
@@ -199,29 +196,39 @@ LOGOUT_REDIRECT_URL = '/'
 ACCOUNT_ADAPTER = 'users.adapters.MyAccountAdapter'
 
 
-
-TIME_ZONE = 'Asia/Ho_Chi_Minh'  
-USE_TZ = True
-
-
-
-
-#Redis for Celery
-CELERY_BROKER_URL = 'redis://redis:6379/0'  
-CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+# Redis for Celery
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
 CELERY_TIMEZONE = 'Asia/Ho_Chi_Minh'
 
 
+# Email
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'letuan16112004@gmail.com'
-EMAIL_HOST_PASSWORD = 'jljo ebef mcpv ogme'
-DEFAULT_FROM_EMAIL = 'Badminton Pro <noreply@badmintonpro.vn>'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Badminton Pro <noreply@badmintonpro.vn>')
 
 
 
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+WHITENOISE_MIMETYPES = {
+    '/media': MEDIA_ROOT
+}
+
+# Mặc định primary key 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Cấu hình Cache sử dụng Redis chung cho tất cả worker
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': os.environ.get('REDIS_URL', 'redis://redis:6379/1'),
+    }
+}
 
 CELERY_BEAT_SCHEDULE = {
     'cleanup-expired-bookings-every-1-minute': {
@@ -229,3 +236,4 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': 60.0,
     },
 }
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True

@@ -19,7 +19,7 @@ def send_booking_confirmation_email(user_email, booking_code, center_name, court
         'court_name': court_name,
         'time_slots': time_slots_str,
         'total_price': formatted_price,
-        'support_phone': '0988.888.888', # Ví dụ
+        'support_phone': '0346.083.728', 
     }
     html_content = render_to_string('emails/booking_success.html', context)
     
@@ -38,11 +38,11 @@ def send_booking_confirmation_email(user_email, booking_code, center_name, court
         email.attach_alternative(html_content, "text/html")
         
         email.send()
-        return f"Email sent to {user_email}"
+        return f"Đã gửi email đến {user_email}"
         
     except Exception as e:
-        print(f"Error sending email: {e}")
-        return f"Failed: {str(e)}"
+        print(f"Lỗi gửi email: {e}")
+        return f"Thất bại: {str(e)}"
     
 @shared_task
 def cancel_expired_bookings():
@@ -51,7 +51,7 @@ def cancel_expired_bookings():
     """
     
 
-    expiration_time = timezone.now() - timedelta(minutes=1)
+    expiration_time = timezone.now() - timedelta(minutes=10)
     expired_bookings = Booking.objects.filter(
         status=Booking.Status.PENDING,
         created_at__lt=expiration_time
@@ -60,4 +60,4 @@ def cancel_expired_bookings():
     count = expired_bookings.count()
     if count > 0:
         expired_bookings.update(status=Booking.Status.ADMIN_CANCELLED)  
-    return f"Cleaned {count} bookings"
+    return f"Đã hủy {count} đơn đặt sân hết hạn"

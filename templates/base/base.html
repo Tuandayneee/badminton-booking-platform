@@ -19,7 +19,7 @@
     {% block navbar %}
     <nav class="navbar navbar-expand-lg navbar-light fixed-top navbar-glass shadow-sm">
         <div class="container">
-            <a class="navbar-brand fs-3 d-flex align-items-center" href="{% url 'home' %}"> 
+            <a class="navbar-brand fs-3 d-flex align-items-center" href="{% if user.is_authenticated %}{% if user.role == 'partner' %}{% url 'partner_dashboard' %}{% elif user.role == 'staff' %}{% url 'pos_sales' %}{% else %}{% url 'home' %}{% endif %}{% else %}{% url 'home' %}{% endif %}"> 
                 <i class="fa-solid fa-shuttlecock me-2 text-primary"></i>Badminton Pro
             </a>
             
@@ -37,6 +37,18 @@
                             <li class="nav-item">
                                 <a class="btn btn-outline-primary rounded-pill px-4 fw-bold" href="{% url 'partner_dashboard' %}">
                                     <i class="fa-solid fa-chart-line me-2"></i>Quản lý sân
+                                </a>
+                            </li>
+
+                        {% elif user.role == 'staff' %}
+                            <li class="nav-item">
+                                <a class="btn btn-outline-success rounded-pill px-4 fw-bold" href="{% url 'pos_sales' %}">
+                                    <i class="fa-solid fa-cash-register me-2"></i>Bán hàng
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link fw-semibold" href="{% url 'staff_sales_report' %}">
+                                    <i class="fa-solid fa-chart-bar me-1"></i>Doanh thu
                                 </a>
                             </li>
 
@@ -66,15 +78,21 @@
                                 {% else %}
                                     <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=0d6efd&color=fff&bold=true" class="rounded-circle border" width="32"> 
                                 {% endif %}
-                                <span class="fw-bold text-dark small d-none d-md-block">{{ user.username }}</span>
+                                <span class="fw-bold text-dark small d-none d-md-block">{{ user.full_name|default:user.username }}</span>
                             </a>
                             
                             <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-3 p-2 animate-slide-down">
                                 {% if user.role == 'partner' %}
                                     <li><a class="dropdown-item rounded-3 py-2" href="{% url 'partner_dashboard' %}"><i class="fa-solid fa-gauge me-2 text-primary"></i>Dashboard</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2" href="{% url 'change_password' %}"><i class="fa-solid fa-key me-2 text-warning"></i>Đổi mật khẩu</a></li>
+                                {% elif user.role == 'staff' %}
+                                    <li><a class="dropdown-item rounded-3 py-2" href="{% url 'pos_sales' %}"><i class="fa-solid fa-cash-register me-2 text-success"></i>Bán hàng</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2" href="{% url 'staff_sales_report' %}"><i class="fa-solid fa-chart-bar me-2 text-primary"></i>Doanh thu</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2" href="{% url 'change_password' %}"><i class="fa-solid fa-key me-2 text-warning"></i>Đổi mật khẩu</a></li>
                                 {% else %}
-                                    <li><a class="dropdown-item rounded-3 py-2" href="#"><i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>Lịch sử đặt sân</a></li>
-                                    <li><a class="dropdown-item rounded-3 py-2" href="#"><i class="fa-solid fa-user-gear me-2 text-info"></i>Hồ sơ cá nhân</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2" href="{% url 'customer_booking_history' %}"><i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>Lịch sử đặt sân</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2" href="{% url 'customer_profile' %}"><i class="fa-solid fa-user-gear me-2 text-info"></i>Hồ sơ cá nhân</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2" href="{% url 'change_password' %}"><i class="fa-solid fa-key me-2 text-warning"></i>Đổi mật khẩu</a></li>
                                 {% endif %}
                                 
                                 <li><hr class="dropdown-divider"></li>

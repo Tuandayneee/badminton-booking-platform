@@ -1,73 +1,95 @@
-version: "3.8"
-
 services:
-  # 1. DATABASE (Tự động tải và chạy Postgres)
+  # 1. DATABASE
   db:
     image: postgres:15
     restart: always
     environment:
-      - POSTGRES_DB=badminton_db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=${POSTGRES_DB:-badminton_db}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
-      - postgres_data:/var/lib/postgresql/data # Lưu dữ liệu để tắt máy không mất
+      - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-  worker:
-    build: .
-    command: celery -A config worker --loglevel=info
-    volumes:
-      - .:/app
-    depends_on:
-      - redis
-      - db
-  # 2. REDIS (Tự động chạy Redis)
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. REDIS
   redis:
     image: redis:alpine
     restart: always
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  beat:
-    build: .
-    command: celery -A config beat -l info
-    volumes:
-      - .:/app
-    depends_on:
-      - redis
-      - db
-
-  # 3. WEB (Django App của bạn)
+  # 3. WEB (Django)
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    image: badmintonpro-web:latest
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --reload
     volumes:
       - .:/app
     ports:
       - "8000:8000"
     depends_on:
-      - db
-      - redis
-    environment:
-      - DB_HOST=db
-      - DB_NAME=badminton_db
-      - DB_USER=postgres
-      - DB_PASS=123456
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
 
+  # 4. CELERY WORKER
   celery:
-    build: .
-    command: celery -A config worker -l info
+    image: badmintonpro-web:latest
+    command: celery -A config worker --loglevel=info
     volumes:
       - .:/app
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+
+  # 5. CELERY BEAT
+  beat:
+    image: badmintonpro-web:latest
+    command: celery -A config beat -l info
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+
+  # 6. FASTAPI
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile.fastapi
+    command: uvicorn staffs.fastapi_service.main:app --host 0.0.0.0 --port 8001 --reload
+    ports:
+      - "8001:8001"
     environment:
-      - DEBUG=1
-      - DB_HOST=db
-      - DB_NAME=badminton_db
-      - DB_USER=postgres
-      - DB_PASS=123456
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-badminton_db}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
   postgres_data:

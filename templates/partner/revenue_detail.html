@@ -52,7 +52,6 @@
                     <div>
                         <p class="text-secondary mb-1 small text-uppercase fw-bold ls-tight">Tiền mặt</p>
                         <h3 class="mb-0 fw-bold text-dark">{{ cash_revenue|floatformat:0|intcomma }}<small class="fs-6 text-muted">đ</small></h3>
-                        <div class="mt-2 text-secondary small">~40% (dự đoán)</div>
                     </div>
                     <div class="icon-shape bg-soft-success">
                         <i class="fa-solid fa-money-bill-wave"></i>
@@ -65,9 +64,8 @@
             <div class="card-modern h-100 p-4 border-start border-4 border-info">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <p class="text-secondary mb-1 small text-uppercase fw-bold ls-tight">Chuyển khoản / QR</p>
+                        <p class="text-secondary mb-1 small text-uppercase fw-bold ls-tight">Chuyển khoản</p>
                         <h3 class="mb-0 fw-bold text-dark">{{ online_revenue|floatformat:0|intcomma }}<small class="fs-6 text-muted">đ</small></h3>
-                        <div class="mt-2 text-secondary small">~60% (dự đoán)</div>
                     </div>
                     <div class="icon-shape bg-soft-info">
                         <i class="fa-solid fa-qrcode"></i>
@@ -226,13 +224,16 @@
 
     // Doughnut Chart
     const ctxSource = document.getElementById('sourceChart');
-    const cashPercent = {{ cash_revenue }} / ({{ total_revenue }} || 1) * 100;
-    const onlinePercent = {{ online_revenue }} / ({{ total_revenue }} || 1) * 100;
+    const cashPercent = {{ total_revenue }} > 0 ? ({{ cash_revenue }} / {{ total_revenue }} * 100) : 0;
+    const onlinePercent = {{ total_revenue }} > 0 ? ({{ online_revenue }} / {{ total_revenue }} * 100) : 0;
     
     new Chart(ctxSource, {
         type: 'doughnut',
         data: {
-            labels: ['Tiền mặt (~40%)', 'Chuyển khoản (~60%)'],
+            labels: [
+                `Tiền mặt (${cashPercent.toFixed(1)}%)`, 
+                `Chuyển khoản (${onlinePercent.toFixed(1)}%)`
+            ],
             datasets: [{
                 data: [cashPercent.toFixed(0), onlinePercent.toFixed(0)],
                 backgroundColor: ['#10b981', '#3b82f6'],

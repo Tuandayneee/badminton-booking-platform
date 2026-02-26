@@ -172,12 +172,9 @@
                         </td>
 
                         <td class="text-end pe-4">
-                            <button class="btn btn-icon me-1" title="Xem chi tiết">
-                                <i class="fa-regular fa-eye"></i>
-                            </button>
-                            <button class="btn btn-icon" title="Lịch sử giao dịch">
+                            <a href="{% url 'partner_customer_history' customer.id %}" class="btn btn-icon text-info" title="Lịch sử giao dịch">
                                 <i class="fa-solid fa-clock-rotate-left"></i>
-                            </button>
+                            </a>
                         </td>
                     </tr>
                     {% empty %}
@@ -209,4 +206,39 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Thêm Khách Hàng -->
+<div class="modal fade" id="addCustomerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-user-plus text-primary me-2"></i>Thêm khách hàng mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'partner_add_customer' center.id %}">
+                {% csrf_token %}
+                <div class="modal-body pt-3 pb-2">
+                    <p class="text-secondary small mb-4">Nhập thông tin để chủ động theo dõi lịch sử đặt sân của khách.</p>
+                    <div class="mb-3">
+                        <label class="form-label fw-medium small">Tên khách hàng <span class="text-danger">*</span></label>
+                        {{ form.name }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-medium small">Số điện thoại <span class="text-danger">*</span></label>
+                        {{ form.phone }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-medium small">Email (Tuỳ chọn)</label>
+                        {{ form.email }}
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-medium shadow-sm">Thêm mới</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

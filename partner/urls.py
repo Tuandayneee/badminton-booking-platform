@@ -3,12 +3,13 @@ from . import views
 
 urlpatterns = [
     path('dashboard/', views.partner_dashboard, name='partner_dashboard'),
-    path('pos/', views.pos_sales, name='pos_sales'),
     path('revenue/', views.revenue_management, name='revenue_management'), 
     path('revenue/<uuid:center_id>/', views.revenue_center_detail, name='revenue_center'),
-    path('schedule/<uuid:center_id>/', views.booking_court_history, name='schedule_management'),
+    path('schedule/<uuid:center_id>/', views.schedule_management, name='schedule_management'),
     path('booking_history/<uuid:center_id>/', views.booking_court_history, name='booking_court_history'),
     path('customers/<uuid:center_id>/', views.customer_management, name='customer_management'),
+    path('customers/<uuid:center_id>/add/', views.partner_add_customer, name='partner_add_customer'),
+    path('customers/history/<int:customer_id>/', views.partner_customer_history, name='partner_customer_history'),
     path('centers/', views.centers_management, name='centers_management'),
     path('add_center/', views.partner_add_center, name='partner_add_center'),
     path('centers/edit/<uuid:center_id>', views.partner_edit_center, name='partner_edit_center'),
@@ -23,4 +24,5 @@ urlpatterns = [
     path('centers/<uuid:center_id>/staff/add/', views.add_staff_to_center, name='add_staff_to_center'),
     path('staff/edit/<int:staff_id>/', views.edit_staff_member, name='edit_staff_member'),
     path('staff/delete/<int:staff_id>/', views.delete_staff_member, name='delete_staff_member'),
+    path('service-orders/', views.service_orders_management, name='service_orders'),
 ]

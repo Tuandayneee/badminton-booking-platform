@@ -5,11 +5,6 @@ from .models import (
     Product, ServiceOrder, ServiceOrderItem
 )
 
-
-# ==============================================================================
-# INLINES (Nhập liệu phụ trong trang chính)
-# ==============================================================================
-
 class CenterImageInline(admin.TabularInline):
     """Cho phép up nhiều ảnh ngay trong trang sửa Cụm sân"""
     model = CenterImage
@@ -26,19 +21,10 @@ class PriceRuleInline(admin.TabularInline):
     model = PriceRule
     extra = 0
 
-# ==============================================================================
-# MODEL ADMINS
-# ==============================================================================
 
 @admin.register(Amenity)
 class AmenityAdmin(admin.ModelAdmin):
-    list_display = ('name', 'display_icon')
-    
-    def display_icon(self, obj):
-        if obj.icon:
-            return format_html('<img src="{}" width="30" height="30" />', obj.icon.url)
-        return "-"
-    display_icon.short_description = 'Icon'
+    list_display = ('name',)
 
 @admin.register(BadmintonCenter)
 class BadmintonCenterAdmin(admin.ModelAdmin):
@@ -50,7 +36,7 @@ class BadmintonCenterAdmin(admin.ModelAdmin):
 
 @admin.register(Court)
 class CourtAdmin(admin.ModelAdmin):
-    # Đã bỏ court_type theo model của bạn
+    
     list_display = ('name', 'center', 'base_price_per_hour','golden_price_per_hour','golden_start_time','golden_end_time', 'is_active')
     list_filter = ('center', 'is_active')
     search_fields = ('name', 'center__name')
@@ -67,7 +53,7 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(ServiceOrder)
 class ServiceOrderAdmin(admin.ModelAdmin):
-    # Model ServiceOrder của bạn KHÔNG có trường booking, nên tôi đã bỏ nó ra khỏi list_display
+    
     list_display = ('id', 'center', 'staff_name', 'total_amount', 'created_at')
     list_filter = ('center', 'created_at')
     inlines = [ServiceOrderItemInline]

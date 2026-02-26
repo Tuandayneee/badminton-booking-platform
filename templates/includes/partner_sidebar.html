@@ -44,15 +44,22 @@
                     <span>Giao dịch</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link-pro {% if 'service_orders' == request.resolver_match.url_name %}active{% endif %}" 
+                   href="{% url 'service_orders' %}">
+                    <i class="fa-solid fa-file-invoice me-3"></i>
+                    <span>Hóa đơn dịch vụ</span>
+                </a>
+            </li>
         </ul>
 
         <h6 class="sidebar-heading-pro">Tài khoản</h6>
         
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link-pro" href="#">
-                    <i class="fa-solid fa-gear me-3"></i>
-                    <span>Cài đặt</span>
+                <a class="nav-link-pro {% if 'change_password' == request.resolver_match.url_name %}active{% endif %}" href="{% url 'change_password' %}">
+                    <i class="fa-solid fa-key me-3"></i>
+                    <span>Đổi mật khẩu</span>
                 </a>
             </li>
             <li class="nav-item">

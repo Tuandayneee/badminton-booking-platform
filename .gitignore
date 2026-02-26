@@ -59,29 +59,9 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
-# Flask stuff (Giữ lại phòng hờ)
-instance/
-.webassets-cache
-
-# Scrapy stuff
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-.pybuilder/
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-
-# Environments
+# ============================================
+# Environments & Secrets (QUAN TRỌNG NHẤT)
+# ============================================
 .env
 .env.*
 !.env.example
@@ -95,49 +75,59 @@ venv.bak/
 # Secret keys and sensitive data
 *.pem
 *.key
+*.crt
 secrets.json
+credentials.json
 
-
-# Docker overrides (File cấu hình docker riêng cho máy cá nhân)
+# ============================================
+# Docker
+# ============================================
 docker-compose.override.yml
 
-# Database Data Volumes (Dữ liệu PostgreSQL)
-# Chặn tất cả các thư mục thường dùng để map volume
+# Database Data Volumes
 pgdata/
 postgres_data/
 data/
 db_data/
 mysql_data/
 
-# Backup files (File dump dữ liệu)
+# Backup files
 *.sql
 *.sql.gz
 *.dump
 
-
-# Static files (collected via collectstatic)
+# ============================================
+# Django Static & Media (generated/uploaded)
+# ============================================
 staticfiles/
 static_collected/
-
-# Media files (User uploads - Ảnh người dùng up lên)
 media/
+center_images/
 
-# Node.js / Frontend 
+# ============================================
+# Celery
+# ============================================
+celerybeat-schedule
+celerybeat-schedule.db
+celerybeat.pid
+
+# ============================================
+# Project-specific
+# ============================================
+du dinh/
+
+# ============================================
+# Node.js / Frontend
+# ============================================
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .eslintcache
 
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# IDE specific files
+# ============================================
+# IDE & Editor
+# ============================================
 .idea/
 .vscode/
 *.swp
@@ -145,6 +135,9 @@ yarn-error.log*
 *~
 .editorconfig
 
+# ============================================
+# OS generated
+# ============================================
 # macOS
 .DS_Store
 
@@ -154,5 +147,20 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
-# Linux
-*~
+# Sphinx / docs
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter
+.ipynb_checkpoints
+profile_default/
+ipython_config.py
+
+# Spyder / Rope
+.spyderproject
+.spyproject
+.ropeproject
+gunicorn.ctl

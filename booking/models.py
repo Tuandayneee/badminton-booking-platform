@@ -4,29 +4,7 @@ from partner.models import Court, Customer
 from django.conf import settings
 
 
-class FixedSchedule(models.Model):
-    """
-    Quản lý khách đặt lịch cố định (VD: Thứ 3-5-7 hàng tuần trong 3 tháng)
-    """
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='fixed_schedules', verbose_name="Khách hàng")
-    court = models.ForeignKey(Court, on_delete=models.CASCADE, verbose_name="Sân")
-    
-    start_date = models.DateField(verbose_name="Ngày bắt đầu")
-    end_date = models.DateField(verbose_name="Ngày kết thúc")
-    
-    # Lưu dạng JSON danh sách thứ: [1, 3, 5] tương ứng T3, T5, T7
-    days_of_week = models.JSONField(verbose_name="Thứ trong tuần") 
-    
-    start_time = models.TimeField(verbose_name="Giờ bắt đầu")
-    end_time = models.TimeField(verbose_name="Giờ kết thúc")
-    
-    total_months = models.IntegerField(default=1, verbose_name="Số tháng đăng ký")
-    is_active = models.BooleanField(default=True, verbose_name="Đang hoạt động")
-    
-    created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"Lịch cố định: {self.user.username} - {self.court.name}"    
 class Booking(models.Model):
     class Status(models.TextChoices):
         PENDING = 'pending', 'Chờ xác nhận'
@@ -35,9 +13,19 @@ class Booking(models.Model):
         COMPLETED = 'completed', 'Hoàn thành'
         ADMIN_CANCELLED = 'admin_cancelled', 'Hủy bởi Admin'
 
+    class PaymentMethod(models.TextChoices):
+        CASH = 'cash', 'Tiền mặt'
+        TRANSFER = 'transfer', 'Chuyển khoản'
+
     booking_code = models.CharField(max_length=20, unique=True, verbose_name="Mã đặt chỗ")
+    group_code = models.CharField(
+        max_length=50, 
+        db_index=True,  
+        verbose_name="Mã nhóm đơn hàng",
+        null=True,
+        blank=True
+    )
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='bookings', verbose_name="Người dùng")
-    fixed_schedule = models.ForeignKey(FixedSchedule, on_delete=models.SET_NULL, blank=True, null=True, related_name='bookings', verbose_name="Lịch cố định")
     court = models.ForeignKey(Court, on_delete=models.CASCADE, related_name='bookings', verbose_name="Sân")
     date = models.DateField(verbose_name="Ngày đặt sân")
     start_time = models.TimeField(verbose_name="Giờ bắt đầu")
@@ -49,6 +37,12 @@ class Booking(models.Model):
         choices=Status.choices, 
         default=Status.PENDING, 
         verbose_name="Trạng thái"
+    )
+    payment_method = models.CharField(
+        max_length=20,
+        choices=PaymentMethod.choices,
+        default=PaymentMethod.TRANSFER,
+        verbose_name="Phương thức thanh toán"
     )
     note = models.TextField(blank=True, verbose_name="Ghi chú")
     

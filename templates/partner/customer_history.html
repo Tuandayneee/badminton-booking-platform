@@ -1,0 +1,119 @@
+{% extends 'base/base_partner.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Lịch sử khách hàng - {{ customer.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3 fade-in-up">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small text-muted">
+                    <li class="breadcrumb-item"><a href="{% url 'customer_management' center.id %}" class="text-decoration-none text-secondary">Danh sách khách hàng</a></li>
+                    <li class="breadcrumb-item active text-dark" aria-current="page">{{ customer.name }}</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold text-dark mb-0 ls-tight">Lịch sử giao dịch: <span class="text-primary">{{ customer.name }}</span></h3>
+            <p class="text-muted small mt-1 mb-0"><i class="fa-solid fa-phone me-1"></i> {{ customer.phone }} | <i class="fa-solid fa-envelope me-1"></i> {{ customer.email|default:"Chưa có email" }}</p>
+        </div>
+
+        <div class="d-flex gap-2 w-100 w-md-auto">
+            <a href="{% url 'customer_management' center.id %}" class="btn btn-pro-light shadow-sm text-nowrap">
+                <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="row g-4 mb-4 fade-in-up" style="animation-delay: 0.1s;">
+        <div class="col-xl-4 col-md-6">
+            <div class="card-modern p-4 border-start border-4 border-primary">
+                <p class="text-secondary mb-1 small text-uppercase fw-bold ls-tight">Tổng Lượt Đến</p>
+                <h3 class="mb-0 fw-bold text-dark">{{ customer.total_visits|default:0 }} lượt</h3>
+            </div>
+        </div>
+        <div class="col-xl-4 col-md-6">
+            <div class="card-modern p-4 border-start border-4 border-success">
+                <p class="text-secondary mb-1 small text-uppercase fw-bold ls-tight">Tổng Chi Tiêu</p>
+                <h3 class="mb-0 fw-bold text-success">{{ customer.total_spent|floatformat:0|intcomma }}đ</h3>
+            </div>
+        </div>
+        <div class="col-xl-4 col-md-6">
+            <div class="card-modern p-4 border-start border-4 border-info">
+                <p class="text-secondary mb-1 small text-uppercase fw-bold ls-tight">Đặt Sân Lần Cuối</p>
+                <h3 class="mb-0 fw-bold text-dark">
+                    {% if customer.last_booking %}
+                        {{ customer.last_booking|date:"d/m/Y" }}
+                    {% else %}
+                        <span class="fs-5 text-muted fst-italic">Chưa có</span>
+                    {% endif %}
+                </h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Table -->
+    <div class="card-modern overflow-hidden fade-in-up" style="animation-delay: 0.2s;">
+        <div class="card-header bg-white border-bottom py-3 px-4">
+            <h6 class="mb-0 fw-bold text-dark">Chi tiết các lượt đặt sân</h6>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-modern align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4 py-3">Mã Đơn / Sân</th>
+                        <th class="py-3">Ngày Chơi</th>
+                        <th class="py-3">Thời Gian</th>
+                        <th class="py-3">Trạng Thái</th>
+                        <th class="text-end pe-4 py-3">Giá Trị</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in bookings %}
+                    <tr>
+                        <td class="ps-4 py-3">
+                            <div class="fw-bold text-dark">{{ booking.booking_code }}</div>
+                            <small class="text-primary">{{ booking.court.name }}</small>
+                        </td>
+                        <td>
+                            <div class="fw-medium">{{ booking.date|date:"l, d/m/Y" }}</div>
+                            <small class="text-muted">Tạo: {{ booking.created_at|date:"d/m/Y H:i" }}</small>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-dark">{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</div>
+                        </td>
+                        <td>
+                            {% if booking.status == 'completed' or booking.status == 'confirmed' %}
+                                <span class="badge badge-soft badge-soft-success"><i class="fa-solid fa-circle-check me-1"></i>{{ booking.get_status_display }}</span>
+                            {% elif booking.status == 'waiting_verify' or booking.status == 'pending' %}
+                                <span class="badge badge-soft badge-soft-warning"><i class="fa-solid fa-clock me-1"></i>{{ booking.get_status_display }}</span>
+                            {% else %}
+                                <span class="badge badge-soft badge-soft-danger"><i class="fa-solid fa-xmark me-1"></i>{{ booking.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="fw-bold text-success">{{ booking.total_price|floatformat:0|intcomma }}đ</div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5">
+                            <div class="d-flex flex-column align-items-center">
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                                    <i class="fa-solid fa-calendar-xmark fs-4 text-muted opacity-50"></i>
+                                </div>
+                                <h6 class="fw-bold text-dark">Chưa có lượt đặt sân nào</h6>
+                                <p class="text-secondary small">Khách hàng chưa phát sinh giao dịch nào tại trung tâm.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -2,7 +2,7 @@
 {% load static %}
 {% load humanize %}
 
-{% block title %}Vé của tôi - Badminton Pro{% endblock %}
+{% block title %}Lịch sử đặt sân - Badminton Pro{% endblock %}
 
 {% block content %}
 <div class="container py-5" style="min-height: 80vh;">
@@ -11,15 +11,23 @@
         <div class="col-lg-10">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
                 <div>
-                    <h2 class="fw-bold text-dark mb-1 ls-tight">Vé của tôi</h2>
+                    <h2 class="fw-bold text-dark mb-1 ls-tight">Lịch sử đặt sân</h2>
                     <p class="text-muted small mb-0">Quản lý lịch đặt sân và trạng thái thanh toán.</p>
                 </div>
                 
                 <div class="nav nav-pills-custom" role="tablist">
-                    <a class="nav-link active" href="#">Tất cả</a>
-                    <a class="nav-link" href="#">Sắp tới</a>
-                    <a class="nav-link" href="#">Hoàn thành</a>
-                    <a class="nav-link" href="#">Đã hủy</a>
+                    <a class="nav-link {% if current_tab == 'all' %}active{% endif %}" href="?tab=all">
+                        Tất cả <span class="badge bg-secondary bg-opacity-25 text-dark ms-1">{{ tab_counts.all }}</span>
+                    </a>
+                    <a class="nav-link {% if current_tab == 'upcoming' %}active{% endif %}" href="?tab=upcoming">
+                        Sắp tới <span class="badge bg-primary bg-opacity-25 text-primary ms-1">{{ tab_counts.upcoming }}</span>
+                    </a>
+                    <a class="nav-link {% if current_tab == 'completed' %}active{% endif %}" href="?tab=completed">
+                        Hoàn thành <span class="badge bg-success bg-opacity-25 text-success ms-1">{{ tab_counts.completed }}</span>
+                    </a>
+                    <a class="nav-link {% if current_tab == 'cancelled' %}active{% endif %}" href="?tab=cancelled">
+                        Đã hủy <span class="badge bg-danger bg-opacity-25 text-danger ms-1">{{ tab_counts.cancelled }}</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -27,6 +35,7 @@
 
     <div class="row justify-content-center fade-in-up" style="animation-delay: 0.1s;">
         <div class="col-lg-10">
+            {% if bookings %}
             <div class="card-modern overflow-hidden">
                 <div class="table-responsive">
                     <table class="table table-modern align-middle mb-0">
@@ -37,144 +46,105 @@
                                 <th style="width: 20%;">Thời gian</th>
                                 <th style="width: 15%;">Tổng tiền</th>
                                 <th class="text-center" style="width: 10%;">Trạng thái</th>
-                                <th class="text-end pe-4" style="width: 10%;">Thao tác</th>
+                                <th class="text-end pe-4" style="width: 10%;"></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
+                            {% for booking in bookings %}
+                            <tr{% if booking.status == 'admin_cancelled' %} class="opacity-50"{% endif %}>
                                 <td class="ps-4">
-                                    <span class="badge-id">#ORD-8821</span>
+                                    <span class="badge-id{% if booking.status == 'admin_cancelled' %} text-muted{% endif %}">#{{ booking.group_code|truncatechars:12 }}</span>
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="bg-light rounded p-2 me-3 border">
+                                        <div class="bg-light rounded p-2 me-3 border{% if booking.status == 'admin_cancelled' %} opacity-50{% endif %}">
                                             <i class="fa-solid fa-map-location-dot text-primary fs-5"></i>
                                         </div>
                                         <div>
-                                            <h6 class="mb-0 fw-bold text-dark fs-6">Sân Cầu Giấy Arena</h6>
+                                            <h6 class="mb-0 fw-bold {% if booking.status == 'admin_cancelled' %}text-secondary{% else %}text-dark{% endif %} fs-6">{{ booking.court.center.name }}</h6>
                                             <div class="small text-muted mt-1">
-                                                <span class="badge badge-soft-secondary border fw-normal" style="font-size: 0.65rem;">Sân 1</span>
-                                                <span class="ms-1 text-secondary" style="font-size: 0.75rem;">• Sân Thảm</span>
+                                                <span class="badge badge-soft-secondary border fw-normal" style="font-size: 0.65rem;">{{ booking.court.name }}</span>
+                                                {% if booking.court.court_type %}
+                                                <span class="ms-1 text-secondary" style="font-size: 0.75rem;">• {{ booking.court.get_court_type_display }}</span>
+                                                {% endif %}
                                             </div>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="d-flex flex-column">
-                                        <span class="fw-bold text-dark">17:00 - 19:00</span>
-                                        <span class="small text-muted">30 Th12, 2025</span>
+                                    <div class="d-flex flex-column{% if booking.status == 'admin_cancelled' %} text-muted{% endif %}">
+                                        <span class="fw-bold {% if booking.status != 'admin_cancelled' %}text-dark{% endif %}">{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</span>
+                                        <span class="small text-muted">{{ booking.date|date:"d/m/Y" }}</span>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="fw-bold text-dark">100.000đ</div>
-                                    <small class="text-success fw-bold" style="font-size: 0.7rem;"><i class="fa-solid fa-check me-1"></i>Đã TT</small>
+                                    <div class="fw-bold {% if booking.status == 'admin_cancelled' %}text-secondary{% else %}text-dark{% endif %}">{{ booking.total_price|intcomma }}đ</div>
+                                    {% if booking.status == 'confirmed' or booking.status == 'completed' %}
+                                        <small class="text-success fw-bold" style="font-size: 0.7rem;"><i class="fa-solid fa-check me-1"></i>Đã TT</small>
+                                    {% elif booking.status == 'waiting_verify' %}
+                                        <small class="text-warning fw-bold" style="font-size: 0.7rem;"><i class="fa-solid fa-clock me-1"></i>Chờ xác nhận</small>
+                                    {% elif booking.status == 'pending' %}
+                                        <small class="text-danger fw-bold" style="font-size: 0.7rem;"><i class="fa-solid fa-clock me-1"></i>Chờ TT</small>
+                                    {% else %}
+                                        <small class="text-muted" style="font-size: 0.7rem;">Đã hủy</small>
+                                    {% endif %}
                                 </td>
                                 <td class="text-center">
-                                    <span class="badge badge-soft bg-success bg-opacity-10 text-success border border-success border-opacity-10 rounded-pill px-3">
-                                        Sắp tới
-                                    </span>
+                                    {% if booking.status == 'confirmed' %}
+                                        <span class="badge badge-soft bg-success bg-opacity-10 text-success border border-success border-opacity-10 rounded-pill px-3">Đã xác nhận</span>
+                                    {% elif booking.status == 'completed' %}
+                                        <span class="badge badge-soft bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-10 rounded-pill px-3">Hoàn thành</span>
+                                    {% elif booking.status == 'pending' %}
+                                        <span class="badge badge-soft bg-warning bg-opacity-10 text-warning border border-warning border-opacity-10 rounded-pill px-3">Chờ thanh toán</span>
+                                    {% elif booking.status == 'waiting_verify' %}
+                                        <span class="badge badge-soft bg-info bg-opacity-10 text-info border border-info border-opacity-10 rounded-pill px-3">Chờ xác nhận</span>
+                                    {% elif booking.status == 'admin_cancelled' %}
+                                        <span class="badge badge-soft bg-danger bg-opacity-10 text-danger border border-danger border-opacity-10 rounded-pill px-3">Đã hủy</span>
+                                    {% else %}
+                                        <span class="badge badge-soft bg-secondary bg-opacity-10 text-secondary rounded-pill px-3">{{ booking.get_status_display }}</span>
+                                    {% endif %}
                                 </td>
                                 <td class="text-end pe-4">
-                                    <button class="btn btn-icon text-primary bg-primary bg-opacity-10 border-primary border-opacity-10" title="Mã QR Check-in">
-                                        <i class="fa-solid fa-qrcode"></i>
-                                    </button>
+                                    {% if booking.status == 'confirmed' %}
+                                        <button class="btn btn-icon text-primary bg-primary bg-opacity-10 border-primary border-opacity-10" title="Mã QR Check-in">
+                                            <i class="fa-solid fa-qrcode"></i>
+                                        </button>
+                                    {% elif booking.status == 'pending' %}
+                                        <a href="{% url 'booking_payment' booking.group_code %}" class="btn btn-primary-gradient btn-sm rounded-pill px-3 fw-bold shadow-sm" style="font-size: 0.75rem;">
+                                            Thanh toán
+                                        </a>
+                                    {% elif booking.status == 'completed' %}
+                                        <a href="{% url 'booking_timeline' booking.court.center.id %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold" style="font-size: 0.75rem;">
+                                            Đặt lại
+                                        </a>
+                                    {% endif %}
                                 </td>
                             </tr>
-
-                            <tr>
-                                <td class="ps-4">
-                                    <span class="badge-id">#ORD-8822</span>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="bg-light rounded p-2 me-3 border">
-                                            <i class="fa-solid fa-map-location-dot text-secondary fs-5"></i>
-                                        </div>
-                                        <div>
-                                            <h6 class="mb-0 fw-bold text-dark fs-6">Sân Mỹ Đình Sport</h6>
-                                            <div class="small text-muted mt-1">
-                                                <span class="badge badge-soft-secondary border fw-normal" style="font-size: 0.65rem;">Sân 3</span>
-                                                <span class="ms-1 text-secondary" style="font-size: 0.75rem;">• Sân Gỗ</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="d-flex flex-column">
-                                        <span class="fw-bold text-dark">08:00 - 09:00</span>
-                                        <span class="small text-muted">01 Th01, 2026</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="fw-bold text-dark">50.000đ</div>
-                                    <small class="text-danger fw-bold" style="font-size: 0.7rem;"><i class="fa-solid fa-clock me-1"></i>Chờ TT</small>
-                                </td>
-                                <td class="text-center">
-                                    <span class="badge badge-soft bg-warning bg-opacity-10 text-warning border border-warning border-opacity-10 rounded-pill px-3">
-                                        Chờ xác nhận
-                                    </span>
-                                </td>
-                                <td class="text-end pe-4">
-                                    <a href="#" class="btn btn-primary-gradient btn-sm rounded-pill px-3 fw-bold shadow-sm" style="font-size: 0.75rem;">
-                                        Thanh toán
-                                    </a>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td class="ps-4">
-                                    <span class="badge-id text-muted">#ORD-8810</span>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="bg-light rounded p-2 me-3 border opacity-50">
-                                            <i class="fa-solid fa-map-location-dot text-secondary fs-5"></i>
-                                        </div>
-                                        <div>
-                                            <h6 class="mb-0 fw-bold text-secondary fs-6">CLB Cầu Lông 365</h6>
-                                            <div class="small text-muted mt-1">
-                                                <span class="badge badge-soft-secondary border fw-normal text-muted" style="font-size: 0.65rem;">Sân VIP</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="d-flex flex-column text-muted">
-                                        <span class="fw-bold">19:00 - 20:00</span>
-                                        <span class="small">15 Th12, 2025</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="fw-bold text-secondary">80.000đ</div>
-                                    <small class="text-muted" style="font-size: 0.7rem;">Tiền mặt</small>
-                                </td>
-                                <td class="text-center">
-                                    <span class="badge badge-soft bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-10 rounded-pill px-3">
-                                        Hoàn thành
-                                    </span>
-                                </td>
-                                <td class="text-end pe-4">
-                                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold" style="font-size: 0.75rem;">
-                                        Đặt lại
-                                    </button>
-                                </td>
-                            </tr>
-
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
-                
-                <div class="card-footer bg-white border-top-0 py-3">
-                    <nav>
-                        <ul class="pagination justify-content-center mb-0">
-                            <li class="page-item disabled"><a class="page-link border-0 text-secondary" href="#"><i class="fa-solid fa-chevron-left"></i></a></li>
-                            <li class="page-item active"><a class="page-link border-0 rounded-circle bg-primary text-white mx-1 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link border-0 text-secondary rounded-circle mx-1 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link border-0 text-secondary" href="#"><i class="fa-solid fa-chevron-right"></i></a></li>
-                        </ul>
-                    </nav>
-                </div>
             </div>
+            {% else %}
+            <div class="card-modern text-center py-5">
+                <i class="fa-regular fa-calendar-xmark fa-3x text-muted opacity-50 mb-3"></i>
+                <h5 class="fw-bold text-dark">Chưa có lịch đặt sân nào</h5>
+                <p class="text-muted small mb-3">
+                    {% if current_tab == 'upcoming' %}
+                        Bạn chưa có lịch đặt sân sắp tới.
+                    {% elif current_tab == 'completed' %}
+                        Chưa có lịch đặt sân nào hoàn thành.
+                    {% elif current_tab == 'cancelled' %}
+                        Không có lịch đặt sân nào bị hủy.
+                    {% else %}
+                        Hãy đặt sân đầu tiên của bạn ngay!
+                    {% endif %}
+                </p>
+                <a href="{% url 'home' %}" class="btn btn-primary-gradient rounded-pill px-4 py-2 fw-bold shadow-sm">
+                    <i class="fa-solid fa-magnifying-glass me-2"></i>Tìm sân ngay
+                </a>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

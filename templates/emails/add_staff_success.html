@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Thông tin tài khoản nhân viên</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0;">
+    
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+        
+        <div style="background-color: #0d6efd; color: white; padding: 15px; text-align: center; border-radius: 8px 8px 0 0;">
+            <h2 style="margin: 0;">THÔNG TIN TÀI KHOẢN NHÂN VIÊN</h2>
+        </div>
+
+        <div style="padding: 20px;">
+            <p>Xin chào <strong>{{ full_name }}</strong>,</p>
+            <p>Bạn đã được thêm làm nhân viên tại trung tâm <strong>{{ center_name }}</strong> thuộc hệ thống <strong>BadmintonPro</strong>.</p>
+            <p>Dưới đây là thông tin tài khoản của bạn:</p>
+            
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 8px 0; border-bottom: 1px dashed #ddd; width: 40%;"><strong>Họ và tên:</strong></td>
+                        <td style="padding: 8px 0; border-bottom: 1px dashed #ddd;">{{ full_name }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; border-bottom: 1px dashed #ddd;"><strong>Tên đăng nhập:</strong></td>
+                        <td style="padding: 8px 0; border-bottom: 1px dashed #ddd;">{{ username }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; border-bottom: 1px dashed #ddd;"><strong>Mật khẩu:</strong></td>
+                        <td style="padding: 8px 0; border-bottom: 1px dashed #ddd;">
+                            <span style="background-color: #fff3cd; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-weight: bold;">{{ password }}</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; border-bottom: 1px dashed #ddd;"><strong>Email:</strong></td>
+                        <td style="padding: 8px 0; border-bottom: 1px dashed #ddd;">{{ email }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; border-bottom: 1px dashed #ddd;"><strong>Số điện thoại:</strong></td>
+                        <td style="padding: 8px 0; border-bottom: 1px dashed #ddd;">{{ phone_number }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; border-bottom: 1px dashed #ddd;"><strong>Chức vụ:</strong></td>
+                        <td style="padding: 8px 0; border-bottom: 1px dashed #ddd;">{{ position }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0;"><strong>Trung tâm:</strong></td>
+                        <td style="padding: 8px 0;">{{ center_name }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div style="background-color: #fff3cd; padding: 12px 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
+                <strong style="color: #856404;">⚠ Lưu ý bảo mật:</strong>
+                <p style="margin: 5px 0 0 0; color: #856404; font-size: 0.9em;">Vui lòng đổi mật khẩu ngay sau khi đăng nhập lần đầu để đảm bảo an toàn tài khoản.</p>
+            </div>
+
+            <p>Nếu cần hỗ trợ, vui lòng liên hệ: <strong style="color: #0d6efd;">{{ support_phone }}</strong>.</p>
+            
+        </div>
+
+        <div style="font-size: 0.8em; text-align: center; color: #777; margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;">
+            &copy; 2026 BadmintonPro System. All rights reserved.
+        </div>
+    </div>
+
+</body>
+</html>

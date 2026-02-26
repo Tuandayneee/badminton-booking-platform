@@ -1,0 +1,269 @@
+{% extends 'base/base_partner.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Hóa đơn dịch vụ - Badminton Pro{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    
+    <!-- HEADER -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3 fade-in-up">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small text-muted">
+                    <li class="breadcrumb-item"><a href="{% url 'partner_dashboard' %}" class="text-decoration-none text-secondary">Dashboard</a></li>
+                    <li class="breadcrumb-item active text-dark" aria-current="page">Hóa đơn dịch vụ</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold text-dark mb-0 ls-tight">
+                <i class="fa-solid fa-file-invoice text-primary me-2"></i>Hóa đơn dịch vụ
+            </h3>
+        </div>
+    </div>
+
+    <!-- THỐNG KÊ -->
+    <div class="row g-3 mb-4 fade-in-up" style="animation-delay: 0.05s;">
+        <div class="col-md-4">
+            <div class="card-modern p-4 h-100">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center me-3" 
+                         style="width: 52px; height: 52px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <i class="fa-solid fa-money-bill-wave text-white fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase">Doanh thu</div>
+                        <div class="fs-4 fw-bold" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                            {{ total_revenue|intcomma }}đ
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-modern p-4 h-100">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center me-3" 
+                         style="width: 52px; height: 52px;">
+                        <i class="fa-solid fa-receipt text-success fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase">Số đơn hàng</div>
+                        <div class="fs-4 fw-bold text-dark">{{ total_orders }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-modern p-4 h-100">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-warning bg-opacity-10 d-flex align-items-center justify-content-center me-3" 
+                         style="width: 52px; height: 52px;">
+                        <i class="fa-solid fa-calendar-day text-warning fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase">Ngày xem</div>
+                        <div class="fs-5 fw-bold text-dark">
+                            {{ selected_date|date:"d/m/Y" }}
+                            {% if selected_date == today %}
+                                <span class="badge bg-success rounded-pill ms-1" style="font-size: 0.6rem;">Hôm nay</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BỘ LỌC -->
+    <div class="card-modern overflow-hidden fade-in-up mb-4" style="animation-delay: 0.1s;">
+        <div class="card-header bg-white border-bottom py-3 px-4">
+            <form method="GET" class="d-flex flex-wrap align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    <label class="form-label mb-0 small fw-bold text-muted text-nowrap">
+                        <i class="fa-solid fa-building me-1"></i>Trung tâm
+                    </label>
+                    <select name="center_id" class="form-select form-select-sm rounded-pill" style="min-width: 180px;">
+                        <option value="">Tất cả trung tâm</option>
+                        {% for c in centers %}
+                        <option value="{{ c.id }}" {% if selected_center_id == c.id|slugify %}selected{% endif %}>{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <label class="form-label mb-0 small fw-bold text-muted text-nowrap">
+                        <i class="fa-solid fa-calendar me-1"></i>Ngày
+                    </label>
+                    <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}" 
+                           max="{{ today|date:'Y-m-d' }}"
+                           class="form-control form-control-sm rounded-pill" style="max-width: 170px;">
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3">
+                    <i class="fa-solid fa-filter me-1"></i>Lọc
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- BẢNG ĐƠN HÀNG -->
+    <div class="card-modern overflow-hidden fade-in-up" style="animation-delay: 0.15s;">
+        <div class="card-header bg-white border-bottom py-3 px-4">
+            <h6 class="fw-bold text-dark mb-0">
+                <i class="fa-solid fa-list-check text-primary me-2"></i>Chi tiết đơn hàng — {{ selected_date|date:"d/m/Y" }}
+            </h6>
+        </div>
+        <div class="table-responsive">
+            {% if orders_with_items %}
+            <table class="table table-modern align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4" style="width: 5%;">#</th>
+                        <th style="width: 12%;">Thời gian</th>
+                        <th style="width: 18%;">Trung tâm</th>
+                        <th style="width: 15%;">Nhân viên</th>
+                        <th style="width: 30%;">Sản phẩm</th>
+                        <th class="text-end pe-4" style="width: 15%;">Tổng tiền</th>
+                        <th style="width: 5%;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in orders_with_items %}
+                    <tr class="order-row" style="cursor: pointer;" onclick="toggleDetail({{ forloop.counter }})">
+                        <td class="ps-4 text-muted fw-medium">{{ forloop.counter }}</td>
+                        <td>
+                            <span class="fw-semibold text-dark">{{ entry.order.created_at|date:"H:i" }}</span>
+                            <div class="text-muted small">{{ entry.order.created_at|date:"d/m/Y" }}</div>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">
+                                <i class="fa-solid fa-location-dot text-muted me-1"></i>{{ entry.order.center.name }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">
+                                <i class="fa-solid fa-user text-muted me-1"></i>{{ entry.order.staff_name }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="text-muted small">{{ entry.items|length }} sản phẩm</span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <span class="fw-bold" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                                {{ entry.order.total_amount|intcomma }}đ
+                            </span>
+                        </td>
+                        <td>
+                            <i class="fa-solid fa-chevron-down text-muted small transition-icon" id="icon-{{ forloop.counter }}"></i>
+                        </td>
+                    </tr>
+                    <!-- Chi tiết items (ẩn) -->
+                    <tr class="detail-row" id="detail-{{ forloop.counter }}" style="display: none;">
+                        <td colspan="7" class="p-0">
+                            <div class="bg-light px-4 py-3" style="border-left: 4px solid #667eea;">
+                                <table class="table table-sm mb-0 bg-white rounded-3 overflow-hidden shadow-sm">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-3 py-2 small text-uppercase text-muted fw-bold">Sản phẩm</th>
+                                            <th class="py-2 small text-uppercase text-muted fw-bold text-center">Số lượng</th>
+                                            <th class="py-2 small text-uppercase text-muted fw-bold text-end">Đơn giá</th>
+                                            <th class="pe-3 py-2 small text-uppercase text-muted fw-bold text-end">Thành tiền</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in entry.items %}
+                                        <tr>
+                                            <td class="ps-3">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                                        <i class="fa-solid fa-box-open text-primary" style="font-size: 0.75rem;"></i>
+                                                    </div>
+                                                    <span class="fw-medium text-dark">{{ item.product.name|default:"Sản phẩm đã xóa" }}</span>
+                                                </div>
+                                            </td>
+                                            <td class="text-center fw-semibold">{{ item.quantity }}</td>
+                                            <td class="text-end text-muted">{{ item.price_at_time|intcomma }}đ</td>
+                                            <td class="pe-3 text-end fw-bold text-dark">
+                                                {% widthratio item.price_at_time 1 item.quantity as subtotal %}
+                                                {{ subtotal|intcomma }}đ
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot class="border-top">
+                                        <tr>
+                                            <td colspan="3" class="ps-3 fw-bold text-dark">TỔNG</td>
+                                            <td class="pe-3 text-end">
+                                                <span class="fw-bold fs-6" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                                                    {{ entry.order.total_amount|intcomma }}đ
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="bg-light">
+                    <tr>
+                        <td colspan="5" class="ps-4 fw-bold text-dark">TỔNG CỘNG</td>
+                        <td class="text-end pe-4">
+                            <span class="fs-5 fw-bold" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                                {{ total_revenue|intcomma }}đ
+                            </span>
+                        </td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+            {% else %}
+            <div class="text-center py-5">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                        <i class="fa-solid fa-box-open fs-4 text-muted opacity-50"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark">Không có hóa đơn nào</h6>
+                    <p class="text-secondary small">
+                        Ngày {{ selected_date|date:"d/m/Y" }} chưa có hóa đơn dịch vụ nào.
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.order-row:hover {
+    background-color: #f8fafc !important;
+}
+.transition-icon {
+    transition: transform 0.3s ease;
+}
+.transition-icon.rotated {
+    transform: rotate(180deg);
+}
+.detail-row td {
+    border-top: none !important;
+}
+</style>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleDetail(id) {
+    const detailRow = document.getElementById('detail-' + id);
+    const icon = document.getElementById('icon-' + id);
+    
+    if (detailRow.style.display === 'none') {
+        detailRow.style.display = '';
+        icon.classList.add('rotated');
+    } else {
+        detailRow.style.display = 'none';
+        icon.classList.remove('rotated');
+    }
+}
+</script>
+{% endblock %}

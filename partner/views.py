@@ -1,9 +1,9 @@
 from django.shortcuts import render,get_object_or_404
-from django.contrib.auth.decorators import login_required
+from users.decorators import role_required
 from django.shortcuts import redirect
 from datetime import timedelta
 from partner.utils import redirect_back
-from .forms import BadmintonCenterForm, CourtForm, StaffForm
+from .forms import BadmintonCenterForm, CourtForm, StaffForm, CustomerForm
 from django.contrib import messages
 from .models import BadmintonCenter, Court, Product, ServiceOrder, ServiceOrderItem
 from booking.services import process_approve_transaction
@@ -14,76 +14,142 @@ from django.db.models import Q, Sum
 from django.db import transaction
 from partner.models import Customer
 from django.db.models import Avg, Count
-from datetime import timedelta
 import json
 from .utils import generate_random_password
 from users.models import User, StaffProfile
-
-@login_required 
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+@role_required('partner')
 def partner_dashboard(request):
+    try:
+        partner = request.user.partner_profile
+    except AttributeError:
+        messages.error(request, "Bạn không có quyền truy cập trang này.")
+        return redirect('home')
     
-    return render(request, 'partner/dashboard.html')
+    centers = BadmintonCenter.objects.filter(partner=partner)
+    today = timezone.now().date()
+    yesterday = today - timedelta(days=1)
 
+    # Doanh thu booking
+    today_revenue = Booking.objects.filter(
+        court__center__in=centers,
+        date=today,
+        status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED]
+    ).aggregate(total=Sum('total_price'))['total'] or 0
 
-@login_required
-def pos_sales(request):
-    # """Trang POS bán hàng tại sân"""
-    # center = get_object_or_404(BadmintonCenter, pk=center_id, partner=request.user.partner_profile)
-    # products = Product.objects.filter(center=center, is_active=True)
+    yesterday_revenue = Booking.objects.filter(
+        court__center__in=centers,
+        date=yesterday,
+        status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED]
+    ).aggregate(total=Sum('total_price'))['total'] or 0
+
+    # Doanh thu dịch vụ hôm nay
+    today_service_revenue = ServiceOrder.objects.filter(
+        center__in=centers,
+        created_at__date=today
+    ).aggregate(total=Sum('total_amount'))['total'] or 0
+
+    total_today_revenue = today_revenue + today_service_revenue
+
+    # % thay đổi
+    if yesterday_revenue > 0:
+        revenue_change = round(((today_revenue - yesterday_revenue) / yesterday_revenue) * 100, 1)
+    else:
+        revenue_change = 100 if today_revenue > 0 else 0
+
+    # Lịch đặt hôm nay
+    today_bookings_count = Booking.objects.filter(
+        court__center__in=centers,
+        date=today
+    ).exclude(status=Booking.Status.ADMIN_CANCELLED).count()
+
+    total_courts = Court.objects.filter(center__in=centers, is_active=True).count()
+
+    pending_transactions = Transaction.objects.filter(
+        booking_group_code__in=Booking.objects.filter(
+            court__center__in=centers
+        ).values_list('group_code', flat=True),
+        is_verified=False
+    ).count()
+
+    # Biểu đồ 7 ngày 
+    chart_labels = []
+    chart_data = []
+    day_names = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
+    for i in range(6, -1, -1):
+        d = today - timedelta(days=i)
+        chart_labels.append(day_names[d.weekday()])
+        day_rev = Booking.objects.filter(
+            court__center__in=centers,
+            date=d,
+            status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED]
+        ).aggregate(total=Sum('total_price'))['total'] or 0
+        chart_data.append(int(day_rev))
+
+    #  Lịch sắp tới 
+    upcoming_bookings = Booking.objects.filter(
+        court__center__in=centers,
+        date=today,
+        status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED, Booking.Status.PENDING, Booking.Status.WAITING_VERIFY]
+    ).select_related('court', 'court__center', 'user', 'customer').order_by('start_time')[:5]
+
+    # Doanh thu theo phương thức thanh toán trong tháng
+    start_of_month = today.replace(day=1)
     
-    # if request.method == 'POST':
-    #     cart_data_str = request.POST.get('cart_data')
-    #     staff_name = request.POST.get('staff_name', request.user.username)
-        
-    #     try:
-    #         cart_items = json.loads(cart_data_str)
-    #         if not cart_items:
-    #             messages.error(request, "Giỏ hàng trống!")
-    #             return redirect('pos_sales', center_id=center_id)
-            
-    #         # Tính tổng tiền
-    #         total_amount = sum(item['price'] * item['quantity'] for item in cart_items)
-            
-    #         # Tạo ServiceOrder
-    #         order = ServiceOrder.objects.create(
-    #             center=center,
-    #             staff_name=staff_name,
-    #             total_amount=total_amount
-    #         )
-            
-    #         # Tạo các ServiceOrderItem
-    #         for item in cart_items:
-    #             product = Product.objects.filter(id=item['product_id']).first()
-    #             ServiceOrderItem.objects.create(
-    #                 order=order,
-    #                 product=product,
-    #                 quantity=item['quantity'],
-    #                 price_at_time=item['price']
-    #             )
-                
-    #             # Giảm tồn kho
-    #             if product and product.stock_quantity >= item['quantity']:
-    #                 product.stock_quantity -= item['quantity']
-    #                 product.save()
-            
-    #         messages.success(request, f"Đã tạo đơn hàng #{order.id} - Tổng: {int(total_amount):,}đ")
-    #         return redirect('pos_sales', center_id=center_id)
-            
-    #     except (json.JSONDecodeError, KeyError) as e:
-    #         messages.error(request, f"Lỗi dữ liệu: {e}")
-    #         return redirect('pos_sales', center_id=center_id)
-    
-    # context = {
-    #     'center': center,
-    #     'products': products,
-    # }
-    return render(request, 'staff/pos.html')
+    booking_cash = Booking.objects.filter(
+        court__center__in=centers,
+        date__gte=start_of_month,
+        status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED],
+        payment_method=Booking.PaymentMethod.CASH
+    ).aggregate(total=Sum('total_price'))['total'] or 0
+
+    booking_transfer = Booking.objects.filter(
+        court__center__in=centers,
+        date__gte=start_of_month,
+        status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED],
+        payment_method=Booking.PaymentMethod.TRANSFER
+    ).aggregate(total=Sum('total_price'))['total'] or 0
+
+    service_cash = ServiceOrder.objects.filter(
+        center__in=centers,
+        created_at__date__gte=start_of_month,
+        payment_method=ServiceOrder.PaymentMethod.CASH
+    ).aggregate(total=Sum('total_amount'))['total'] or 0
+
+    service_transfer = ServiceOrder.objects.filter(
+        center__in=centers,
+        created_at__date__gte=start_of_month,
+        payment_method=ServiceOrder.PaymentMethod.TRANSFER
+    ).aggregate(total=Sum('total_amount'))['total'] or 0
+
+    total_cash_month = int(booking_cash + service_cash)
+    total_transfer_month = int(booking_transfer + service_transfer)
+
+    context = {
+        'centers': centers,
+        'total_today_revenue': total_today_revenue,
+        'revenue_change': revenue_change,
+        'today_bookings_count': today_bookings_count,
+        'total_courts': total_courts,
+        'pending_transactions': pending_transactions,
+        'chart_labels': json.dumps(chart_labels),
+        'chart_data': json.dumps(chart_data),
+        'total_cash_month': total_cash_month,
+        'total_transfer_month': total_transfer_month,
+        'upcoming_bookings': upcoming_bookings,
+        'today': today,
+    }
+    return render(request, 'partner/dashboard.html', context)
 
 
 
 
 
-@login_required
+
+
+
+@role_required('partner')
 def manage_staff(request, center_id):
     """Trang quản lý nhân viên của 1 center"""
     center = get_object_or_404(BadmintonCenter, id=center_id, partner=request.user.partner_profile)
@@ -97,7 +163,7 @@ def manage_staff(request, center_id):
     })
 
 
-@login_required
+@role_required('partner')
 def add_staff_to_center(request, center_id):
     """Thêm nhân viên mới vào center"""
     center = get_object_or_404(BadmintonCenter, id=center_id, partner=request.user.partner_profile)
@@ -108,7 +174,6 @@ def add_staff_to_center(request, center_id):
             data = form.cleaned_data
             phone_number = data['phone_number']
             
-            # Kiểm tra trùng
             if User.objects.filter(username=phone_number).exists():
                 messages.error(request, f"Số điện thoại '{phone_number}' đã được đăng ký!")
                 return redirect('manage_staff', center_id=center_id)
@@ -120,7 +185,7 @@ def add_staff_to_center(request, center_id):
                 password = generate_random_password(8)
                 
                 with transaction.atomic():
-                    # Tạo User (SĐT làm tài khoản)
+                    
                     user = User.objects.create_user(
                         username=phone_number,
                         email=data['email'],
@@ -130,15 +195,39 @@ def add_staff_to_center(request, center_id):
                         role=User.Role.STAFF,
                     )
                     
-                    # Tạo hoặc cập nhật StaffProfile
+                    
                     staff_profile, created = StaffProfile.objects.get_or_create(user=user)
                     staff_profile.center = center
                     staff_profile.position = data.get('position', 'Nhân viên')
                     staff_profile.is_active = True
                     staff_profile.save()
                     
-                # TODO: Gửi email thông tin tài khoản
-                messages.success(request, f"Đã thêm nhân viên '{user.full_name or user.username}'. Mật khẩu: {password} (sẽ gửi về email)")
+                try:
+                    
+                    
+                    email_context = {
+                        'full_name': user.full_name or user.username,
+                        'username': user.username,
+                        'password': password,
+                        'email': user.email,
+                        'phone_number': phone_number,
+                        'position': data.get('position', 'Nhân viên'),
+                        'center_name': center.name,
+                        'support_phone': '0123 456 789',
+                    }
+                    html_content = render_to_string('emails/add_staff_success.html', email_context)
+                    
+                    email_msg = EmailMessage(
+                        subject=f'[BadmintonPro] Thông tin tài khoản nhân viên - {center.name}',
+                        body=html_content,
+                        to=[user.email],
+                    )
+                    email_msg.content_subtype = 'html'
+                    email_msg.send(fail_silently=True)
+                except Exception:
+                    pass  
+                
+                messages.success(request, f"Đã thêm nhân viên '{user.full_name or user.username}' thành công! Thông tin tài khoản đã gửi về email.")
             except Exception as e:
                 messages.error(request, f"Lỗi hệ thống: {str(e)}")
         else:
@@ -147,13 +236,12 @@ def add_staff_to_center(request, center_id):
     return redirect('manage_staff', center_id=center_id)
 
 
-@login_required
+@role_required('partner')
 def edit_staff_member(request, staff_id):
     """Sửa thông tin nhân viên"""
     staff_profile = get_object_or_404(StaffProfile, id=staff_id)
     center = staff_profile.center
     
-    # Kiểm tra quyền
     if center.partner != request.user.partner_profile:
         messages.error(request, "Bạn không có quyền chỉnh sửa nhân viên này!")
         return redirect('centers_management')
@@ -175,7 +263,7 @@ def edit_staff_member(request, staff_id):
     return redirect('manage_staff', center_id=center.id)
 
 
-@login_required
+@role_required('partner')
 @require_POST
 def delete_staff_member(request, staff_id):
     """Xóa (vô hiệu hóa) nhân viên"""
@@ -197,8 +285,7 @@ def delete_staff_member(request, staff_id):
     return redirect('manage_staff', center_id=center.id)
 
 
-@login_required
-
+@role_required('partner')
 def revenue_management(request):
 
     """Trang tổng quan - hiển thị danh sách center với doanh thu mini"""
@@ -244,7 +331,7 @@ def revenue_management(request):
 
 
 
-@login_required
+@role_required('partner')
 def revenue_center_detail(request, center_id):
     """Chi tiết doanh thu của 1 center cụ thể"""
     center = get_object_or_404(BadmintonCenter, pk=center_id, partner=request.user.partner_profile)
@@ -279,13 +366,38 @@ def revenue_center_detail(request, center_id):
         verified_at__date__gte=start_date
     )
     total_revenue = all_verified.aggregate(total=Sum('amount'))['total'] or 0
-    float
-
     total_revenue_int = int(total_revenue) if total_revenue else 0
 
-    cash_revenue = int(total_revenue_int * 0.4)
+    # Tính doanh thu Tiền Mặt (Booking cash + POS cash)
+    booking_cash = Booking.objects.filter(
+        court__center=center,
+        status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED],
+        date__gte=start_date,
+        payment_method=Booking.PaymentMethod.CASH
+    ).aggregate(total=Sum('total_price'))['total'] or 0
 
-    online_revenue = int(total_revenue_int * 0.6)
+    service_cash = ServiceOrder.objects.filter(
+        center=center,
+        created_at__date__gte=start_date,
+        payment_method=ServiceOrder.PaymentMethod.CASH
+    ).aggregate(total=Sum('total_amount'))['total'] or 0
+
+    # Tính doanh thu Chuyển khoản (Booking transfer + POS transfer)
+    booking_transfer = Booking.objects.filter(
+        court__center=center,
+        status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED],
+        date__gte=start_date,
+        payment_method=Booking.PaymentMethod.TRANSFER
+    ).aggregate(total=Sum('total_price'))['total'] or 0
+
+    service_transfer = ServiceOrder.objects.filter(
+        center=center,
+        created_at__date__gte=start_date,
+        payment_method=ServiceOrder.PaymentMethod.TRANSFER
+    ).aggregate(total=Sum('total_amount'))['total'] or 0
+
+    cash_revenue = int(booking_cash + service_cash)
+    online_revenue = int(booking_transfer + service_transfer)
 
     chart_labels = []
     chart_data = []
@@ -317,12 +429,12 @@ def revenue_center_detail(request, center_id):
     return render(request, 'partner/revenue_detail.html', context)
 
 
-@login_required
+@role_required('partner')
 def schedule_management(request,center_id):
     center = get_object_or_404(BadmintonCenter, pk=center_id)
     courts = Court.objects.filter(center=center, is_active=True)
     
-    # 1. Xử lý ngày lọc
+    # Lấy ngày lọc
     today = timezone.now().date()
     selected_date_str = request.GET.get('date')
     try:
@@ -330,18 +442,16 @@ def schedule_management(request,center_id):
     except ValueError:
         filter_date = today
 
-    # 2. Lấy các slot lẻ (Raw Bookings)
+    # Lấy các slot lẻ 
     raw_bookings = Booking.objects.filter(
         court__center=center,
         date=filter_date
     ).select_related('user', 'court').order_by('start_time')
 
-    # Lọc theo sân nếu có
     selected_court_id = request.GET.get('court_id')
     if selected_court_id:
         raw_bookings = raw_bookings.filter(court_id=selected_court_id)
 
-    # 3. THUẬT TOÁN GOM NHÓM (Grouping Algorithm)
     grouped_schedule = {}
     
     for b in raw_bookings:
@@ -353,39 +463,39 @@ def schedule_management(request,center_id):
             grouped_schedule[group_code] = {
                 'group_code': group_code,
                 'user': b.user,
-                'court_names': {b.court.name}, # Dùng Set để không bị trùng tên sân
+                'court_names': {b.court.name}, 
                 'start_time': b.start_time,
                 'end_time': b.end_time,
                 'total_price': 0,
                 'status': b.status,
-                'is_paid': False, # Logic check thanh toán
+                'is_paid': False,
                 'slots_count': 0
             }
         
-        # Cộng dồn thông tin
+        
         item = grouped_schedule[group_code]
         item['total_price'] += b.total_price
         item['slots_count'] += 1
         item['court_names'].add(b.court.name)
         
-        # Cập nhật thời gian Min - Max
+        
         if b.start_time < item['start_time']: item['start_time'] = b.start_time
         if b.end_time > item['end_time']: item['end_time'] = b.end_time
         
-        # Kiểm tra trạng thái thanh toán (Logic tạm: confirmed = đã cọc/thanh toán)
+        
         if b.status in ['confirmed', 'checked_in']:
             item['is_paid'] = True
 
     # Chuyển Dict thành List để gửi sang Template
     schedule_list = list(grouped_schedule.values())
     
-    # Sắp xếp lại danh sách theo giờ bắt đầu
+    
     schedule_list.sort(key=lambda x: x['start_time'])
 
     context = {
         'center': center,
         'courts': courts,
-        'schedule_list': schedule_list, # Dùng biến mới này thay vì 'bookings'
+        'schedule_list': schedule_list, 
         'today_date': today.strftime("%Y-%m-%d"),
         'filter_date': filter_date,
     }
@@ -393,7 +503,7 @@ def schedule_management(request,center_id):
     return render(request, 'partner/schedule.html', context)
 
 
-@login_required
+@role_required('partner')
 def customer_management(request, center_id):
     center = get_object_or_404(BadmintonCenter, pk=center_id, partner=request.user.partner_profile)
     
@@ -420,6 +530,9 @@ def customer_management(request, center_id):
     vip_customers = customers.filter(total_spent__gt=5000000).count()
     avg_spent = customers.aggregate(avg=Avg('total_spent'))['avg'] or 0
     
+    # Form thêm khách hàng mới
+    form = CustomerForm()
+
     context = {
         'center': center,
         'customers': customers,
@@ -428,15 +541,51 @@ def customer_management(request, center_id):
         'avg_spent': avg_spent,
         'keyword': keyword,
         'sort_by': sort_by,
+        'form': form,
     }
     return render(request, 'partner/customers.html', context)
 
-@login_required
+@role_required('partner')
+@require_POST
+def partner_add_customer(request, center_id):
+    center = get_object_or_404(BadmintonCenter, pk=center_id, partner=request.user.partner_profile)
+    form = CustomerForm(request.POST)
+    
+    if form.is_valid():
+        customer = form.save(commit=False)
+        customer.center = center
+        customer.save()
+        messages.success(request, f"Đã thêm khách hàng {customer.name} thành công.")
+    else:
+        for field, errors in form.errors.items():
+            for error in errors:
+                messages.error(request, f"Lỗi ở trường {field}: {error}")
+                
+    return redirect('customer_management', center_id=center_id)
+
+@role_required('partner')
+def partner_customer_history(request, customer_id):
+    customer = get_object_or_404(Customer, pk=customer_id, center__partner=request.user.partner_profile)
+    
+    # Lấy lịch sử giao dịch/đặt sân của khách tại trung tâm này
+    bookings = Booking.objects.filter(
+        customer=customer, 
+        court__center=customer.center
+    ).order_by('-date', '-start_time')
+    
+    context = {
+        'customer': customer,
+        'bookings': bookings,
+        'center': customer.center
+    }
+    return render(request, 'partner/customer_history.html', context)
+
+@role_required('partner')
 def centers_management(request):
     centers = BadmintonCenter.objects.filter(partner=request.user.partner_profile)
     center_form = BadmintonCenterForm()
     return render(request ,'partner/manage_centers.html', {'centers': centers, 'center_form': center_form})
-@login_required
+@role_required('partner')
 def partner_add_center(request):
     if request.method == 'POST':
         form = BadmintonCenterForm(request.POST, request.FILES)
@@ -453,7 +602,7 @@ def partner_add_center(request):
     return redirect('centers_management')
 
 
-@login_required
+@role_required('partner')
 def partner_edit_center(request,center_id):
     center = get_object_or_404(BadmintonCenter,id = center_id, partner=request.user.partner_profile)
     if request.method == 'POST':
@@ -470,7 +619,7 @@ def partner_edit_center(request,center_id):
             return redirect('partner_centers')
     return redirect('partner_centers')
 
-@login_required
+@role_required('partner')
 def partner_delete_center(request,center_id):
 
     center = get_object_or_404(BadmintonCenter,id = center_id, partner=request.user.partner_profile)
@@ -481,7 +630,7 @@ def partner_delete_center(request,center_id):
     return redirect('centers_management')
 
 
-@login_required
+@role_required('partner')
 def manage_courts(request,center_id):
     center = get_object_or_404(BadmintonCenter,id = center_id, partner=request.user.partner_profile)
     courts = center.courts.all()
@@ -493,7 +642,7 @@ def manage_courts(request,center_id):
     })
 
 
-@login_required
+@role_required('partner')
 def add_court(request,center_id):
     center = get_object_or_404(BadmintonCenter,id = center_id, partner=request.user.partner_profile)
     if request.method == 'POST':
@@ -509,7 +658,7 @@ def add_court(request,center_id):
             messages.error(request, "có lỗi xảy ra!")
     return redirect('manage_courts', center_id=center_id)          
 
-@login_required
+@role_required('partner')
 def edit_court(request,court_id):
     court = get_object_or_404(Court,id = court_id)
     center_id = court.center.id
@@ -523,7 +672,7 @@ def edit_court(request,court_id):
             messages.error(request, "có lỗi xảy ra!")
     return redirect('manage_courts', center_id=center_id)
 
-@login_required
+@role_required('partner')
 def delete_court(request,court_id):
     court = get_object_or_404(Court,id = court_id)
     center_id = court.center.id
@@ -533,21 +682,21 @@ def delete_court(request,court_id):
     return redirect('manage_courts', center_id=center_id)
 
 
-@login_required
+@role_required('partner')
 def transactions_management(request):
     """Danh sách giao dịch chờ xác nhận của Partner"""
-    # Lấy tất cả center thuộc partner
+    
     centers = BadmintonCenter.objects.filter(partner=request.user.partner_profile)
     
-    # Lấy tất cả booking_code prefix của các center này
+    
     booking_codes = Booking.objects.filter(
         court__center__in=centers
     ).values_list('booking_code', flat=True)
     
-    # Extract group codes (BK-YYYYMMDD-HHMMSS format, lấy phần trước số cuối)
+    # Extract group codes 
     group_codes = set()
     for code in booking_codes:
-        # VD: BK-20260124-163000-1 -> BK-20260124-163000
+        
         parts = code.rsplit('-', 1)
         if len(parts) > 1:
             group_codes.add(parts[0])
@@ -571,7 +720,7 @@ def transactions_management(request):
     return render(request, 'partner/transactions.html', context)
 
 
-@login_required
+@role_required('partner')
 @require_POST
 def approve_transaction(request, transaction_id):
     """Duyệt giao dịch + cộng điểm"""
@@ -600,6 +749,7 @@ def approve_transaction(request, transaction_id):
     return redirect('partner_transactions')
 
 
+@role_required('partner')
 def booking_court_history(request,center_id):
     center = get_object_or_404(BadmintonCenter, pk=center_id)
     if center.partner.user != request.user:
@@ -646,10 +796,10 @@ def booking_court_history(request,center_id):
         'transactions': transactions,
         'total_revenue': total_revenue,
     }
-    return render(request, 'partner/schedule.html', context)  # Template for transaction-based history
+    return render(request, 'partner/schedule.html', context)  
 
 
-@login_required
+@role_required('partner')
 @require_POST
 def partner_approve_transaction(request, transaction_id):
     trans = get_object_or_404(Transaction, id=transaction_id)
@@ -675,6 +825,48 @@ def partner_approve_transaction(request, transaction_id):
     return redirect_back(request, transaction_id)
 
 
+@role_required('partner')
+def service_orders_management(request):
+    """Danh sách hóa đơn dịch vụ của Partner"""
+    centers = BadmintonCenter.objects.filter(partner=request.user.partner_profile)
 
+    selected_center_id = request.GET.get('center_id')
+    if selected_center_id:
+        orders = ServiceOrder.objects.filter(center_id=selected_center_id, center__in=centers)
+    else:
+        orders = ServiceOrder.objects.filter(center__in=centers)
+
+    today = timezone.now().date()
+    selected_date_str = request.GET.get('date')
+    try:
+        selected_date = timezone.datetime.strptime(selected_date_str, "%Y-%m-%d").date() if selected_date_str else today
+    except ValueError:
+        selected_date = today
+
+    orders = orders.filter(created_at__date=selected_date).order_by('-created_at')
+
+    # Tổng hợp
+    stats = orders.aggregate(
+        total_revenue=Sum('total_amount'),
+        total_orders=Count('id'),
+    )
 
     
+    orders_with_items = []
+    for order in orders.prefetch_related('items__product').select_related('center'):
+        items = order.items.all()
+        orders_with_items.append({
+            'order': order,
+            'items': items,
+        })
+
+    context = {
+        'centers': centers,
+        'selected_center_id': selected_center_id,
+        'selected_date': selected_date,
+        'today': today,
+        'total_revenue': stats['total_revenue'] or 0,
+        'total_orders': stats['total_orders'] or 0,
+        'orders_with_items': orders_with_items,
+    }
+    return render(request, 'partner/service_orders.html', context)

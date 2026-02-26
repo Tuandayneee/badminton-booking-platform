@@ -27,5 +27,5 @@ COPY . /app/
 # 8. Mở cổng 8000 (Cổng mặc định của Django)
 EXPOSE 8000
 
-# 9. Lệnh chạy server khi container khởi động
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# 9. Lệnh chạy server khi container khởi động (Sử dụng Gunicorn cho production)
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]

@@ -1,5 +1,20 @@
 from django import forms
-from .models import BadmintonCenter, Amenity,Court
+from .models import BadmintonCenter, Amenity, Court, Customer
+
+class CustomerForm(forms.ModelForm):
+    class Meta:
+        model = Customer
+        fields = ['name', 'phone', 'email']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'VD: Nguyễn Văn A'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'VD: 0912345678'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'VD: email@example.com'}),
+        }
+        labels = {
+            'name': 'Họ và tên',
+            'phone': 'Số điện thoại',
+            'email': 'Email',
+        }
 
 class BadmintonCenterForm(forms.ModelForm):
     
@@ -21,7 +36,7 @@ class BadmintonCenterForm(forms.ModelForm):
         ]
         
         widgets = {
-            # 1. Các trường nhập liệu cơ bản
+           
             'name': forms.TextInput(attrs={
                 'class': 'form-control', 
                 'placeholder': 'Ví dụ: Sân Cầu Lông Cầu Giấy Arena'

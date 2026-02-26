@@ -1,7 +1,7 @@
 import os
 from celery import Celery
 
-# Thiết lập biến môi trường mặc định cho Django
+# bien moi truong mac dinh
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
 app = Celery('config')
