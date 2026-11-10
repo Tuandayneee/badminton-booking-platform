@@ -1,87 +1,136 @@
-# 🏸 BadmintonPro - Hệ Sinh Thái Quản Lý Đặt Sân Cầu Lông
+# 🏸 BadmintonPro — Real-Time Badminton Court Booking & Management Platform
 
-BadmintonPro là một nền tảng quản lý đặt sân cầu lông chuyên nghiệp, cung cấp hệ sinh thái từ Người Chơi đến Chủ Sân và Nhân Viên thu ngân. Dự án được tối ưu để hoạt động thời gian thực (real-time booking) và dễ dàng mở rộng.
+[![CI](https://github.com/Tuandayneee/badminton-booking-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/Tuandayneee/badminton-booking-platform/actions/workflows/ci.yml)
 
-## 🚀 Công Nghệ Sử Dụng (Tech Stack)
-
-### Backend
-- **Ngôn ngữ:** Python 3.x
-- **Framework Chính:** Django (MVT architecture)
-- **Microservice:** FastAPI (Xử lý các logic lock sân đồng thời, ngăn chặn việc 2 người đặt cùng lúc - Race Condition).
-- **Asynchronous Tasks:** Celery (Hàng đợi tác vụ bất đồng bộ, xử lý kịch bản hủy sân tự động, gửi email...).
-- **Cơ sở dữ liệu:** PostgreSQL (Lưu trữ dữ liệu quan hệ, transaction toàn vẹn).
-- **Cache / Message Broker:** Redis (Sử dụng làm môi trường đệm lưu khóa lock sân và là Broker cho Celery).
-
-### Frontend
-- **Ngôn ngữ:** HTML5, CSS3, JavaScript (Vanilla JS).
-- **Thư viện UI/UX:** Bootstrap 5 (Responsive UI), FontAwesome (Icons).
-- **Biểu đồ Analytics:** Chart.js (Vẽ biểu đồ hình tròn, biểu đồ đường doanh thu).
-
-### DevOps & Triển khai
-- **Containerization:** Docker & Docker Compose (Quản lý các container đồng bộ: Web Django, FastAPI, Celery Worker, PostgreSQL, Redis).
-- **Static / Media Serves:** WhiteNoise (Phục vụ static resources trong production).
+Nền tảng quản lý và đặt sân cầu lông toàn diện cho **Người chơi (Customer)**, **Nhân viên thu ngân (Staff)** và **Chủ sân (Partner)** — kết hợp Django (Monolith & Admin/POS/Dashboard), FastAPI (Realtime Search & Distributed Redis Slot Locking), Celery (Async Emails & TTL Auto-Cancel), PostgreSQL và Redis.
 
 ---
 
-## 🛠 Tính Năng Nổi Bật
+## 🏗 Kiến trúc hệ thống
 
-**1. Dành cho Khách Hàng (Người chơi)**
-- Đăng nhập/Đăng ký, bao gồm hỗ trợ Đăng nhập Mạng xã hội (Google, Github).
-- Xem danh sách sân, tìm kiếm sân trống theo giờ/ngày thông minh.
-- Giao diện "Booking Timeline" trực quan: Đặt sân giữ chỗ ngay lập tức qua API FastAPI.
-
-**2. Dành cho Nhân viên (Staff)**
-- Hệ thống POS bán hàng tại quầy (Nước, Cầu lông, Đồ ăn nhẹ).
-- Chọn phương thức thanh toán **Tiền Mặt** hoặc **Chuyển Khoản** linh hoạt cho các biên lai.
-
-**3. Dành cho Chủ Sân (Partner)**
-- Bảng điều khiển (Dashboard): Thống kê doanh thu thời gian thực. Theo dõi tổng thu theo biểu đồ đường 7 ngày. Phễu tỷ trọng thanh toán Tiền mặt vs Chuyển khoản (Doughnut Chart).
-- Quản lý CRM: Lưu trữ lịch sử đến sân, số tiền tổng chi tiêu của từng khách hàng.
-- Phân quyền nội bộ: Tạo và gán quyền chi nhánh cho các tài khoản thu ngân/nhân viên.
-
----
-
-## ⚙️ Hướng Dẫn Cài Đặt và Chạy (Local Development)
-
-Dự án được cấu hình bằng Docker, bạn chỉ cần một vài lệnh để hệ thống tự động khởi chạy môi trường:
-
-### Bước 1: Clone dự án và cấu hình biến môi trường
-```bash
-git clone https://github.com/your-username/badmintonpro.git
-cd badmintonpro
+```mermaid
+flowchart LR
+    Client["Browser (Customer / Staff / Partner)"] -->|HTTP + CSRF| Django["Django Web (Gunicorn :8000)"]
+    Client -->|Search Courts| FastAPI["FastAPI Service (Uvicorn :8001)"]
+    Django -->|Session Auth + HMAC Token| FastAPI
+    Django -->|ORM / Row Lock| Postgres[(PostgreSQL 15)]
+    FastAPI -->|asyncpg Read Query| Postgres
+    Django -->|Cache & Lock Check| Redis[(Redis)]
+    FastAPI -->|Atomic SETNX Lock| Redis
+    Django -->|Enqueue Tasks| Celery["Celery Worker & Beat"]
+    Celery -->|Broker| Redis
+    Celery -->|SMTP Email & TTL Cleanup| Postgres
 ```
-Tạo file `.env` từ file `.env.example` và thiết lập các API key/password tương ứng:
+
+### Điểm nhấn kỹ thuật & Bảo mật
+- **Chống Race Condition (Double Booking):** Kết hợp khóa phân tán Redis (`SET NX EX 600` qua FastAPI) + khóa hàng database (`SELECT ... FOR UPDATE` trong `transaction.atomic()`) + `UniqueConstraint` ở tầng PostgreSQL.
+- **Bảo vệ API giữ chỗ:** Trình duyệt gọi Django proxy (`/booking/api/lock-slot/`) đã xác thực session & CSRF; Django ký `X-Internal-Token` (HMAC-SHA256) gửi sang FastAPI — chặn giả mạo `user_id`.
+- **Chống Price Tampering & Âm kho:** Toàn bộ giá đặt sân (`Court.get_price_at_time`) và đơn POS (`Product.price`) được tính và kiểm tra tồn kho lại hoàn toàn trên server trong transaction nguyên tử.
+- **Phân quyền & IDOR Protection:** Kiểm tra quyền sở hữu cơ sở (`partner=request.user.partner_profile`) trên toàn bộ thao tác CRUD sân, nhân viên, lịch đặt, doanh thu và duyệt giao dịch.
+
+---
+
+## 🛠 Tech Stack
+
+- **Backend Core:** Python 3.13, Django 6.0, Django Allauth (Google / GitHub OAuth)
+- **Realtime Microservice:** FastAPI, Uvicorn, `asyncpg`, `redis.asyncio`
+- **Database & Cache:** PostgreSQL 15, Redis
+- **Background Jobs:** Celery Worker & Celery Beat (gửi email HTML, tự động hủy đơn quá hạn 10 phút)
+- **Reporting & Exports:** `openpyxl` (xuất báo cáo Excel `.xlsx`), Chart.js
+- **Frontend:** HTML5, CSS3, Bootstrap 5, Vanilla JS (DOM API an toàn chống XSS)
+- **DevOps & CI:** Docker, Docker Compose, WhiteNoise, GitHub Actions (`ruff` + `manage.py test`)
+
+---
+
+## ✨ Tính năng chính
+
+1. **Khách hàng (Customer)**
+   - Đăng ký/đăng nhập, quên/đặt lại mật khẩu qua email token, đăng nhập Google/GitHub.
+   - Tìm kiếm sân trống theo khu vực, ngày và khung giờ qua FastAPI.
+   - Chọn sân trực quan trên Booking Timeline (hỗ trợ giờ thường / giờ vàng), giữ chỗ 10 phút, thanh toán VietQR, theo dõi lịch sử & tích điểm nâng hạng thành viên (Bronze → Diamond).
+   - Trợ lý Chatbot hỗ trợ hỏi đáp nhanh.
+2. **Nhân viên (Staff)**
+   - Giao diện POS bán đồ uống/dịch vụ tại quầy (Tiền mặt / Chuyển khoản), trừ tồn kho nguyên tử.
+   - Thống kê doanh thu và hóa đơn dịch vụ theo ngày và biểu đồ 7 ngày.
+3. **Chủ sân (Partner)**
+   - Dashboard tổng quan doanh thu ngày, tỷ trọng tiền mặt vs chuyển khoản, biểu đồ 7 ngày.
+   - Quản lý cơ sở, sân, khung giờ vàng, nhân viên theo chi nhánh, CRM khách hàng.
+   - Duyệt giao dịch chuyển khoản (idempotent), tự động cập nhật doanh thu & điểm thưởng.
+   - Xuất báo cáo doanh thu, cơ sở, giao dịch ra file Excel (`.xlsx`).
+
+---
+
+## ⚙️ Cài đặt & Chạy dự án (Docker Compose)
+
+> **Lưu ý:** Nếu bạn chưa đổi tên repo trên GitHub từ `booking_batminton` sang `badminton-booking-platform`, hãy dùng đúng URL repo hiện tại của bạn khi clone.
+
+### 1. Clone repo & cấu hình biến môi trường
 ```bash
+git clone https://github.com/Tuandayneee/badminton-booking-platform.git
+cd badminton-booking-platform
 cp .env.example .env
 ```
+Điền các giá trị thật (như `SECRET_KEY`, `POSTGRES_PASSWORD`, `INTERNAL_LOCK_SECRET`, `EMAIL_*`) vào file `.env`.
 
-### Bước 2: Chạy Docker Compose
-Khởi động cụm dịch vụ ẩn dưới background bằng Docker Compose:
+### 2. Khởi chạy toàn bộ dịch vụ
 ```bash
 docker compose up -d --build
 ```
-Lệnh này sẽ tự động pull các image, cài đặt requirements, và khởi động: `db` (PostgreSQL), `redis`, `web` (Django), `fastapi`, và `celery`.
+Lệnh này sẽ khởi chạy 6 container: `db` (PostgreSQL), `redis`, `web` (Django), `celery`, `beat`, và `fastapi`.
 
-### Bước 3: Tạo Migrations (Nếu chạy lần đầu)
+### 3. Chạy Migration & Tạo Superuser
 ```bash
 docker compose exec web python manage.py migrate
-```
-
-### Bước 4: Tạo tài khoản Admin (Superuser)
-```bash
 docker compose exec web python manage.py createsuperuser
 ```
 
-### Bước 5: Truy cập 
-- Giao diện chính (Khách hàng & Partner): [http://localhost:8000](http://localhost:8000)
-- Trang admin quản trị Django: [http://localhost:8000/admin](http://localhost:8000/admin)
-- Endpoint FastAPI đặt lịch: [http://localhost:8001](http://localhost:8001)
+### 4. Truy cập hệ thống
+- Web App (Customer / Staff / Partner): `http://localhost:8000`
+- Django Admin: `http://localhost:8000/admin`
+- FastAPI Docs (Swagger): `http://localhost:8001/docs`
 
 ---
 
-## 🛡 Bảo Mật (Security Note)
-- File `.env` chứa các thông số quan trọng (Secret Key, DB credentials) đã được đưa vào `.gitignore`. Tuyệt đối không push file này lên repository public.
-- Mọi mật khẩu và API key sẽ được lấy tuần tự từ biến môi trường.
+## 🔐 Danh sách biến môi trường (`.env.example`)
+
+| Biến | Mô tả | Mặc định (Dev) |
+| :--- | :--- | :--- |
+| `SECRET_KEY` | Django secret key (bắt buộc khi `DEBUG=False`) | — |
+| `DEBUG` | Bật/tắt chế độ debug | `False` |
+| `ALLOWED_HOSTS` | Danh sách host hợp lệ (phân tách bằng dấu `,`) | `localhost,127.0.0.1` |
+| `CSRF_TRUSTED_ORIGINS` | Origins được phép gửi CSRF POST | `http://localhost:8000,http://127.0.0.1:8000` |
+| `DATABASE_URL` | Chuỗi kết nối PostgreSQL (`postgresql://...`) | — |
+| `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS`, `DB_PORT` | Tham số PostgreSQL (fallback nếu không dùng `DATABASE_URL`) | `db`, `badminton_db`, ... |
+| `USE_SQLITE` | Dùng SQLite cục bộ khi không chạy Docker | `False` |
+| `REDIS_URL` | Redis URL cho lock & Celery | `redis://redis:6379/0` |
+| `CACHE_REDIS_URL` | Redis URL cho Django Cache | `redis://redis:6379/1` |
+| `FASTAPI_PUBLIC_URL` | URL FastAPI phía trình duyệt gọi | `http://localhost:8001` |
+| `FASTAPI_INTERNAL_URL` | URL nội bộ Docker để Django gọi FastAPI | `http://fastapi:8001` |
+| `CORS_ORIGINS` | Origins cho phép CORS trên FastAPI | `http://localhost:8000,http://127.0.0.1:8000` |
+| `INTERNAL_LOCK_SECRET` | Secret HMAC-SHA256 ký token khóa sân giữa Django & FastAPI | — |
+| `SUPPORT_PHONE` | Hotline hiển thị trên email & trang xác nhận | `0900.000.000` |
+| `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` | Tài khoản SMTP gửi email thông báo | — |
 
 ---
-_Sản phẩm được code với 💚 dành cho cộng đồng yêu Cầu Lông Việt Nam._
+
+## 🧪 Chạy kiểm thử & Linter (Local)
+
+```bash
+# Cài dependencies (trong virtualenv)
+pip install -r requirements.txt
+pip install fastapi uvicorn asyncpg pydantic ruff
+
+# Kiểm tra linter & migrations
+ruff check .
+USE_SQLITE=True DEBUG=True python manage.py check
+USE_SQLITE=True DEBUG=True python manage.py makemigrations --check --dry-run
+
+# Chạy toàn bộ unit & integration tests (tự động dùng SQLite in-memory & LocMemCache)
+python manage.py test --verbosity=2
+```
+
+---
+
+## 📸 Screenshots
+
+> Thêm ảnh chụp màn hình thực tế của các trang **Booking Timeline**, **Partner Dashboard**, và **Staff POS** vào thư mục `docs/screenshots/` và nhúng vào đây sau khi chạy Docker local.

@@ -220,7 +220,7 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Badminton Pro <noreply@badmintonpro.vn>')
 
-if TESTING:
+if TESTING or USE_SQLITE:
     STORAGES = {
         'default': {
             'BACKEND': 'django.core.files.storage.FileSystemStorage',
@@ -229,7 +229,8 @@ if TESTING:
             'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
         },
     }
-    EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+    if TESTING:
+        EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',

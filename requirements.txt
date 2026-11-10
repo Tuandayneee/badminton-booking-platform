@@ -19,5 +19,7 @@ whitenoise>=6.5.0
 openpyxl>=3.1.0
 dj-database-url==3.1.2
 google-generativeai>=0.8.0
-
-
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+asyncpg>=0.29.0
+pydantic>=2.6.0

@@ -10,9 +10,12 @@ def get_bank():
     """
     Trả về danh sách ngân hàng từ VietQR API (cache 24h).
     """
-    data = cache.get('vietqr_banks_raw_data')
-    if data:
-        return data
+    try:
+        data = cache.get('vietqr_banks_raw_data')
+        if data:
+            return data
+    except Exception as exc:
+        logger.warning("Cache read error in get_bank: %s", exc)
 
     for attempt in range(2):
         try:
@@ -25,7 +28,10 @@ def get_bank():
                 result = response.json()
                 if result.get('code') == '00':
                     raw_data = result.get('data', [])
-                    cache.set('vietqr_banks_raw_data', raw_data, 86400)
+                    try:
+                        cache.set('vietqr_banks_raw_data', raw_data, 86400)
+                    except Exception as exc:
+                        logger.warning("Cache write error in get_bank: %s", exc)
                     return raw_data
         except requests.RequestException as exc:
             logger.warning("Error fetching VietQR banks (attempt %d): %s", attempt + 1, exc)
