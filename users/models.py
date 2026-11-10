@@ -12,13 +12,13 @@ class User(AbstractUser):
     full_name = models.CharField(max_length=150, blank=True)
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
-    
+
 
     def __str__(self):
         return self.username
-    
-   
-    
+
+
+
 
 class CustomerProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='customer_profile')
@@ -46,7 +46,7 @@ class CustomerProfile(models.Model):
 
 class PartnerProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='partner_profile')
-    
+
     bank_name = models.CharField(max_length=100, blank=True, verbose_name="Tên ngân hàng")
     bank_bin = models.CharField(max_length=20, blank=True, verbose_name="Mã BIN ngân hàng")
     bank_account_number = models.CharField(max_length=30, blank=True, verbose_name="Số tài khoản")
@@ -58,7 +58,7 @@ class PartnerProfile(models.Model):
     def __str__(self):
         name_display = self.contact_person if self.contact_person else self.user.username
         return f"Đối tác: {name_display}"
-    
+
 
 class StaffProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='staff_profile')
@@ -70,14 +70,14 @@ class StaffProfile(models.Model):
     def __str__(self):
         center_name = self.center.name if self.center else "Chưa phân công"
         return f"Nhân viên: {self.user.username} - {center_name}"
-    
+
 
 @receiver(post_save, sender=User)
 def create_staff_profile(sender, instance, created, **kwargs):
     if created and instance.role == User.Role.STAFF:
         StaffProfile.objects.create(user=instance)
 
-        
+
 @receiver(post_save, sender=User)
 def create_customer_profile(sender, instance, created, **kwargs):
     if created and instance.role == User.Role.CUSTOMER:

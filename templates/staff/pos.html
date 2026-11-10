@@ -9,7 +9,7 @@
 {% block content %}
 <div class="container-fluid" style="padding-top: 90px; padding-bottom: 20px; min-height: 100vh; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);">
     <div class="row g-4 p-3" style="height: calc(100vh - 110px);">
-        
+
         <!-- CỘT TRÁI: DANH SÁCH SẢN PHẨM -->
         <div class="col-lg-8 h-100 d-flex flex-column">
             <div class="card border-0 shadow-lg rounded-4 h-100">
@@ -26,9 +26,9 @@
                                 <span class="input-group-text bg-white border-end-0">
                                     <i class="fa-solid fa-magnifying-glass text-muted"></i>
                                 </span>
-                                <input type="text" 
-                                       id="searchProduct" 
-                                       class="form-control border-start-0 ps-0" 
+                                <input type="text"
+                                       id="searchProduct"
+                                       class="form-control border-start-0 ps-0"
                                        placeholder="Tìm sản phẩm...">
                             </div>
                             <a href="{% url 'home' %}" class="btn btn-outline-secondary rounded-pill px-3">
@@ -37,16 +37,17 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="card-body p-4 overflow-auto" style="flex: 1;">
                     <div class="row g-3" id="productsGrid">
                         {% for product in products %}
                         <div class="col-6 col-md-4 col-xl-3 product-item" data-name="{{ product.name|lower }}">
-                            <div class="product-card h-100 {% if product.stock_quantity == 0 %}disabled{% endif %}" 
-                                 {% if product.stock_quantity > 0 %}
-                                 onclick="addToCart({{ product.id }}, '{{ product.name }}', {{ product.price }}, '{{ product.image.url|default:'' }}')"
-                                 {% endif %}
-                                 data-id="{{ product.id }}">
+                            <div class="product-card h-100 {% if product.stock_quantity == 0 %}disabled{% endif %}"
+                                 data-id="{{ product.id }}"
+                                 data-product-name="{{ product.name }}"
+                                 data-price="{{ product.price }}"
+                                 data-stock="{{ product.stock_quantity }}"
+                                 data-image="{% if product.image %}{{ product.image.url }}{% endif %}">
                                 <div class="product-img-wrapper">
                                     {% if product.image %}
                                         <img src="{{ product.image.url }}" alt="{{ product.name }}">
@@ -86,7 +87,7 @@
         <!-- CỘT PHẢI: GIỎ HÀNG -->
         <div class="col-lg-4 h-100" style="overflow-y: auto;">
             <div class="card border-0 shadow-lg rounded-4 h-100 d-flex flex-column">
-                <div class="card-header bg-gradient text-white border-0 pt-4 pb-3 px-4 rounded-top-4" 
+                <div class="card-header bg-gradient text-white border-0 pt-4 pb-3 px-4 rounded-top-4"
                      style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); flex-shrink: 0;">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="fw-bold mb-0">
@@ -95,23 +96,18 @@
                         <span class="badge bg-white text-primary fs-6 px-3 py-2 rounded-pill" id="cartCount">0</span>
                     </div>
                 </div>
-                
+
                 <div class="card-body p-0 d-flex flex-column" style="flex: 1; min-height: 0; overflow-y: auto;">
-                    <!-- Cart Empty State -->
                     <div id="cartEmpty" class="text-center py-5 flex-grow-1 d-flex flex-column justify-content-center">
                         <i class="fa-solid fa-shopping-basket fa-3x text-muted mb-3"></i>
                         <p class="text-muted mb-1">Chưa có sản phẩm</p>
                         <small class="text-secondary">Click sản phẩm bên trái để thêm</small>
                     </div>
-                    
-                    <!-- Cart Items -->
-                    <ul class="list-group list-group-flush overflow-auto" id="cartItems" style="flex: 1;">
-                        <!-- Items được render bằng JS -->
-                    </ul>
+
+                    <ul class="list-group list-group-flush overflow-auto" id="cartItems" style="flex: 1;"></ul>
                 </div>
-                
+
                 <div class="card-footer bg-light border-0 p-4 rounded-bottom-4" style="flex-shrink: 0;">
-                    <!-- Tổng tiền -->
                     <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
                         <span class="text-muted">Tạm tính:</span>
                         <span class="fs-5 fw-bold text-dark" id="cartSubtotal">0đ</span>
@@ -120,32 +116,30 @@
                         <span class="fs-5 fw-bold text-dark">Tổng cộng:</span>
                         <span class="fs-3 fw-bold text-primary" id="cartTotal">0đ</span>
                     </div>
-                    
-                    <!-- Form thanh toán -->
+
                     <form method="POST" id="checkoutForm">
                         {% csrf_token %}
                         <input type="hidden" name="cart_data" id="cartDataInput">
                         <input type="hidden" name="center_id" value="{{ center.id }}">
-                        
+
                         <div class="mb-3">
                             <label class="form-label small text-muted fw-bold">
                                 <i class="fa-solid fa-user me-1"></i>Nhân viên bán hàng
                             </label>
-                            <input type="text" 
-                                   name="staff_name" 
-                                   class="form-control rounded-3 bg-white" 
+                            <input type="text"
+                                   name="staff_name"
+                                   class="form-control rounded-3 bg-white"
                                    placeholder="Nhập tên nhân viên"
                                    value="{{ request.user.full_name|default:request.user.username }}"
                                    required>
                         </div>
-                        
-                        <!-- Nút thanh toán -->
+
                         <input type="hidden" name="payment_method" id="paymentMethodInput" value="cash">
-                        
+
                         <div class="row g-2 mb-2">
                             <div class="col-6">
-                                <button type="button" 
-                                        class="btn w-100 py-3 rounded-3 fw-bold text-white btn-checkout-option" 
+                                <button type="button"
+                                        class="btn w-100 py-3 rounded-3 fw-bold text-white btn-checkout-option"
                                         onclick="submitCheckout('cash')"
                                         disabled
                                         style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
@@ -153,8 +147,8 @@
                                 </button>
                             </div>
                             <div class="col-6">
-                                <button type="button" 
-                                        class="btn w-100 py-3 rounded-3 fw-bold text-white btn-checkout-option" 
+                                <button type="button"
+                                        class="btn w-100 py-3 rounded-3 fw-bold text-white btn-checkout-option"
                                         onclick="submitCheckout('transfer')"
                                         disabled
                                         style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
@@ -175,7 +169,6 @@
 </div>
 
 <style>
-/* ===== PRODUCT CARD STYLES ===== */
 .product-card {
     background: #fff;
     border-radius: 16px;
@@ -267,7 +260,6 @@
     text-align: center;
 }
 
-/* ===== CART ITEM STYLES ===== */
 .cart-item {
     padding: 14px 18px;
     border-bottom: 1px solid #f1f5f9;
@@ -317,7 +309,6 @@
     font-size: 1rem;
 }
 
-/* ===== ANIMATIONS ===== */
 @keyframes addedToCart {
     0% { transform: scale(1); }
     50% { transform: scale(1.08); box-shadow: 0 0 20px rgba(102, 126, 234, 0.5); }
@@ -339,39 +330,50 @@
 
 {% block extra_js %}
 <script>
-    // ===== CART STATE =====
-    let cart = {};  // { productId: { name, price, qty, image } }
+    let cart = {};
 
-    // ===== FUNCTIONS =====
-    function addToCart(id, name, price, image) {
+    document.querySelectorAll('.product-card:not(.disabled)').forEach(card => {
+        card.addEventListener('click', () => {
+            const id = card.dataset.id;
+            const name = card.dataset.productName;
+            const price = parseFloat(card.dataset.price || '0');
+            const stock = parseInt(card.dataset.stock || '0', 10);
+            const image = card.dataset.image || '';
+            addToCart(id, name, price, image, stock);
+        });
+    });
+
+    function addToCart(id, name, price, image, stock) {
         if (cart[id]) {
+            if (stock && cart[id].qty >= stock) {
+                alert('Số lượng đã đạt mức tồn kho hiện tại!');
+                return;
+            }
             cart[id].qty += 1;
         } else {
-            cart[id] = { name, price, qty: 1, image };
+            cart[id] = { name, price, qty: 1, image, stock };
         }
-        
-        // Animation effect
+
         const card = document.querySelector(`.product-card[data-id="${id}"]`);
         if (card) {
             card.classList.add('added');
             setTimeout(() => card.classList.remove('added'), 350);
         }
-        
+
         renderCart();
     }
 
     function updateQty(id, delta) {
-        if (cart[id]) {
-            cart[id].qty += delta;
-            if (cart[id].qty <= 0) {
-                delete cart[id];
-            }
+        if (!cart[id]) return;
+        const nextQty = cart[id].qty + delta;
+        if (cart[id].stock && nextQty > cart[id].stock) {
+            alert('Số lượng vượt quá tồn kho hiện tại!');
+            return;
         }
-        renderCart();
-    }
-
-    function removeFromCart(id) {
-        delete cart[id];
+        cart[id].qty = nextQty;
+        if (cart[id].qty <= 0) {
+            delete cart[id];
+        }
         renderCart();
     }
 
@@ -390,9 +392,9 @@
         const cartDataInput = document.getElementById('cartDataInput');
 
         const keys = Object.keys(cart);
-        
+        cartItems.innerHTML = '';
+
         if (keys.length === 0) {
-            cartItems.innerHTML = '';
             cartItems.classList.add('d-none');
             cartEmpty.classList.remove('d-none');
             cartEmpty.classList.add('d-flex');
@@ -409,7 +411,7 @@
         cartItems.classList.remove('d-none');
         checkoutBtns.forEach(btn => btn.disabled = false);
 
-        let html = '';
+        const fragment = document.createDocumentFragment();
         let total = 0;
         let totalItems = 0;
 
@@ -419,38 +421,63 @@
             total += subtotal;
             totalItems += item.qty;
 
-            html += `
-                <li class="cart-item d-flex align-items-center justify-content-between">
-                    <div class="flex-grow-1 pe-2">
-                        <div class="cart-item-name">${item.name}</div>
-                        <div class="cart-item-price">${formatPrice(item.price)} × ${item.qty}</div>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="d-flex align-items-center">
-                            <button type="button" class="btn btn-outline-secondary qty-btn" onclick="updateQty(${id}, -1)">
-                                <i class="fa-solid fa-minus"></i>
-                            </button>
-                            <span class="qty-value">${item.qty}</span>
-                            <button type="button" class="btn btn-outline-primary qty-btn" onclick="updateQty(${id}, 1)">
-                                <i class="fa-solid fa-plus"></i>
-                            </button>
-                        </div>
-                        <span class="cart-item-subtotal ms-2">${formatPrice(subtotal)}</span>
-                    </div>
-                </li>
-            `;
+            const li = document.createElement('li');
+            li.className = 'cart-item d-flex align-items-center justify-content-between';
+
+            const leftDiv = document.createElement('div');
+            leftDiv.className = 'flex-grow-1 pe-2';
+
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'cart-item-name';
+            nameDiv.textContent = item.name;
+
+            const priceDiv = document.createElement('div');
+            priceDiv.className = 'cart-item-price';
+            priceDiv.textContent = `${formatPrice(item.price)} × ${item.qty}`;
+
+            leftDiv.append(nameDiv, priceDiv);
+
+            const rightDiv = document.createElement('div');
+            rightDiv.className = 'd-flex align-items-center gap-2';
+
+            const qtyWrap = document.createElement('div');
+            qtyWrap.className = 'd-flex align-items-center';
+
+            const minusBtn = document.createElement('button');
+            minusBtn.type = 'button';
+            minusBtn.className = 'btn btn-outline-secondary qty-btn';
+            minusBtn.innerHTML = '<i class="fa-solid fa-minus"></i>';
+            minusBtn.addEventListener('click', () => updateQty(id, -1));
+
+            const qtyVal = document.createElement('span');
+            qtyVal.className = 'qty-value';
+            qtyVal.textContent = String(item.qty);
+
+            const plusBtn = document.createElement('button');
+            plusBtn.type = 'button';
+            plusBtn.className = 'btn btn-outline-primary qty-btn';
+            plusBtn.innerHTML = '<i class="fa-solid fa-plus"></i>';
+            plusBtn.addEventListener('click', () => updateQty(id, 1));
+
+            qtyWrap.append(minusBtn, qtyVal, plusBtn);
+
+            const subtotalSpan = document.createElement('span');
+            subtotalSpan.className = 'cart-item-subtotal ms-2';
+            subtotalSpan.textContent = formatPrice(subtotal);
+
+            rightDiv.append(qtyWrap, subtotalSpan);
+            li.append(leftDiv, rightDiv);
+            fragment.appendChild(li);
         });
 
-        cartItems.innerHTML = html;
-        cartCount.textContent = totalItems;
+        cartItems.appendChild(fragment);
+        cartCount.textContent = String(totalItems);
         cartSubtotal.textContent = formatPrice(total);
         cartTotal.textContent = formatPrice(total);
-        
-        // Prepare data for form submission
+
         const cartData = keys.map(id => ({
-            product_id: parseInt(id),
+            product_id: parseInt(id, 10),
             quantity: cart[id].qty,
-            price: cart[id].price
         }));
         cartDataInput.value = JSON.stringify(cartData);
     }
@@ -459,7 +486,6 @@
         return new Intl.NumberFormat('vi-VN').format(price) + 'đ';
     }
 
-    // ===== SEARCH =====
     document.getElementById('searchProduct').addEventListener('input', function(e) {
         const query = e.target.value.toLowerCase();
         document.querySelectorAll('.product-item').forEach(item => {
@@ -468,7 +494,6 @@
         });
     });
 
-    // ===== FORM SUBMIT =====
     document.getElementById('checkoutForm').addEventListener('submit', function(e) {
         if (Object.keys(cart).length === 0) {
             e.preventDefault();
@@ -476,7 +501,6 @@
         }
     });
 
-    // Handle dual checkout buttons
     function submitCheckout(paymentMethod) {
         if (Object.keys(cart).length === 0) {
             alert('Vui lòng thêm sản phẩm vào giỏ hàng!');

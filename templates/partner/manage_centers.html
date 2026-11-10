@@ -11,20 +11,24 @@
         <div>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-1 small text-muted">
-                    <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-secondary">Hệ thống sân bãi</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'centers_management' %}" class="text-decoration-none text-secondary">Hệ thống sân bãi</a></li>
                     <li class="breadcrumb-item active text-dark" aria-current="page">Danh sách cơ sở</li>
                 </ol>
             </nav>
             <h3 class="fw-bold text-dark mb-0 ls-tight">Quản lý Cơ sở</h3>
         </div>
-        
-        <button class="btn btn-pro btn-pro-primary shadow-sm px-4" 
-                data-bs-toggle="modal" 
-                data-bs-target="#addCenterModal"
-                data-mode="add" 
-                data-action="{% url 'partner_add_center' %}">
-            <i class="fa-solid fa-plus me-2"></i>Thêm Cơ sở mới
-        </button>
+        <div class="d-flex gap-2">
+            <a href="{% url 'partner_export_centers' %}" class="btn btn-success shadow-sm px-4">
+                <i class="fa-solid fa-file-excel me-2"></i>Xuất Excel
+            </a>
+            <button class="btn btn-pro btn-pro-primary shadow-sm px-4" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#addCenterModal"
+                    data-mode="add" 
+                    data-action="{% url 'partner_add_center' %}">
+                <i class="fa-solid fa-plus me-2"></i>Thêm Cơ sở mới
+            </button>
+        </div>
     </div>
 
     <div class="card-modern overflow-hidden fade-in-up" style="animation-delay: 0.1s;">

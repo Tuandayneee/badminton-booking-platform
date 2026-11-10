@@ -48,7 +48,7 @@
                 </select>
 
                 <button type="submit" class="btn btn-dark btn-sm px-3 ms-1">Lọc</button>
-                <a href="{% url 'booking_court_history' center.id %}" class="btn btn-light btn-sm px-3 border"><i class="fa-solid fa-rotate"></i></a>
+                <a href="{% url 'schedule_management' center.id %}" class="btn btn-light btn-sm px-3 border"><i class="fa-solid fa-rotate"></i></a>
             </form>
 
             <button class="btn btn-outline-secondary btn-sm px-3 border-0">
@@ -156,10 +156,10 @@
                                         <i class="fa-solid fa-ellipsis text-secondary"></i>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-3">
-                                        <li><a class="dropdown-item py-2 small" href="#"><i class="fa-regular fa-eye me-2 text-muted"></i>Xem chi tiết</a></li>
+                                        <li><a class="dropdown-item py-2 small" href="javascript:Swal.fire('Thông tin', 'Tính năng xem chi tiết đang phát triển', 'info')"><i class="fa-regular fa-eye me-2 text-muted"></i>Xem chi tiết</a></li>
                                         {% if not trans.is_verified %}
                                             <li><hr class="dropdown-divider"></li>
-                                            <li><a class="dropdown-item py-2 small text-danger" href="#"><i class="fa-solid fa-ban me-2"></i>Từ chối</a></li>
+                                            <li><a class="dropdown-item py-2 small text-danger" href="javascript:Swal.fire('Cảnh báo', 'Tính năng từ chối đang cập nhật', 'warning')"><i class="fa-solid fa-ban me-2"></i>Từ chối</a></li>
                                         {% endif %}
                                     </ul>
                                 </div>

@@ -1,0 +1,88 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Hướng dẫn đặt sân - Badminton Pro{% endblock %}
+
+{% block content %}
+<section class="py-5" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 280px;">
+    <div class="container py-5 text-center">
+        <span class="badge bg-info bg-opacity-25 text-info mb-3 px-3 py-2 rounded-pill fw-bold text-uppercase" style="font-size: 0.7rem;">
+            <i class="fa-solid fa-book-open me-1"></i> Hướng dẫn
+        </span>
+        <h1 class="display-5 fw-bold text-white mb-3">Hướng dẫn đặt sân</h1>
+        <p class="text-white-50 mb-0">Chỉ với 4 bước đơn giản, bạn đã có ngay sân cầu lông như ý!</p>
+    </div>
+</section>
+
+<section class="py-5 bg-white">
+    <div class="container" style="max-width: 900px;">
+        <div class="row g-4 relative">
+            <!-- Step 1 -->
+            <div class="col-12 fade-in-up">
+                <div class="card border-0 bg-body rounded-4 p-4 shadow-sm">
+                    <div class="d-flex align-items-center gap-4">
+                        <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 64px; height: 64px; font-size: 24px; font-weight: bold;">
+                            1
+                        </div>
+                        <div>
+                            <h4 class="fw-bold text-dark mb-2">Tìm kiếm sân</h4>
+                            <p class="text-secondary mb-0 lh-lg">Tại trang chủ, bạn có thể nhập <strong>khu vực</strong>, <strong>ngày chơi</strong> và <strong>giờ bắt đầu</strong> vào thanh tìm kiếm nhanh. Hệ thống sẽ tự động lọc ra các sân còn trống phù hợp với yêu cầu của bạn. Bạn cũng có thể xem danh sách toàn bộ các sân nổi bật trên hệ thống.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="col-12 fade-in-up" style="animation-delay: 0.1s;">
+                <div class="card border-0 bg-body rounded-4 p-4 shadow-sm">
+                    <div class="d-flex align-items-center gap-4">
+                        <div class="step-number bg-success text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 64px; height: 64px; font-size: 24px; font-weight: bold;">
+                            2
+                        </div>
+                        <div>
+                            <h4 class="fw-bold text-dark mb-2">Chọn sân và khung giờ</h4>
+                            <p class="text-secondary mb-0 lh-lg">Click vào sân bạn muốn đặt để xem thông tin chi tiết (giá cả, tiện ích, hình ảnh). Sau đó, chọn <strong>ngày</strong> và tích chọn các <strong>khung giờ trống</strong> (màu xanh). Bạn có thể chọn nhiều khung giờ liên tiếp hoặc chọn nhiều sân cùng lúc.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="col-12 fade-in-up" style="animation-delay: 0.2s;">
+                <div class="card border-0 bg-body rounded-4 p-4 shadow-sm">
+                    <div class="d-flex align-items-center gap-4">
+                        <div class="step-number bg-warning text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 64px; height: 64px; font-size: 24px; font-weight: bold;">
+                            3
+                        </div>
+                        <div>
+                            <h4 class="fw-bold text-dark mb-2">Thanh toán</h4>
+                            <p class="text-secondary mb-0 lh-lg">Kiểm tra lại thông tin đơn hàng và tổng tiền. Tiến hành thanh toán qua các cổng thanh toán an toàn như <strong>VNPAY, Momo, hoặc chuyển khoản ngân hàng</strong>. Lưu ý bạn có thời gian 10 phút để hoàn tất thanh toán trước khi slot bị hủy.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="col-12 fade-in-up" style="animation-delay: 0.3s;">
+                <div class="card border-0 bg-body rounded-4 p-4 shadow-sm">
+                    <div class="d-flex align-items-center gap-4">
+                        <div class="step-number bg-info text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 64px; height: 64px; font-size: 24px; font-weight: bold;">
+                            4
+                        </div>
+                        <div>
+                            <h4 class="fw-bold text-dark mb-2">Xác nhận và đến sân</h4>
+                            <p class="text-secondary mb-0 lh-lg">Sau khi thanh toán thành công, bạn sẽ nhận được thông báo xác nhận và mã đơn hàng (QR Code). Khi đến sân, bạn chỉ cần đưa mã này cho nhân viên để nhận sân. Chúc bạn có những trận cầu thật cháy!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5 fade-in-up" style="animation-delay: 0.4s;">
+            <a href="{% url 'home' %}" class="btn btn-primary rounded-pill px-5 py-3 fw-bold shadow-sm">
+                <i class="fa-solid fa-magnifying-glass me-2"></i>Tìm sân ngay
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

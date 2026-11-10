@@ -18,8 +18,8 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt /app/
 
 # 6. Cài đặt các thư viện Python
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip --retries 5 --timeout 60
+RUN pip install -r requirements.txt --retries 5 --timeout 60
 
 # 7. Copy toàn bộ code dự án vào container
 COPY . /app/

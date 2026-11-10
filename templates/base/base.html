@@ -4,14 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <title>{% block title %}Badminton Pro - Đặt sân đỉnh cao{% endblock %}</title>
-    
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="{% static 'css/style.css' %}" rel="stylesheet">
-    
+    <link href="{% static 'css/chatbot.css' %}" rel="stylesheet">
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+
     {% block extra_css %}{% endblock %}
 </head>
 <body class="d-flex flex-column min-vh-100 {% block body_class %}{% endblock %}">
@@ -19,20 +21,20 @@
     {% block navbar %}
     <nav class="navbar navbar-expand-lg navbar-light fixed-top navbar-glass shadow-sm">
         <div class="container">
-            <a class="navbar-brand fs-3 d-flex align-items-center" href="{% if user.is_authenticated %}{% if user.role == 'partner' %}{% url 'partner_dashboard' %}{% elif user.role == 'staff' %}{% url 'pos_sales' %}{% else %}{% url 'home' %}{% endif %}{% else %}{% url 'home' %}{% endif %}"> 
+            <a class="navbar-brand fs-3 d-flex align-items-center" href="{% if user.is_authenticated %}{% if user.role == 'partner' %}{% url 'partner_dashboard' %}{% elif user.role == 'staff' %}{% url 'pos_sales' %}{% else %}{% url 'home' %}{% endif %}{% else %}{% url 'home' %}{% endif %}">
                 <i class="fa-solid fa-shuttlecock me-2 text-primary"></i>Badminton Pro
             </a>
-            
+
             <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center gap-2 gap-lg-4">
                     <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Trang chủ</a></li>
 
                     {% if user.is_authenticated %}
-                        
+
                         {% if user.role == 'partner' %}
                             <li class="nav-item">
                                 <a class="btn btn-outline-primary rounded-pill px-4 fw-bold" href="{% url 'partner_dashboard' %}">
@@ -54,8 +56,7 @@
 
                         {% else %}
                             <li class="nav-item"><a class="nav-link" href="{% url 'home' %}#courts">Sân bãi</a></li>
-                            
-                            
+
                             {% if user.role == 'customer' %}
                                 <li class="nav-item d-none d-lg-block">
                                     <div class="d-flex flex-column align-items-end lh-1">
@@ -76,11 +77,11 @@
                                 {% if user.avatar %}
                                     <img src="{{ user.avatar.url }}" class="rounded-circle border" width="32" height="32" style="object-fit:cover;">
                                 {% else %}
-                                    <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=0d6efd&color=fff&bold=true" class="rounded-circle border" width="32"> 
+                                    <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=0d6efd&color=fff&bold=true" class="rounded-circle border" width="32">
                                 {% endif %}
                                 <span class="fw-bold text-dark small d-none d-md-block">{{ user.full_name|default:user.username }}</span>
                             </a>
-                            
+
                             <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-3 p-2 animate-slide-down">
                                 {% if user.role == 'partner' %}
                                     <li><a class="dropdown-item rounded-3 py-2" href="{% url 'partner_dashboard' %}"><i class="fa-solid fa-gauge me-2 text-primary"></i>Dashboard</a></li>
@@ -94,7 +95,7 @@
                                     <li><a class="dropdown-item rounded-3 py-2" href="{% url 'customer_profile' %}"><i class="fa-solid fa-user-gear me-2 text-info"></i>Hồ sơ cá nhân</a></li>
                                     <li><a class="dropdown-item rounded-3 py-2" href="{% url 'change_password' %}"><i class="fa-solid fa-key me-2 text-warning"></i>Đổi mật khẩu</a></li>
                                 {% endif %}
-                                
+
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item rounded-3 py-2 text-danger fw-medium" href="{% url 'logout' %}"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Đăng xuất</a></li>
                             </ul>
@@ -125,7 +126,7 @@
                 <div class="col-md-4">
                     <h4 class="fw-bold mb-3 text-white"><i class="fa-solid fa-shuttlecock me-2 text-primary"></i>Badminton Pro</h4>
                     <p class="text-secondary small lh-lg">
-                        Nền tảng đặt sân cầu lông số 1 Việt Nam. <br>
+                        Nền tảng đặt sân cầu lông hàng đầu Việt Nam. <br>
                         Kết nối đam mê, nâng tầm sức khỏe.
                     </p>
                     <div class="d-flex gap-3 mt-3">
@@ -134,36 +135,36 @@
                         <a href="#" class="text-white hover-primary"><i class="fa-brands fa-youtube fa-lg"></i></a>
                     </div>
                 </div>
-                
+
                 <div class="col-md-2">
                     <h6 class="fw-bold text-white mb-3">Về chúng tôi</h6>
-                    <a href="#" class="footer-link small">Giới thiệu</a>
-                    <a href="#" class="footer-link small">Điều khoản</a>
-                    <a href="#" class="footer-link small">Chính sách bảo mật</a>
+                    <a href="{% url 'about' %}" class="footer-link small">Giới thiệu</a>
+                    <a href="{% url 'terms' %}" class="footer-link small">Điều khoản</a>
+                    <a href="{% url 'privacy' %}" class="footer-link small">Chính sách bảo mật</a>
                 </div>
 
                 <div class="col-md-2">
                     <h6 class="fw-bold text-white mb-3">Hỗ trợ</h6>
-                    <a href="#" class="footer-link small">Hướng dẫn đặt sân</a>
-                    <a href="#" class="footer-link small">Liên hệ đối tác</a>
-                    <a href="#" class="footer-link small">Câu hỏi thường gặp</a>
+                    <a href="{% url 'booking_guide' %}" class="footer-link small">Hướng dẫn đặt sân</a>
+                    <a href="{% url 'contact_partner' %}" class="footer-link small">Liên hệ đối tác</a>
+                    <a href="{% url 'faq' %}" class="footer-link small">Câu hỏi thường gặp</a>
                 </div>
 
                 <div class="col-md-3">
                     <h6 class="fw-bold text-white mb-3">Liên hệ</h6>
                     <ul class="list-unstyled small text-secondary">
-                        <li class="mb-2"><i class="fa-solid fa-phone me-2 text-primary"></i> 0912.345.678</li>
+                        <li class="mb-2"><i class="fa-solid fa-phone me-2 text-primary"></i> {{ SUPPORT_PHONE }}</li>
                         <li class="mb-2"><i class="fa-solid fa-envelope me-2 text-primary"></i> support@badmintonpro.vn</li>
                         <li><i class="fa-solid fa-location-dot me-2 text-primary"></i> Hà Nội, Việt Nam</li>
                     </ul>
                 </div>
             </div>
-            
+
             <hr class="border-secondary opacity-25 mt-5">
-            
+
             <div class="row align-items-center">
                 <div class="col-md-6 text-center text-md-start">
-                    <span class="text-secondary small">&copy; 2025 Badminton Pro. Developed by <span class="text-white">Tuan Senior Dev</span>.</span>
+                    <span class="text-secondary small">&copy; 2026 Badminton Pro. All rights reserved.</span>
                 </div>
             </div>
         </div>
@@ -172,13 +173,13 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     {% block extra_js %}{% endblock %}
-    
+
     <script>
         const Toast = Swal.mixin({
             toast: true,
-            position: 'top-end', 
+            position: 'top-end',
             showConfirmButton: false,
-            timer: 3000, 
+            timer: 3000,
             timerProgressBar: true,
             background: '#fff',
             color: '#1e293b',
@@ -195,14 +196,54 @@
         {% if messages %}
             {% for message in messages %}
                 var type = "{{ message.tags }}";
-                if (type === 'danger') type = 'error'; 
-                
+                if (type === 'danger') type = 'error';
+
                 Toast.fire({
-                    icon: type, 
-                    title: "{{ message }}"
+                    icon: type,
+                    title: "{{ message|escapejs }}"
                 });
             {% endfor %}
         {% endif %}
     </script>
+
+    <!-- ===== CHATBOT WIDGET ===== -->
+    <button class="chatbot-toggle" id="chatbot-toggle" title="Chat với trợ lý">
+        <i class="fa-solid fa-comments"></i>
+        <span class="badge-dot"></span>
+    </button>
+
+    <div class="chatbot-window" id="chatbot-window">
+        <div class="chatbot-header">
+            <div class="chatbot-avatar">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+            <div class="chatbot-header-info">
+                <h6>Badminton Pro Assistant</h6>
+                <div class="status"><span class="dot"></span> Trực tuyến</div>
+            </div>
+            <button class="chatbot-close" id="chatbot-close" title="Đóng">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="chatbot-messages" id="chatbot-messages"></div>
+
+        <div class="quick-replies" id="chatbot-quick-replies"></div>
+
+        <div class="chatbot-input">
+            <input type="text" id="chatbot-input" placeholder="Nhập tin nhắn..." autocomplete="off">
+            <button class="chatbot-send" id="chatbot-send" title="Gửi">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </div>
+
+        <div class="chatbot-powered">
+            <i class="fa-solid fa-headset"></i> Badminton Pro Smart Assistant
+        </div>
+    </div>
+
+    <script src="{% static 'js/chatbot.js' %}"></script>
+    <!-- ===== END CHATBOT ===== -->
+
 </body>
 </html>

@@ -1,0 +1,107 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Liên hệ đối tác - Badminton Pro{% endblock %}
+
+{% block content %}
+<section class="py-5" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 280px;">
+    <div class="container py-5 text-center">
+        <span class="badge bg-primary bg-opacity-25 text-primary mb-3 px-3 py-2 rounded-pill fw-bold text-uppercase" style="font-size: 0.7rem;">
+            <i class="fa-solid fa-handshake me-1"></i> Hợp tác
+        </span>
+        <h1 class="display-5 fw-bold text-white mb-3">Liên hệ với chúng tôi</h1>
+        <p class="text-white-50 mb-0">Đội ngũ Badminton Pro luôn sẵn sàng hỗ trợ bạn 24/7.</p>
+    </div>
+</section>
+
+<section class="py-5 bg-white">
+    <div class="container" style="max-width: 1000px;">
+        <div class="row g-5">
+            <!-- Thông tin liên hệ -->
+            <div class="col-lg-5 fade-in-up">
+                <h3 class="fw-bold text-dark mb-4">Thông tin liên hệ</h3>
+                <p class="text-secondary mb-5">Bạn có câu hỏi, đóng góp ý kiến hay muốn trở thành đối tác của chúng tôi? Đừng ngần ngại liên hệ qua các kênh sau:</p>
+
+                <div class="d-flex align-items-start gap-3 mb-4">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                        <i class="fa-solid fa-location-dot fa-lg"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">Trụ sở chính</h6>
+                        <p class="text-secondary mb-0">123 Đường Xuân Thủy, Cầu Giấy, Hà Nội</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-start gap-3 mb-4">
+                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                        <i class="fa-solid fa-phone fa-lg"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">Hotline hỗ trợ</h6>
+                        <p class="text-secondary mb-0">1900 1234 (8:00 - 22:00 hàng ngày)</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-start gap-3 mb-5">
+                    <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                        <i class="fa-solid fa-envelope fa-lg"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">Email</h6>
+                        <p class="text-secondary mb-0">partner@badmintonpro.vn</p>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold text-dark mb-3">Kết nối với chúng tôi</h5>
+                <div class="d-flex gap-2">
+                    <a href="#" class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#" class="btn btn-outline-info rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="fa-brands fa-tiktok"></i></a>
+                    <a href="#" class="btn btn-outline-danger rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="fa-brands fa-youtube"></i></a>
+                </div>
+            </div>
+
+            <!-- Form liên hệ -->
+            <div class="col-lg-7 fade-in-up" style="animation-delay: 0.1s;">
+                <div class="card border-0 bg-body rounded-4 p-4 p-md-5 shadow-sm">
+                    <h4 class="fw-bold text-dark mb-4">Gửi tin nhắn cho chúng tôi</h4>
+                    <form>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-secondary">Họ và tên *</label>
+                                <input type="text" class="form-control py-2" placeholder="Nhập họ tên của bạn" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-secondary">Số điện thoại *</label>
+                                <input type="text" class="form-control py-2" placeholder="Nhập số điện thoại" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-secondary">Email</label>
+                                <input type="email" class="form-control py-2" placeholder="Nhập địa chỉ email (không bắt buộc)">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-secondary">Chủ đề *</label>
+                                <select class="form-select py-2">
+                                    <option>Đăng ký đối tác chủ sân</option>
+                                    <option>Hỗ trợ kỹ thuật</option>
+                                    <option>Hợp tác quảng cáo</option>
+                                    <option>Phản ánh dịch vụ</option>
+                                    <option>Khác</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-secondary">Nội dung *</label>
+                                <textarea class="form-control py-2" rows="4" placeholder="Nhập nội dung bạn muốn gửi..." required></textarea>
+                            </div>
+                            <div class="col-12 mt-4">
+                                <button type="button" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm" onclick="Swal.fire('Thành công', 'Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi trong thời gian sớm nhất.', 'success')">
+                                    <i class="fa-solid fa-paper-plane me-2"></i> Gửi tin nhắn
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

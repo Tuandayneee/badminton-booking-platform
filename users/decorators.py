@@ -7,11 +7,11 @@ def role_required(*allowed_roles):
     """
     Decorator kiểm tra role của user.
     Kết hợp luôn @login_required, không cần dùng cả 2.
-    
+
     Usage:
         @role_required('partner')
         def partner_dashboard(request): ...
-        
+
         @role_required('staff', 'partner')  # Cho phép nhiều role
         def shared_view(request): ...
     """

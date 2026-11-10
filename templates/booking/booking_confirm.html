@@ -8,9 +8,9 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-6 col-md-8">
-            
+
             <div class="mb-4 fade-in-up">
-                <a href="#" class="text-decoration-none text-muted small mb-2 d-inline-block">
+                <a href="javascript:history.back()" class="text-decoration-none text-muted small mb-2 d-inline-block">
                     <i class="fa-solid fa-arrow-left me-1"></i> Quay lại chọn giờ
                 </a>
                 <h3 class="fw-bold text-dark">Xác nhận & Thanh toán</h3>
@@ -30,14 +30,14 @@
                         <h5 class="fw-bold mb-1">{{ center.name|default:"Tên sân chưa cập nhật" }}</h5>
                         <p class="text-white-50 small mb-0">{{ center.address|default:"Địa chỉ chưa cập nhật" }}</p>
                     </div>
-                    
+
                     <hr class="border-secondary opacity-25">
 
                     <div>
                         <div class="confirm-section-title text-white-50">
                             <i class="fa-regular fa-clock"></i> Chi tiết lịch đặt
                         </div>
-                        
+
                         <div class="d-flex justify-content-between mb-2">
                             <span>Ngày:</span>
                             <span class="fw-bold">{{ selected_date|date:"d/m/Y" }}</span>
@@ -90,7 +90,7 @@
                 <div class="alert bg-warning bg-opacity-10 border-warning border-opacity-25 rounded-3 d-flex gap-3 mb-4">
                     <i class="fa-solid fa-triangle-exclamation text-warning mt-1"></i>
                     <div class="small text-secondary">
-                        <strong>Lưu ý:</strong> Sân không thể hủy nếu bạn có việc bận có thể nhắn riêng Zalo: 0346083728 để được hỗ trợ tìm người pass sân.
+                        <strong>Lưu ý:</strong> Sân không thể hủy sau khi xác nhận thanh toán. Nếu cần hỗ trợ đổi/nhượng sân vui lòng liên hệ hotline: {{ SUPPORT_PHONE }}.
                     </div>
                 </div>
 

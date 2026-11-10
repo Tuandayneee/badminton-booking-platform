@@ -11,11 +11,16 @@
         <div>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-1 small text-muted">
-                    <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-secondary">Thanh toán</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'partner_transactions' %}" class="text-decoration-none text-secondary">Thanh toán</a></li>
                     <li class="breadcrumb-item active text-dark" aria-current="page">Giao dịch chuyển khoản</li>
                 </ol>
             </nav>
             <h3 class="fw-bold text-dark mb-0 ls-tight">Xác nhận giao dịch</h3>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'partner_export_transactions' %}?status={{ filter_status }}" class="btn btn-success shadow-sm px-4">
+                <i class="fa-solid fa-file-excel me-2"></i>Xuất Excel
+            </a>
         </div>
     </div>
 

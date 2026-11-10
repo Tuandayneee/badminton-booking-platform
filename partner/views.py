@@ -1,24 +1,51 @@
-from django.shortcuts import render,get_object_or_404
-from users.decorators import role_required
-from django.shortcuts import redirect
 from datetime import timedelta
-from partner.utils import redirect_back
-from .forms import BadmintonCenterForm, CourtForm, StaffForm, CustomerForm
+import json
+import logging
+
+from django.conf import settings
 from django.contrib import messages
-from .models import BadmintonCenter, Court, Product, ServiceOrder, ServiceOrderItem
-from booking.services import process_approve_transaction
+from django.core.mail import EmailMessage
+from django.db import transaction
+from django.db.models import Avg, Count, Q, Sum
+from django.db.models.functions import TruncDate
+from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+
 from booking.models import Booking, Transaction
-from django.db.models import Q, Sum
-from django.db import transaction
-from partner.models import Customer
-from django.db.models import Avg, Count
-import json
+from booking.services import process_approve_transaction
+from partner.excel_utils import create_excel_response
+from partner.utils import redirect_back
+from users.decorators import role_required
+from users.models import StaffProfile, User
+from .forms import BadmintonCenterForm, CourtForm, CustomerForm, StaffForm
+from .models import BadmintonCenter, Court, Customer, ServiceOrder
 from .utils import generate_random_password
-from users.models import User, StaffProfile
-from django.core.mail import EmailMessage
-from django.template.loader import render_to_string
+
+logger = logging.getLogger(__name__)
+
+
+def _center_group_codes(center):
+    return (
+        Booking.objects.filter(court__center=center)
+        .exclude(group_code__isnull=True)
+        .exclude(group_code='')
+        .values_list('group_code', flat=True)
+        .distinct()
+    )
+
+
+def _centers_group_codes(centers):
+    return (
+        Booking.objects.filter(court__center__in=centers)
+        .exclude(group_code__isnull=True)
+        .exclude(group_code='')
+        .values_list('group_code', flat=True)
+        .distinct()
+    )
+
+
 @role_required('partner')
 def partner_dashboard(request):
     try:
@@ -26,102 +53,132 @@ def partner_dashboard(request):
     except AttributeError:
         messages.error(request, "Bạn không có quyền truy cập trang này.")
         return redirect('home')
-    
+
     centers = BadmintonCenter.objects.filter(partner=partner)
-    today = timezone.now().date()
+    today = timezone.localdate()
     yesterday = today - timedelta(days=1)
 
-    # Doanh thu booking
-    today_revenue = Booking.objects.filter(
-        court__center__in=centers,
-        date=today,
-        status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED]
-    ).aggregate(total=Sum('total_price'))['total'] or 0
+    today_revenue = (
+        Booking.objects.filter(
+            court__center__in=centers,
+            date=today,
+            status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED],
+        ).aggregate(total=Sum('total_price'))['total']
+        or 0
+    )
 
-    yesterday_revenue = Booking.objects.filter(
-        court__center__in=centers,
-        date=yesterday,
-        status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED]
-    ).aggregate(total=Sum('total_price'))['total'] or 0
+    yesterday_revenue = (
+        Booking.objects.filter(
+            court__center__in=centers,
+            date=yesterday,
+            status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED],
+        ).aggregate(total=Sum('total_price'))['total']
+        or 0
+    )
 
-    # Doanh thu dịch vụ hôm nay
-    today_service_revenue = ServiceOrder.objects.filter(
-        center__in=centers,
-        created_at__date=today
-    ).aggregate(total=Sum('total_amount'))['total'] or 0
+    today_service_revenue = (
+        ServiceOrder.objects.filter(
+            center__in=centers,
+            created_at__date=today,
+        ).aggregate(total=Sum('total_amount'))['total']
+        or 0
+    )
 
     total_today_revenue = today_revenue + today_service_revenue
 
-    # % thay đổi
     if yesterday_revenue > 0:
         revenue_change = round(((today_revenue - yesterday_revenue) / yesterday_revenue) * 100, 1)
     else:
         revenue_change = 100 if today_revenue > 0 else 0
 
-    # Lịch đặt hôm nay
-    today_bookings_count = Booking.objects.filter(
-        court__center__in=centers,
-        date=today
-    ).exclude(status=Booking.Status.ADMIN_CANCELLED).count()
+    today_bookings_count = (
+        Booking.objects.filter(court__center__in=centers, date=today)
+        .exclude(status=Booking.Status.ADMIN_CANCELLED)
+        .count()
+    )
 
     total_courts = Court.objects.filter(center__in=centers, is_active=True).count()
 
     pending_transactions = Transaction.objects.filter(
-        booking_group_code__in=Booking.objects.filter(
-            court__center__in=centers
-        ).values_list('group_code', flat=True),
-        is_verified=False
+        booking_group_code__in=_centers_group_codes(centers),
+        is_verified=False,
     ).count()
 
-    # Biểu đồ 7 ngày 
+    seven_days_ago = today - timedelta(days=6)
+    daily_revs = (
+        Booking.objects.filter(
+            court__center__in=centers,
+            date__gte=seven_days_ago,
+            date__lte=today,
+            status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED],
+        )
+        .values('date')
+        .annotate(total=Sum('total_price'))
+    )
+    rev_by_date = {row['date']: int(row['total'] or 0) for row in daily_revs}
+
     chart_labels = []
     chart_data = []
     day_names = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
     for i in range(6, -1, -1):
         d = today - timedelta(days=i)
         chart_labels.append(day_names[d.weekday()])
-        day_rev = Booking.objects.filter(
+        chart_data.append(rev_by_date.get(d, 0))
+
+    upcoming_bookings = (
+        Booking.objects.filter(
             court__center__in=centers,
-            date=d,
-            status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED]
-        ).aggregate(total=Sum('total_price'))['total'] or 0
-        chart_data.append(int(day_rev))
+            date=today,
+            status__in=[
+                Booking.Status.CONFIRMED,
+                Booking.Status.COMPLETED,
+                Booking.Status.PENDING,
+                Booking.Status.WAITING_VERIFY,
+            ],
+        )
+        .select_related('court', 'court__center', 'user', 'customer')
+        .order_by('start_time')[:5]
+    )
 
-    #  Lịch sắp tới 
-    upcoming_bookings = Booking.objects.filter(
-        court__center__in=centers,
-        date=today,
-        status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED, Booking.Status.PENDING, Booking.Status.WAITING_VERIFY]
-    ).select_related('court', 'court__center', 'user', 'customer').order_by('start_time')[:5]
-
-    # Doanh thu theo phương thức thanh toán trong tháng
     start_of_month = today.replace(day=1)
-    
-    booking_cash = Booking.objects.filter(
-        court__center__in=centers,
-        date__gte=start_of_month,
-        status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED],
-        payment_method=Booking.PaymentMethod.CASH
-    ).aggregate(total=Sum('total_price'))['total'] or 0
 
-    booking_transfer = Booking.objects.filter(
-        court__center__in=centers,
-        date__gte=start_of_month,
-        status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED],
-        payment_method=Booking.PaymentMethod.TRANSFER
-    ).aggregate(total=Sum('total_price'))['total'] or 0
+    booking_cash = (
+        Booking.objects.filter(
+            court__center__in=centers,
+            date__gte=start_of_month,
+            status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED],
+            payment_method=Booking.PaymentMethod.CASH,
+        ).aggregate(total=Sum('total_price'))['total']
+        or 0
+    )
 
-    service_cash = ServiceOrder.objects.filter(
-        center__in=centers,
-        created_at__date__gte=start_of_month,
-        payment_method=ServiceOrder.PaymentMethod.CASH
-    ).aggregate(total=Sum('total_amount'))['total'] or 0
+    booking_transfer = (
+        Booking.objects.filter(
+            court__center__in=centers,
+            date__gte=start_of_month,
+            status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED],
+            payment_method=Booking.PaymentMethod.TRANSFER,
+        ).aggregate(total=Sum('total_price'))['total']
+        or 0
+    )
 
-    service_transfer = ServiceOrder.objects.filter(
-        center__in=centers,
-        created_at__date__gte=start_of_month,
-        payment_method=ServiceOrder.PaymentMethod.TRANSFER
-    ).aggregate(total=Sum('total_amount'))['total'] or 0
+    service_cash = (
+        ServiceOrder.objects.filter(
+            center__in=centers,
+            created_at__date__gte=start_of_month,
+            payment_method=ServiceOrder.PaymentMethod.CASH,
+        ).aggregate(total=Sum('total_amount'))['total']
+        or 0
+    )
+
+    service_transfer = (
+        ServiceOrder.objects.filter(
+            center__in=centers,
+            created_at__date__gte=start_of_month,
+            payment_method=ServiceOrder.PaymentMethod.TRANSFER,
+        ).aggregate(total=Sum('total_amount'))['total']
+        or 0
+    )
 
     total_cash_month = int(booking_cash + service_cash)
     total_transfer_month = int(booking_transfer + service_transfer)
@@ -143,19 +200,13 @@ def partner_dashboard(request):
     return render(request, 'partner/dashboard.html', context)
 
 
-
-
-
-
-
-
 @role_required('partner')
 def manage_staff(request, center_id):
-    """Trang quản lý nhân viên của 1 center"""
+    """Trang quản lý nhân viên của 1 center."""
     center = get_object_or_404(BadmintonCenter, id=center_id, partner=request.user.partner_profile)
     staff_list = StaffProfile.objects.filter(center=center).select_related('user').order_by('-created_at')
     staff_form = StaffForm()
-    
+
     return render(request, 'partner/manage_staff.html', {
         'center': center,
         'staff_list': staff_list,
@@ -165,27 +216,26 @@ def manage_staff(request, center_id):
 
 @role_required('partner')
 def add_staff_to_center(request, center_id):
-    """Thêm nhân viên mới vào center"""
+    """Thêm nhân viên mới vào center."""
     center = get_object_or_404(BadmintonCenter, id=center_id, partner=request.user.partner_profile)
-    
+
     if request.method == 'POST':
         form = StaffForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
             phone_number = data['phone_number']
-            
+
             if User.objects.filter(username=phone_number).exists():
                 messages.error(request, f"Số điện thoại '{phone_number}' đã được đăng ký!")
                 return redirect('manage_staff', center_id=center_id)
             if User.objects.filter(email=data['email']).exists():
                 messages.error(request, f"Email '{data['email']}' đã được đăng ký!")
                 return redirect('manage_staff', center_id=center_id)
-            
+
             try:
                 password = generate_random_password(8)
-                
+
                 with transaction.atomic():
-                    
                     user = User.objects.create_user(
                         username=phone_number,
                         email=data['email'],
@@ -194,17 +244,14 @@ def add_staff_to_center(request, center_id):
                         phone_number=phone_number,
                         role=User.Role.STAFF,
                     )
-                    
-                    
-                    staff_profile, created = StaffProfile.objects.get_or_create(user=user)
+
+                    staff_profile, _ = StaffProfile.objects.get_or_create(user=user)
                     staff_profile.center = center
                     staff_profile.position = data.get('position', 'Nhân viên')
                     staff_profile.is_active = True
                     staff_profile.save()
-                    
+
                 try:
-                    
-                    
                     email_context = {
                         'full_name': user.full_name or user.username,
                         'username': user.username,
@@ -213,10 +260,10 @@ def add_staff_to_center(request, center_id):
                         'phone_number': phone_number,
                         'position': data.get('position', 'Nhân viên'),
                         'center_name': center.name,
-                        'support_phone': '0123 456 789',
+                        'support_phone': settings.SUPPORT_PHONE,
                     }
                     html_content = render_to_string('emails/add_staff_success.html', email_context)
-                    
+
                     email_msg = EmailMessage(
                         subject=f'[BadmintonPro] Thông tin tài khoản nhân viên - {center.name}',
                         body=html_content,
@@ -224,197 +271,208 @@ def add_staff_to_center(request, center_id):
                     )
                     email_msg.content_subtype = 'html'
                     email_msg.send(fail_silently=True)
-                except Exception:
-                    pass  
-                
-                messages.success(request, f"Đã thêm nhân viên '{user.full_name or user.username}' thành công! Thông tin tài khoản đã gửi về email.")
-            except Exception as e:
-                messages.error(request, f"Lỗi hệ thống: {str(e)}")
+                except Exception as exc:
+                    logger.warning("Failed sending welcome email to staff %s: %s", user.email, exc)
+
+                messages.success(
+                    request,
+                    f"Đã thêm nhân viên '{user.full_name or user.username}' thành công! Thông tin tài khoản đã gửi về email.",
+                )
+            except Exception as exc:
+                logger.exception("Error creating staff member for center %s", center_id)
+                messages.error(request, f"Lỗi hệ thống: {exc}")
         else:
             messages.error(request, "Vui lòng kiểm tra lại thông tin nhập liệu.")
-    
+
     return redirect('manage_staff', center_id=center_id)
 
 
 @role_required('partner')
 def edit_staff_member(request, staff_id):
-    """Sửa thông tin nhân viên"""
-    staff_profile = get_object_or_404(StaffProfile, id=staff_id)
+    """Sửa thông tin nhân viên."""
+    staff_profile = get_object_or_404(
+        StaffProfile,
+        id=staff_id,
+        center__partner=request.user.partner_profile,
+    )
     center = staff_profile.center
-    
-    if center.partner != request.user.partner_profile:
-        messages.error(request, "Bạn không có quyền chỉnh sửa nhân viên này!")
-        return redirect('centers_management')
-    
+
     if request.method == 'POST':
         user = staff_profile.user
         user.full_name = request.POST.get('full_name', user.full_name)
         user.phone_number = request.POST.get('phone_number', user.phone_number)
         user.email = request.POST.get('email', user.email)
         user.save()
-        
+
         staff_profile.position = request.POST.get('position', staff_profile.position)
         is_active = request.POST.get('is_active')
-        staff_profile.is_active = is_active == 'on' or is_active == 'true'
+        staff_profile.is_active = is_active in ('on', 'true', 'True', '1')
         staff_profile.save()
-        
+
         messages.success(request, f"Đã cập nhật thông tin nhân viên '{user.full_name or user.username}'!")
-    
+
     return redirect('manage_staff', center_id=center.id)
 
 
 @role_required('partner')
 @require_POST
 def delete_staff_member(request, staff_id):
-    """Xóa (vô hiệu hóa) nhân viên"""
-    staff_profile = get_object_or_404(StaffProfile, id=staff_id)
+    """Xóa (vô hiệu hóa) nhân viên."""
+    staff_profile = get_object_or_404(
+        StaffProfile,
+        id=staff_id,
+        center__partner=request.user.partner_profile,
+    )
     center = staff_profile.center
-    
-    if center.partner != request.user.partner_profile:
-        messages.error(request, "Bạn không có quyền xóa nhân viên này!")
-        return redirect('centers_management')
-    
     staff_name = staff_profile.user.full_name or staff_profile.user.username
-    
+
     staff_profile.is_active = False
     staff_profile.user.is_active = False
-    staff_profile.user.save()
-    staff_profile.save()
-    
+    staff_profile.user.save(update_fields=['is_active'])
+    staff_profile.save(update_fields=['is_active'])
+
     messages.success(request, f"Đã xóa nhân viên '{staff_name}'!")
     return redirect('manage_staff', center_id=center.id)
 
 
 @role_required('partner')
 def revenue_management(request):
-
-    """Trang tổng quan - hiển thị danh sách center với doanh thu mini"""
+    """Trang tổng quan - hiển thị danh sách center với doanh thu mini."""
     centers = BadmintonCenter.objects.filter(partner=request.user.partner_profile)
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     start_of_month = today.replace(day=1)
     centers_with_revenue = []
     total_all_revenue = 0
+
     for center in centers:
-        group_codes = Booking.objects.filter(
-            court__center=center
-        ).values_list('group_code', flat=True).distinct()
+        group_codes = _center_group_codes(center)
 
         revenue_data = Transaction.objects.filter(
             booking_group_code__in=group_codes,
             is_verified=True,
-            verified_at__date__gte=start_of_month
-        ).aggregate(
-            total_rev=Sum('amount'),
-        )
+            verified_at__date__gte=start_of_month,
+        ).aggregate(total_rev=Sum('amount'))
         month_revenue = revenue_data['total_rev'] or 0
+
         pending_count = Transaction.objects.filter(
             booking_group_code__in=group_codes,
-            is_verified=False
+            is_verified=False,
         ).count()
+
         centers_with_revenue.append({
             'center': center,
             'month_revenue': month_revenue,
             'pending_count': pending_count,
         })
         total_all_revenue += month_revenue
-    
+
     context = {
         'centers_data': centers_with_revenue,
         'total_all_revenue': total_all_revenue,
         'current_month': today.strftime('%m/%Y'),
     }
-
     return render(request, 'partner/revenue.html', context)
-
-
-
 
 
 @role_required('partner')
 def revenue_center_detail(request, center_id):
-    """Chi tiết doanh thu của 1 center cụ thể"""
+    """Chi tiết doanh thu của 1 center cụ thể."""
     center = get_object_or_404(BadmintonCenter, pk=center_id, partner=request.user.partner_profile)
-    group_codes = set()
-    booking_codes = Booking.objects.filter(
-        court__center=center
-    ).values_list('booking_code', flat=True)
-    for code in booking_codes:
-        parts = code.rsplit('-', 1)
-        if len(parts) > 1:
-            group_codes.add(parts[0])
-    today = timezone.now().date()
+    group_codes = _center_group_codes(center)
+
+    today = timezone.localdate()
     period = request.GET.get('period', 'month')
 
     if period == 'day':
         start_date = today
     elif period == 'week':
-        start_date = today - timedelta(days= 7)
+        start_date = today - timedelta(days=7)
     elif period == 'month':
         start_date = today - timedelta(days=30)
+    else:
+        start_date = today - timedelta(days=30)
 
-    transactions = Transaction.objects.filter(
-        booking_group_code__in=group_codes,
-        is_verified=True,
-        verified_at__date__gte=start_date
-    ).select_related('user','verified_by').order_by('-verified_at')[:20]
-
+    transactions = (
+        Transaction.objects.filter(
+            booking_group_code__in=group_codes,
+            is_verified=True,
+            verified_at__date__gte=start_date,
+        )
+        .select_related('user', 'verified_by')
+        .order_by('-verified_at')[:20]
+    )
 
     all_verified = Transaction.objects.filter(
         booking_group_code__in=group_codes,
         is_verified=True,
-        verified_at__date__gte=start_date
+        verified_at__date__gte=start_date,
     )
     total_revenue = all_verified.aggregate(total=Sum('amount'))['total'] or 0
-    total_revenue_int = int(total_revenue) if total_revenue else 0
+    total_revenue_int = int(total_revenue)
 
-    # Tính doanh thu Tiền Mặt (Booking cash + POS cash)
-    booking_cash = Booking.objects.filter(
-        court__center=center,
-        status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED],
-        date__gte=start_date,
-        payment_method=Booking.PaymentMethod.CASH
-    ).aggregate(total=Sum('total_price'))['total'] or 0
+    booking_cash = (
+        Booking.objects.filter(
+            court__center=center,
+            status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED],
+            date__gte=start_date,
+            payment_method=Booking.PaymentMethod.CASH,
+        ).aggregate(total=Sum('total_price'))['total']
+        or 0
+    )
 
-    service_cash = ServiceOrder.objects.filter(
-        center=center,
-        created_at__date__gte=start_date,
-        payment_method=ServiceOrder.PaymentMethod.CASH
-    ).aggregate(total=Sum('total_amount'))['total'] or 0
+    service_cash = (
+        ServiceOrder.objects.filter(
+            center=center,
+            created_at__date__gte=start_date,
+            payment_method=ServiceOrder.PaymentMethod.CASH,
+        ).aggregate(total=Sum('total_amount'))['total']
+        or 0
+    )
 
-    # Tính doanh thu Chuyển khoản (Booking transfer + POS transfer)
-    booking_transfer = Booking.objects.filter(
-        court__center=center,
-        status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED],
-        date__gte=start_date,
-        payment_method=Booking.PaymentMethod.TRANSFER
-    ).aggregate(total=Sum('total_price'))['total'] or 0
+    booking_transfer = (
+        Booking.objects.filter(
+            court__center=center,
+            status__in=[Booking.Status.CONFIRMED, Booking.Status.COMPLETED],
+            date__gte=start_date,
+            payment_method=Booking.PaymentMethod.TRANSFER,
+        ).aggregate(total=Sum('total_price'))['total']
+        or 0
+    )
 
-    service_transfer = ServiceOrder.objects.filter(
-        center=center,
-        created_at__date__gte=start_date,
-        payment_method=ServiceOrder.PaymentMethod.TRANSFER
-    ).aggregate(total=Sum('total_amount'))['total'] or 0
+    service_transfer = (
+        ServiceOrder.objects.filter(
+            center=center,
+            created_at__date__gte=start_date,
+            payment_method=ServiceOrder.PaymentMethod.TRANSFER,
+        ).aggregate(total=Sum('total_amount'))['total']
+        or 0
+    )
 
     cash_revenue = int(booking_cash + service_cash)
     online_revenue = int(booking_transfer + service_transfer)
 
+    seven_days_ago = today - timedelta(days=6)
+    daily_revs = (
+        Transaction.objects.filter(
+            booking_group_code__in=group_codes,
+            is_verified=True,
+            verified_at__date__gte=seven_days_ago,
+            verified_at__date__lte=today,
+        )
+        .annotate(day=TruncDate('verified_at'))
+        .values('day')
+        .annotate(total=Sum('amount'))
+    )
+    rev_by_day = {row['day']: float(row['total'] or 0) for row in daily_revs}
+
     chart_labels = []
     chart_data = []
-    for i in range(6,-1,1):
+    for i in range(6, -1, -1):
         day = today - timedelta(days=i)
         chart_labels.append(day.strftime('%d/%m'))
-        day_revenue = Transaction.objects.filter(
+        chart_data.append(rev_by_day.get(day, 0.0))
 
-            booking_group_code__in=group_codes,
-
-            is_verified=True,
-
-            verified_at__date=day
-
-        ).aggregate(total=Sum('amount'))['total'] or 0
-
-        chart_data.append(float(day_revenue))
     context = {
         'center': center,
         'transactions': transactions,
@@ -425,98 +483,169 @@ def revenue_center_detail(request, center_id):
         'chart_data': chart_data,
         'selected_period': period,
     }
-    
     return render(request, 'partner/revenue_detail.html', context)
 
 
 @role_required('partner')
-def schedule_management(request,center_id):
-    center = get_object_or_404(BadmintonCenter, pk=center_id)
+def export_revenue_csv(request):
+    """Xuất tổng quan doanh thu tất cả cơ sở ra Excel."""
+    centers = BadmintonCenter.objects.filter(partner=request.user.partner_profile)
+    today = timezone.localdate()
+    start_of_month = today.replace(day=1)
+
+    headers = ['Tên Cơ Sở', 'Địa chỉ', 'Số đơn chờ duyệt', 'Doanh thu tháng (VND)']
+    rows = []
+
+    for center in centers:
+        group_codes = _center_group_codes(center)
+
+        revenue_data = Transaction.objects.filter(
+            booking_group_code__in=group_codes,
+            is_verified=True,
+            verified_at__date__gte=start_of_month,
+        ).aggregate(total_rev=Sum('amount'))
+        month_revenue = revenue_data['total_rev'] or 0
+
+        pending_count = Transaction.objects.filter(
+            booking_group_code__in=group_codes,
+            is_verified=False,
+        ).count()
+
+        rows.append([
+            center.name,
+            center.address,
+            pending_count,
+            int(month_revenue),
+        ])
+
+    return create_excel_response('bao_cao_tong_doanh_thu.xlsx', headers, rows, 'Tổng quan doanh thu')
+
+
+@role_required('partner')
+def export_revenue_detail_csv(request, center_id):
+    """Xuất chi tiết doanh thu giao dịch của 1 cơ sở ra Excel."""
+    center = get_object_or_404(BadmintonCenter, pk=center_id, partner=request.user.partner_profile)
+    group_codes = _center_group_codes(center)
+
+    today = timezone.localdate()
+    period = request.GET.get('period', 'month')
+
+    if period == 'day':
+        start_date = today
+    elif period == 'week':
+        start_date = today - timedelta(days=7)
+    else:
+        start_date = today - timedelta(days=30)
+
+    transactions = (
+        Transaction.objects.filter(
+            booking_group_code__in=group_codes,
+            is_verified=True,
+            verified_at__date__gte=start_date,
+        )
+        .select_related('user', 'verified_by')
+        .order_by('-verified_at')
+    )
+
+    headers = ['Mã GD (Hệ thống)', 'Nội dung Đặt sân', 'Khách hàng', 'Số tiền (VND)', 'Thời gian duyệt', 'Người duyệt']
+    rows = []
+
+    for trans in transactions:
+        rows.append([
+            f"#{trans.id}",
+            trans.booking_group_code,
+            trans.user.full_name or trans.user.username,
+            int(trans.amount) if trans.amount else 0,
+            trans.verified_at.strftime('%H:%M %d/%m/%Y') if trans.verified_at else '',
+            trans.verified_by.username if trans.verified_by else '',
+        ])
+
+    return create_excel_response('bao_cao_chi_tiet_doanh_thu.xlsx', headers, rows, 'Chi tiết doanh thu')
+
+
+@role_required('partner')
+def schedule_management(request, center_id):
+    center = get_object_or_404(BadmintonCenter, pk=center_id, partner=request.user.partner_profile)
     courts = Court.objects.filter(center=center, is_active=True)
-    
-    # Lấy ngày lọc
-    today = timezone.now().date()
+
+    today = timezone.localdate()
     selected_date_str = request.GET.get('date')
     try:
-        filter_date = timezone.datetime.strptime(selected_date_str, "%Y-%m-%d").date() if selected_date_str else today
+        filter_date = (
+            timezone.datetime.strptime(selected_date_str, "%Y-%m-%d").date()
+            if selected_date_str
+            else today
+        )
     except ValueError:
         filter_date = today
 
-    # Lấy các slot lẻ 
-    raw_bookings = Booking.objects.filter(
-        court__center=center,
-        date=filter_date
-    ).select_related('user', 'court').order_by('start_time')
+    center_bookings = (
+        Booking.objects.filter(court__center=center, date=filter_date)
+        .select_related('user', 'court')
+        .order_by('start_time')
+    )
 
     selected_court_id = request.GET.get('court_id')
     if selected_court_id:
-        raw_bookings = raw_bookings.filter(court_id=selected_court_id)
+        center_bookings = center_bookings.filter(court_id=selected_court_id)
 
-    grouped_schedule = {}
-    
-    for b in raw_bookings:
-        # Lấy mã nhóm: BK-2026...-1 -> BK-2026...
-        # Nếu là booking lẻ không có dấu gạch ngang, fallback về booking_code gốc
-        group_code = b.booking_code.rsplit('-', 1)[0] if '-' in b.booking_code else b.booking_code
-        
-        if group_code not in grouped_schedule:
-            grouped_schedule[group_code] = {
-                'group_code': group_code,
-                'user': b.user,
-                'court_names': {b.court.name}, 
-                'start_time': b.start_time,
-                'end_time': b.end_time,
-                'total_price': 0,
-                'status': b.status,
-                'is_paid': False,
-                'slots_count': 0
-            }
-        
-        
-        item = grouped_schedule[group_code]
-        item['total_price'] += b.total_price
-        item['slots_count'] += 1
-        item['court_names'].add(b.court.name)
-        
-        
-        if b.start_time < item['start_time']: item['start_time'] = b.start_time
-        if b.end_time > item['end_time']: item['end_time'] = b.end_time
-        
-        
-        if b.status in ['confirmed', 'checked_in']:
-            item['is_paid'] = True
+    group_map = {}
+    for b in center_bookings:
+        key = b.group_code or b.booking_code
+        group_map.setdefault(key, []).append(b)
 
-    # Chuyển Dict thành List để gửi sang Template
-    schedule_list = list(grouped_schedule.values())
-    
-    
-    schedule_list.sort(key=lambda x: x['start_time'])
+    valid_group_codes = list(group_map.keys())
+    transactions = (
+        Transaction.objects.filter(booking_group_code__in=valid_group_codes)
+        .select_related('user', 'verified_by')
+        .order_by('-timestamp')
+    )
+
+    status = request.GET.get('status')
+    keyword = request.GET.get('keyword')
+    if status == 'verified':
+        transactions = transactions.filter(is_verified=True)
+    elif status == 'unverified':
+        transactions = transactions.filter(is_verified=False)
+
+    if keyword:
+        transactions = transactions.filter(
+            Q(transaction_reference__icontains=keyword)
+            | Q(booking_group_code__icontains=keyword)
+            | Q(amount__icontains=keyword)
+        )
+
+    for trans in transactions:
+        trans.related_bookings = group_map.get(trans.booking_group_code, [])
+
+    total_revenue = (
+        transactions.filter(is_verified=True).aggregate(doanh_thu=Sum('amount'))['doanh_thu'] or 0
+    )
 
     context = {
         'center': center,
         'courts': courts,
-        'schedule_list': schedule_list, 
+        'transactions': transactions,
+        'total_revenue': total_revenue,
         'today_date': today.strftime("%Y-%m-%d"),
         'filter_date': filter_date,
     }
-    
     return render(request, 'partner/schedule.html', context)
 
 
 @role_required('partner')
 def customer_management(request, center_id):
     center = get_object_or_404(BadmintonCenter, pk=center_id, partner=request.user.partner_profile)
-    
+
     customers = Customer.objects.filter(center=center).order_by('-total_spent')
     keyword = request.GET.get('keyword', '')
     if keyword:
         customers = customers.filter(
-            Q(name__icontains=keyword) | 
-            Q(phone__icontains=keyword) |
-            Q(email__icontains=keyword)
+            Q(name__icontains=keyword)
+            | Q(phone__icontains=keyword)
+            | Q(email__icontains=keyword)
         )
-    
-    # Xử lý sắp xếp
+
     sort_by = request.GET.get('sort', 'spent')
     if sort_by == 'spent':
         customers = customers.order_by('-total_spent')
@@ -524,14 +653,10 @@ def customer_management(request, center_id):
         customers = customers.order_by('-last_booking')
     elif sort_by == 'name':
         customers = customers.order_by('name')
-    
-    # Thống kê
+
     total_customers = customers.count()
     vip_customers = customers.filter(total_spent__gt=5000000).count()
     avg_spent = customers.aggregate(avg=Avg('total_spent'))['avg'] or 0
-    
-    # Form thêm khách hàng mới
-    form = CustomerForm()
 
     context = {
         'center': center,
@@ -541,16 +666,17 @@ def customer_management(request, center_id):
         'avg_spent': avg_spent,
         'keyword': keyword,
         'sort_by': sort_by,
-        'form': form,
+        'form': CustomerForm(),
     }
     return render(request, 'partner/customers.html', context)
+
 
 @role_required('partner')
 @require_POST
 def partner_add_customer(request, center_id):
     center = get_object_or_404(BadmintonCenter, pk=center_id, partner=request.user.partner_profile)
     form = CustomerForm(request.POST)
-    
+
     if form.is_valid():
         customer = form.save(commit=False)
         customer.center = center
@@ -560,31 +686,38 @@ def partner_add_customer(request, center_id):
         for field, errors in form.errors.items():
             for error in errors:
                 messages.error(request, f"Lỗi ở trường {field}: {error}")
-                
+
     return redirect('customer_management', center_id=center_id)
+
 
 @role_required('partner')
 def partner_customer_history(request, customer_id):
-    customer = get_object_or_404(Customer, pk=customer_id, center__partner=request.user.partner_profile)
-    
-    # Lấy lịch sử giao dịch/đặt sân của khách tại trung tâm này
+    customer = get_object_or_404(
+        Customer,
+        pk=customer_id,
+        center__partner=request.user.partner_profile,
+    )
+
     bookings = Booking.objects.filter(
-        customer=customer, 
-        court__center=customer.center
+        customer=customer,
+        court__center=customer.center,
     ).order_by('-date', '-start_time')
-    
+
     context = {
         'customer': customer,
         'bookings': bookings,
-        'center': customer.center
+        'center': customer.center,
     }
     return render(request, 'partner/customer_history.html', context)
+
 
 @role_required('partner')
 def centers_management(request):
     centers = BadmintonCenter.objects.filter(partner=request.user.partner_profile)
     center_form = BadmintonCenterForm()
-    return render(request ,'partner/manage_centers.html', {'centers': centers, 'center_form': center_form})
+    return render(request, 'partner/manage_centers.html', {'centers': centers, 'center_form': center_form})
+
+
 @role_required('partner')
 def partner_add_center(request):
     if request.method == 'POST':
@@ -596,55 +729,68 @@ def partner_add_center(request):
             form.save_m2m()
             messages.success(request, "Đã thêm trung tâm thành công!")
             return redirect('centers_management')
-        else:
-            messages.error(request, "có lỗi xảy ra!")
-            
+        messages.error(request, "Có lỗi xảy ra!")
+
     return redirect('centers_management')
 
 
 @role_required('partner')
-def partner_edit_center(request,center_id):
-    center = get_object_or_404(BadmintonCenter,id = center_id, partner=request.user.partner_profile)
+def export_centers_csv(request):
+    """Xuất danh sách cơ sở ra file Excel."""
+    centers = BadmintonCenter.objects.filter(partner=request.user.partner_profile)
+
+    headers = ['Tên cơ sở', 'Địa chỉ', 'Giờ mở cửa', 'Giờ đóng cửa', 'Số lượng sân', 'Trạng thái']
+    rows = []
+    for center in centers:
+        rows.append([
+            center.name,
+            center.address,
+            center.open_time.strftime('%H:%M') if center.open_time else '',
+            center.close_time.strftime('%H:%M') if center.close_time else '',
+            center.courts.count(),
+            'Hoạt động' if center.is_active else 'Tạm dừng',
+        ])
+
+    return create_excel_response('danh_sach_co_so.xlsx', headers, rows, 'Danh sách cơ sở')
+
+
+@role_required('partner')
+def partner_edit_center(request, center_id):
+    center = get_object_or_404(BadmintonCenter, id=center_id, partner=request.user.partner_profile)
     if request.method == 'POST':
-        
-        form = BadmintonCenterForm(request.POST, request.FILES,instance=center)
+        form = BadmintonCenterForm(request.POST, request.FILES, instance=center)
         if form.is_valid():
-            center = form.save()
-            
-            
-            messages.success(request, "Đã cập nhập thông tin!")
-            return redirect('centers_management')
+            form.save()
+            messages.success(request, "Đã cập nhật thông tin!")
         else:
-            messages.error(request, "có lỗi xảy ra!")
-            return redirect('partner_centers')
-    return redirect('partner_centers')
-
-@role_required('partner')
-def partner_delete_center(request,center_id):
-
-    center = get_object_or_404(BadmintonCenter,id = center_id, partner=request.user.partner_profile)
-    if request.method == 'POST':
-
-        center.delete()
-        messages.success(request, f"Đã xóa cơ sở '{center.name}' thành công!")
+            messages.error(request, "Có lỗi xảy ra!")
     return redirect('centers_management')
 
 
 @role_required('partner')
-def manage_courts(request,center_id):
-    center = get_object_or_404(BadmintonCenter,id = center_id, partner=request.user.partner_profile)
+@require_POST
+def partner_delete_center(request, center_id):
+    center = get_object_or_404(BadmintonCenter, id=center_id, partner=request.user.partner_profile)
+    center.delete()
+    messages.success(request, f"Đã xóa cơ sở '{center.name}' thành công!")
+    return redirect('centers_management')
+
+
+@role_required('partner')
+def manage_courts(request, center_id):
+    center = get_object_or_404(BadmintonCenter, id=center_id, partner=request.user.partner_profile)
     courts = center.courts.all()
     court_form = CourtForm()
     return render(request, 'partner/manage_courts.html', {
         'center': center,
         'courts': courts,
-        'court_form': court_form
+        'court_form': court_form,
     })
 
 
 @role_required('partner')
-def add_court(request,center_id):
-    center = get_object_or_404(BadmintonCenter,id = center_id, partner=request.user.partner_profile)
+def add_court(request, center_id):
+    center = get_object_or_404(BadmintonCenter, id=center_id, partner=request.user.partner_profile)
     if request.method == 'POST':
         form = CourtForm(request.POST)
         if form.is_valid():
@@ -653,66 +799,53 @@ def add_court(request,center_id):
             court.save()
             form.save_m2m()
             messages.success(request, "Đã thêm sân!")
-            return redirect('manage_courts', center_id=center_id)
         else:
-            messages.error(request, "có lỗi xảy ra!")
-    return redirect('manage_courts', center_id=center_id)          
-
-@role_required('partner')
-def edit_court(request,court_id):
-    court = get_object_or_404(Court,id = court_id)
-    center_id = court.center.id
-    if request.method == 'POST':
-        form = CourtForm(request.POST,instance=court)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Đã cập nhập thông tin!")
-            return redirect('manage_courts', center_id=center_id)
-        else:
-            messages.error(request, "có lỗi xảy ra!")
+            messages.error(request, "Có lỗi xảy ra!")
     return redirect('manage_courts', center_id=center_id)
 
+
 @role_required('partner')
-def delete_court(request,court_id):
-    court = get_object_or_404(Court,id = court_id)
+def edit_court(request, court_id):
+    court = get_object_or_404(Court, id=court_id, center__partner=request.user.partner_profile)
     center_id = court.center.id
     if request.method == 'POST':
-        court.delete()
-        messages.success(request, "Đã xóa sân!")
+        form = CourtForm(request.POST, instance=court)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Đã cập nhật thông tin!")
+        else:
+            messages.error(request, "Có lỗi xảy ra!")
+    return redirect('manage_courts', center_id=center_id)
+
+
+@role_required('partner')
+@require_POST
+def delete_court(request, court_id):
+    court = get_object_or_404(Court, id=court_id, center__partner=request.user.partner_profile)
+    center_id = court.center.id
+    court.delete()
+    messages.success(request, "Đã xóa sân!")
     return redirect('manage_courts', center_id=center_id)
 
 
 @role_required('partner')
 def transactions_management(request):
-    """Danh sách giao dịch chờ xác nhận của Partner"""
-    
+    """Danh sách giao dịch chờ xác nhận của Partner."""
     centers = BadmintonCenter.objects.filter(partner=request.user.partner_profile)
-    
-    
-    booking_codes = Booking.objects.filter(
-        court__center__in=centers
-    ).values_list('booking_code', flat=True)
-    
-    # Extract group codes 
-    group_codes = set()
-    for code in booking_codes:
-        
-        parts = code.rsplit('-', 1)
-        if len(parts) > 1:
-            group_codes.add(parts[0])
-    
-    # Lấy transactions có group_code thuộc partner
-    transactions = Transaction.objects.filter(
-        booking_group_code__in=group_codes
-    ).select_related('user', 'verified_by').order_by('-timestamp')
-    
-    
+    group_codes = _centers_group_codes(centers)
+
+    transactions = (
+        Transaction.objects.filter(booking_group_code__in=group_codes)
+        .select_related('user', 'verified_by')
+        .order_by('-timestamp')
+    )
+
     filter_status = request.GET.get('status', 'pending')
     if filter_status == 'pending':
         transactions = transactions.filter(is_verified=False)
     elif filter_status == 'verified':
         transactions = transactions.filter(is_verified=True)
-    
+
     context = {
         'transactions': transactions,
         'filter_status': filter_status,
@@ -721,113 +854,72 @@ def transactions_management(request):
 
 
 @role_required('partner')
+def export_transactions_csv(request):
+    """Xuất danh sách giao dịch ra file Excel."""
+    centers = BadmintonCenter.objects.filter(partner=request.user.partner_profile)
+    group_codes = _centers_group_codes(centers)
+
+    transactions = (
+        Transaction.objects.filter(booking_group_code__in=group_codes)
+        .select_related('user', 'verified_by')
+        .order_by('-timestamp')
+    )
+
+    filter_status = request.GET.get('status', 'all')
+    if filter_status == 'pending':
+        transactions = transactions.filter(is_verified=False)
+    elif filter_status == 'verified':
+        transactions = transactions.filter(is_verified=True)
+
+    headers = ['Mã đơn hàng', 'Khách hàng', 'Số điện thoại', 'Số tiền (VND)', 'Mã giao dịch', 'Thời gian', 'Trạng thái', 'Người duyệt']
+    rows = []
+
+    for trans in transactions:
+        rows.append([
+            trans.booking_group_code,
+            trans.user.full_name or trans.user.username,
+            trans.user.phone_number or '',
+            int(trans.amount) if trans.amount else 0,
+            trans.transaction_reference,
+            trans.timestamp.strftime('%H:%M %d/%m/%Y') if trans.timestamp else '',
+            'Đã duyệt' if trans.is_verified else 'Chờ duyệt',
+            trans.verified_by.username if trans.is_verified and trans.verified_by else '',
+        ])
+
+    return create_excel_response('danh_sach_giao_dich.xlsx', headers, rows, 'Danh sách giao dịch')
+
+
+@role_required('partner')
 @require_POST
 def approve_transaction(request, transaction_id):
-    """Duyệt giao dịch + cộng điểm"""
+    """Duyệt giao dịch + cộng doanh thu & điểm loyalty."""
     trans = get_object_or_404(Transaction, id=transaction_id)
     centers = BadmintonCenter.objects.filter(partner=request.user.partner_profile)
-    bookings = Booking.objects.filter(
-        booking_code__startswith=trans.booking_group_code,
-        court__center__in=centers
-    )       
-    
-    if not bookings.exists():
+    has_access = Booking.objects.filter(
+        group_code=trans.booking_group_code,
+        court__center__in=centers,
+    ).exists()
+
+    if not has_access:
         messages.error(request, "Bạn không có quyền duyệt giao dịch này!")
-        return redirect('partner_transactions')
-    
+        return redirect_back(request, fallback='partner_transactions')
+
     if trans.is_verified:
         messages.warning(request, "Giao dịch này đã được duyệt trước đó!")
-        return redirect('partner_transactions')
-    
+        return redirect_back(request, fallback='partner_transactions')
+
     success = process_approve_transaction(trans, request.user)
-    
     if success:
         messages.success(request, f"Đã duyệt giao dịch {trans.transaction_reference}!")
     else:
         messages.warning(request, "Giao dịch này đã được duyệt trước đó!")
-        
-    return redirect('partner_transactions')
 
-
-@role_required('partner')
-def booking_court_history(request,center_id):
-    center = get_object_or_404(BadmintonCenter, pk=center_id)
-    if center.partner.user != request.user:
-        messages.error(request, "Bạn không có quyền truy cập sân này.")
-        return redirect('home')
-
-    center_bookings = Booking.objects.filter(court__center=center)
-    group_codes = center_bookings.values_list('booking_code', flat=True)
-
-    bookings = center_bookings.select_related('user', 'court').order_by('-created_at')
-
-    group_map = {}
-    for b in bookings:
-        group_code = b.booking_code.rsplit('-', 1)[0]
-        if group_code not in group_map:
-            group_map[group_code] = []
-        group_map[group_code].append(b)
-
-    valid_group_codes = list(group_map.keys())
-    transactions = Transaction.objects.filter(
-        booking_group_code__in=valid_group_codes
-    ).select_related('user').order_by('-timestamp')
-
-    status = request.GET.get('status') 
-    keyword = request.GET.get('keyword')
-    if status == 'verified':
-        transactions = transactions.filter(is_verified=True)
-    elif status == 'unverified':
-        transactions = transactions.filter(is_verified=False)
-
-    if keyword:
-        transactions = transactions.filter(
-            Q(transaction_reference__icontains=keyword) |
-            Q(booking_group_code__icontains=keyword) |
-            Q(amount__icontains=keyword)
-        )
-
-
-    for trans in transactions:
-        trans.related_bookings = group_map.get(trans.booking_group_code, [])
-    total_revenue = transactions.filter(is_verified=True).aggregate(doanh_thu=Sum('amount'))['doanh_thu'] or 0
-    context = {
-        'center': center,
-        'transactions': transactions,
-        'total_revenue': total_revenue,
-    }
-    return render(request, 'partner/schedule.html', context)  
-
-
-@role_required('partner')
-@require_POST
-def partner_approve_transaction(request, transaction_id):
-    trans = get_object_or_404(Transaction, id=transaction_id)
-    related_booking = Booking.objects.filter(booking_code__startswith = trans.booking_group_code).select_related('court__center__partner__user').first()
-    if not related_booking:
-        messages.error(request, "Lỗi dữ liệu: Không tìm thấy đơn đặt sân tương ứng với giao dịch này.")
-        return redirect_back(request, transaction_id)
-    
-    is_owner = (related_booking.court.center.partner.user == request.user)
-    if not is_owner:
-        messages.error(request, "Bạn không có quyền duyệt giao dịch của cơ sở khác!")
-        return redirect('home')
-    
-    try:
-        success = process_approve_transaction(trans, request.user)
-        if success:
-            messages.success(request, f"Đã duyệt giao dịch {trans.transaction_reference}!")
-        else:
-            messages.warning(request, "Giao dịch này đã được duyệt trước đó hoặc đang được xử lý.")
-    except Exception as e:
-        print(f"CRITICAL ERROR in partner_approve_transaction: {e}")
-        messages.error(request, "Đã xảy ra lỗi hệ thống khi duyệt đơn. Vui lòng liên hệ Admin.")
-    return redirect_back(request, transaction_id)
+    return redirect_back(request, fallback='partner_transactions')
 
 
 @role_required('partner')
 def service_orders_management(request):
-    """Danh sách hóa đơn dịch vụ của Partner"""
+    """Danh sách hóa đơn dịch vụ của Partner."""
     centers = BadmintonCenter.objects.filter(partner=request.user.partner_profile)
 
     selected_center_id = request.GET.get('center_id')
@@ -836,29 +928,33 @@ def service_orders_management(request):
     else:
         orders = ServiceOrder.objects.filter(center__in=centers)
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     selected_date_str = request.GET.get('date')
     try:
-        selected_date = timezone.datetime.strptime(selected_date_str, "%Y-%m-%d").date() if selected_date_str else today
+        selected_date = (
+            timezone.datetime.strptime(selected_date_str, "%Y-%m-%d").date()
+            if selected_date_str
+            else today
+        )
     except ValueError:
         selected_date = today
 
-    orders = orders.filter(created_at__date=selected_date).order_by('-created_at')
+    orders = (
+        orders.filter(created_at__date=selected_date)
+        .prefetch_related('items__product')
+        .select_related('center')
+        .order_by('-created_at')
+    )
 
-    # Tổng hợp
     stats = orders.aggregate(
         total_revenue=Sum('total_amount'),
         total_orders=Count('id'),
     )
 
-    
-    orders_with_items = []
-    for order in orders.prefetch_related('items__product').select_related('center'):
-        items = order.items.all()
-        orders_with_items.append({
-            'order': order,
-            'items': items,
-        })
+    orders_with_items = [
+        {'order': order, 'items': order.items.all()}
+        for order in orders
+    ]
 
     context = {
         'centers': centers,

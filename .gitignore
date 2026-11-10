@@ -1,4 +1,3 @@
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -48,6 +47,7 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+.ruff_cache/
 
 # Translations
 *.mo
@@ -60,7 +60,7 @@ db.sqlite3
 db.sqlite3-journal
 
 # ============================================
-# Environments & Secrets (QUAN TRỌNG NHẤT)
+# Environments & Secrets
 # ============================================
 .env
 .env.*
@@ -80,21 +80,21 @@ secrets.json
 credentials.json
 
 # ============================================
-# Docker
+# Docker & Database Data Volumes
 # ============================================
 docker-compose.override.yml
-
-# Database Data Volumes
 pgdata/
 postgres_data/
 data/
 db_data/
 mysql_data/
 
-# Backup files
+# Backup & Archive files
 *.sql
 *.sql.gz
 *.dump
+*.rar
+*.zip
 
 # ============================================
 # Django Static & Media (generated/uploaded)
@@ -105,16 +105,19 @@ media/
 center_images/
 
 # ============================================
-# Celery
+# Celery & Runtime artifacts
 # ============================================
 celerybeat-schedule
 celerybeat-schedule.db
 celerybeat.pid
+gunicorn.ctl
 
 # ============================================
-# Project-specific
+# Project-specific & Binaries
 # ============================================
 du dinh/
+cloudflared.exe
+*.exe
 
 # ============================================
 # Node.js / Frontend
@@ -138,10 +141,7 @@ yarn-error.log*
 # ============================================
 # OS generated
 # ============================================
-# macOS
 .DS_Store
-
-# Windows
 Thumbs.db
 ehthumbs.db
 Desktop.ini
@@ -163,4 +163,3 @@ ipython_config.py
 .spyderproject
 .spyproject
 .ropeproject
-gunicorn.ctl

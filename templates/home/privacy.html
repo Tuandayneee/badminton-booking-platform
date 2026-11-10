@@ -1,0 +1,153 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Chính sách bảo mật - Badminton Pro{% endblock %}
+
+{% block content %}
+<section class="py-5" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 280px;">
+    <div class="container py-5 text-center">
+        <span class="badge bg-success bg-opacity-25 text-success mb-3 px-3 py-2 rounded-pill fw-bold text-uppercase" style="font-size: 0.7rem;">
+            <i class="fa-solid fa-shield-halved me-1"></i> Bảo mật
+        </span>
+        <h1 class="display-5 fw-bold text-white mb-3">Chính sách bảo mật</h1>
+        <p class="text-white-50 mb-0">Cập nhật lần cuối: Tháng 4, 2026</p>
+    </div>
+</section>
+
+<section class="py-5 bg-white">
+    <div class="container" style="max-width: 820px;">
+
+        <div class="alert bg-primary bg-opacity-10 border-0 rounded-4 p-4 mb-4 fade-in-up">
+            <div class="d-flex gap-3">
+                <i class="fa-solid fa-circle-info text-primary mt-1 fa-lg"></i>
+                <p class="text-secondary mb-0 lh-lg">Badminton Pro cam kết bảo vệ quyền riêng tư của bạn. Chính sách này giải thích cách chúng tôi thu thập, sử dụng và bảo vệ thông tin cá nhân khi bạn sử dụng nền tảng.</p>
+            </div>
+        </div>
+
+        <div class="card border-0 bg-body rounded-4 p-4 mb-4 shadow-sm fade-in-up" style="animation-delay: 0.05s;">
+            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-database text-primary me-2"></i> Thông tin chúng tôi thu thập</h5>
+            <p class="text-secondary lh-lg mb-3">Khi bạn sử dụng Badminton Pro, chúng tôi có thể thu thập các thông tin sau:</p>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="p-3 rounded-3 border border-light">
+                        <h6 class="fw-bold text-dark mb-2 small text-uppercase"><i class="fa-solid fa-user-pen text-primary me-1"></i> Thông tin cá nhân</h6>
+                        <ul class="text-secondary small mb-0 ps-3">
+                            <li class="mb-1">Họ tên, email, số điện thoại</li>
+                            <li class="mb-1">Tên đăng nhập, mật khẩu (mã hóa)</li>
+                            <li class="mb-0">Ảnh đại diện (nếu cung cấp)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 rounded-3 border border-light">
+                        <h6 class="fw-bold text-dark mb-2 small text-uppercase"><i class="fa-solid fa-chart-line text-success me-1"></i> Dữ liệu sử dụng</h6>
+                        <ul class="text-secondary small mb-0 ps-3">
+                            <li class="mb-1">Lịch sử đặt sân, thanh toán</li>
+                            <li class="mb-1">Địa chỉ IP, loại trình duyệt</li>
+                            <li class="mb-0">Thời gian truy cập, hành vi sử dụng</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 bg-body rounded-4 p-4 mb-4 shadow-sm fade-in-up" style="animation-delay: 0.1s;">
+            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-bullseye text-primary me-2"></i> Mục đích sử dụng thông tin</h5>
+            <div class="d-flex flex-column gap-3">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 flex-shrink-0" style="width: 36px; height: 36px;"><i class="fa-solid fa-check text-primary" style="font-size: 12px;"></i></div>
+                    <p class="text-secondary mb-0"><strong>Xử lý đặt sân:</strong> Xác nhận đơn đặt, gửi thông báo, xử lý thanh toán và liên lạc khi cần thiết.</p>
+                </div>
+                <div class="d-flex align-items-start gap-3">
+                    <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 flex-shrink-0" style="width: 36px; height: 36px;"><i class="fa-solid fa-check text-primary" style="font-size: 12px;"></i></div>
+                    <p class="text-secondary mb-0"><strong>Cải thiện dịch vụ:</strong> Phân tích hành vi sử dụng để tối ưu trải nghiệm người dùng và phát triển tính năng mới.</p>
+                </div>
+                <div class="d-flex align-items-start gap-3">
+                    <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 flex-shrink-0" style="width: 36px; height: 36px;"><i class="fa-solid fa-check text-primary" style="font-size: 12px;"></i></div>
+                    <p class="text-secondary mb-0"><strong>Bảo mật:</strong> Phát hiện và ngăn chặn các hành vi gian lận, truy cập trái phép hoặc lạm dụng hệ thống.</p>
+                </div>
+                <div class="d-flex align-items-start gap-3">
+                    <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 flex-shrink-0" style="width: 36px; height: 36px;"><i class="fa-solid fa-check text-primary" style="font-size: 12px;"></i></div>
+                    <p class="text-secondary mb-0"><strong>Thông báo:</strong> Gửi email xác nhận đặt sân, cập nhật trạng thái đơn hàng và các thông báo hệ thống quan trọng.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 bg-body rounded-4 p-4 mb-4 shadow-sm fade-in-up" style="animation-delay: 0.15s;">
+            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-lock text-primary me-2"></i> Cách chúng tôi bảo vệ dữ liệu</h5>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="text-center p-3 rounded-3 border border-light h-100">
+                        <div class="mx-auto mb-2 d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10" style="width: 48px; height: 48px;"><i class="fa-solid fa-key text-primary"></i></div>
+                        <h6 class="fw-bold text-dark small">Mã hóa mật khẩu</h6>
+                        <p class="text-secondary small mb-0">Sử dụng thuật toán PBKDF2 + SHA256 để băm mật khẩu.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center p-3 rounded-3 border border-light h-100">
+                        <div class="mx-auto mb-2 d-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10" style="width: 48px; height: 48px;"><i class="fa-solid fa-shield-halved text-success"></i></div>
+                        <h6 class="fw-bold text-dark small">CSRF Protection</h6>
+                        <p class="text-secondary small mb-0">Tất cả form đều được bảo vệ bằng token chống giả mạo.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center p-3 rounded-3 border border-light h-100">
+                        <div class="mx-auto mb-2 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10" style="width: 48px; height: 48px;"><i class="fa-solid fa-server text-warning"></i></div>
+                        <h6 class="fw-bold text-dark small">Hạ tầng an toàn</h6>
+                        <p class="text-secondary small mb-0">Triển khai trên Docker với phân quyền truy cập nghiêm ngặt.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 bg-body rounded-4 p-4 mb-4 shadow-sm fade-in-up" style="animation-delay: 0.2s;">
+            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-share-nodes text-primary me-2"></i> Chia sẻ thông tin với bên thứ ba</h5>
+            <p class="text-secondary lh-lg mb-3">Chúng tôi <strong>không bán, cho thuê hoặc trao đổi</strong> thông tin cá nhân của bạn cho bất kỳ bên thứ ba nào vì mục đích thương mại. Thông tin chỉ được chia sẻ trong các trường hợp sau:</p>
+            <ul class="text-secondary lh-lg mb-0 ps-3">
+                <li class="mb-2"><strong>Chủ sân đối tác:</strong> Tên, số điện thoại được chia sẻ với chủ sân khi bạn đặt sân để phục vụ việc liên lạc.</li>
+                <li class="mb-2"><strong>Yêu cầu pháp lý:</strong> Khi được yêu cầu bởi cơ quan nhà nước có thẩm quyền theo quy định pháp luật.</li>
+                <li class="mb-0"><strong>Dịch vụ thanh toán:</strong> Thông tin giao dịch được chia sẻ với đối tác thanh toán (VNPAY, ngân hàng) để xử lý thanh toán.</li>
+            </ul>
+        </div>
+
+        <div class="card border-0 bg-body rounded-4 p-4 mb-4 shadow-sm fade-in-up" style="animation-delay: 0.25s;">
+            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-user-gear text-primary me-2"></i> Quyền của bạn</h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start gap-2 mb-2">
+                        <i class="fa-solid fa-circle-check text-success mt-1 small"></i>
+                        <span class="text-secondary small">Xem và chỉnh sửa thông tin cá nhân bất cứ lúc nào.</span>
+                    </div>
+                    <div class="d-flex align-items-start gap-2 mb-2">
+                        <i class="fa-solid fa-circle-check text-success mt-1 small"></i>
+                        <span class="text-secondary small">Thay đổi mật khẩu tài khoản.</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start gap-2 mb-2">
+                        <i class="fa-solid fa-circle-check text-success mt-1 small"></i>
+                        <span class="text-secondary small">Yêu cầu xóa tài khoản và dữ liệu liên quan.</span>
+                    </div>
+                    <div class="d-flex align-items-start gap-2 mb-2">
+                        <i class="fa-solid fa-circle-check text-success mt-1 small"></i>
+                        <span class="text-secondary small">Liên hệ hỗ trợ để biết thêm về dữ liệu đã lưu.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 bg-body rounded-4 p-4 shadow-sm fade-in-up" style="animation-delay: 0.3s;">
+            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-rotate text-primary me-2"></i> Cập nhật chính sách</h5>
+            <p class="text-secondary lh-lg mb-0">Chúng tôi có thể cập nhật chính sách bảo mật này theo thời gian. Khi có thay đổi quan trọng, chúng tôi sẽ thông báo qua email hoặc thông báo trên nền tảng. Bạn nên kiểm tra trang này định kỳ để nắm bắt các cập nhật mới nhất.</p>
+        </div>
+
+        <div class="text-center mt-5 fade-in-up" style="animation-delay: 0.35s;">
+            <div class="d-flex align-items-center justify-content-center gap-2 text-muted small">
+                <i class="fa-solid fa-envelope"></i>
+                <span>Câu hỏi về bảo mật? Liên hệ: <strong>privacy@badmintonpro.vn</strong></span>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}

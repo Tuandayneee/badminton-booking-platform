@@ -6,10 +6,10 @@ from .tasks import send_register_confirmation_email
 
 class PartnerProfileInline(admin.StackedInline):
     model = PartnerProfile
-    can_delete = False  
+    can_delete = False
     verbose_name_plural = 'Hồ sơ Đối tác (Partner)'
     fk_name = 'user'
-    
+
     def get_formset(self, request, obj=None, **kwargs):
         formset = super().get_formset(request, obj, **kwargs)
         return formset
@@ -28,15 +28,15 @@ class CustomUserAdmin(BaseUserAdmin):
     list_display = ('username', 'email', 'full_name', 'role', 'phone_number', 'is_active')
     list_filter = ('role', 'is_active', 'is_staff')
     search_fields = ('username', 'email', 'phone_number')
-    
-    
+
+
     fieldsets = BaseUserAdmin.fieldsets + (
         ('Thông tin bổ sung', {'fields': ('role', 'phone_number')}),
     )
     add_fieldsets = BaseUserAdmin.add_fieldsets + (
         ('Thông tin bổ sung', {'fields': ('role', 'phone_number', 'email')}),
     )
-    
+
     inlines = [PartnerProfileInline, CustomerProfileInline]
 
 
@@ -45,7 +45,7 @@ class PartnerProfileAdmin(admin.ModelAdmin):
     list_display = ('id', 'get_username', 'contact_person', 'is_verified', 'created_at')
     list_filter = ('is_verified', 'created_at')
     search_fields = ('contact_person', 'user__username', 'user__email', 'user__full_name')
-    
+
     actions = ['approve_partners', 'reject_partners']
 
     @admin.display(description='Tài khoản (Username)', ordering='user__username')

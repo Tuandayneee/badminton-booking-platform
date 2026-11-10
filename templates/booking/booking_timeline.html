@@ -5,19 +5,19 @@
 {% block title %}Đặt lịch - Badminton Pro{% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top: 100px; padding-bottom: 100px;"> 
+<div class="container" style="padding-top: 100px; padding-bottom: 100px;">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="fw-bold text-dark mb-0">Đặt lịch trực quan</h3>
-        
+
         <div class="d-flex gap-2">
             <div class="input-group-unified bg-white shadow-sm" style="width: auto;">
                 <span class="input-group-text pe-2"><i class="fa-regular fa-calendar"></i></span>
-                <input type="date" 
-                       id="bookingDate" 
-                       class="form-control fw-bold border-0" 
-                       value="{{ selected_date }}" 
-                       min="{{ min_date }}" 
-                       max="{{ max_date }}" 
+                <input type="date"
+                       id="bookingDate"
+                       class="form-control fw-bold border-0"
+                       value="{{ selected_date }}"
+                       min="{{ min_date }}"
+                       max="{{ max_date }}"
                        onchange="window.location.href='?date=' + this.value">
             </div>
         </div>
@@ -67,27 +67,23 @@
                             </span>
                         </div>
                     </td>
-                    
+
                     {% for slot in item.slots %}
-                    <td class="booking-slot {{ slot.status }} position-relative" 
-                        data-court-id="{{ item.court_obj.id }}" 
+                    <td class="booking-slot {{ slot.status }} position-relative"
+                        data-court-id="{{ item.court_obj.id }}"
                         data-court-name="{{ item.court_obj.name }}"
                         data-time="{{ slot.time }}"
                         data-price="{{ slot.price }}"
-                        
-                        {# --- GIỮ NGUYÊN PHẦN LOGIC KHÓA SÂN THEO THỜI GIAN CỦA BẠN TẠI ĐÂY --- #}
+
                         {% if slot.status == 'booked' %}
                             title="Đã có người đặt"
                             style="cursor: not-allowed; background-color: #fee2e2;"
-                            
                         {% elif slot.status == 'locked' %}
                             title="Đang có người giữ chỗ"
                             style="cursor: not-allowed; background-color: #fef3c7;"
-                            
                         {% elif slot.status == 'expired' or slot.status == 'completed' %}
                             title="Đã qua thời gian đặt"
                             style="cursor: not-allowed; background-color: #6d6d6e; color: #9ca3af;"
-                            
                         {% else %}
                             title="Sân trống: {{ slot.time }}"
                             onclick="toggleSlot(this)"
@@ -116,7 +112,7 @@
                     <span class="text-secondary ms-2 small" id="totalHours">(0h)</span>
                 </div>
             </div>
-            
+
             <form method="POST" action="{% url 'booking_confirm' %}" id="bookingForm">
                 {% csrf_token %}
                 <input type="hidden" name="booking_data" id="bookingDataInput">
@@ -133,19 +129,20 @@
 </div>
 
 <script>
-    let selectedSlots = []; 
+    let selectedSlots = [];
     let total = 0;
-    
-    // Lấy ID user từ Django Template (Quan trọng cho FastAPI)
-    const userId = "{{ request.user.id }}"; 
 
-    // 1. Hàm chọn/bỏ chọn ô (Giữ nguyên logic của bạn)
+    const isAuthenticated = {{ request.user.is_authenticated|yesno:"true,false" }};
+    const lockApiUrl = "{% url 'proxy_lock_slot' %}";
+    const loginUrl = "{% url 'login' %}";
+    const csrfToken = "{{ csrf_token }}";
+
     function toggleSlot(element) {
         const courtId = element.getAttribute('data-court-id');
         const courtName = element.getAttribute('data-court-name');
         const time = element.getAttribute('data-time');
         const pricePerHour = parseFloat(element.getAttribute('data-price'));
-        const pricePerSlot = pricePerHour / 2; 
+        const pricePerSlot = pricePerHour / 2;
 
         const slotKey = `${courtId}_${time}`;
 
@@ -169,22 +166,18 @@
         document.getElementById('totalHours').innerText = '(' + totalHours + 'h)';
     }
 
-    // 2. Hàm Submit mới (Gọi FastAPI Lock trước khi gửi)
     async function submitBooking() {
-        // Kiểm tra user đăng nhập
-        if (!userId || userId === "None") {
+        if (!isAuthenticated) {
             alert("Vui lòng đăng nhập để đặt sân!");
-            window.location.href = "/login/";
+            window.location.href = loginUrl;
             return;
         }
 
-        // Kiểm tra đã chọn slot chưa
         if (selectedSlots.length === 0) {
             alert("Vui lòng chọn ít nhất một khung giờ!");
             return;
         }
 
-        // Hiệu ứng Loading cho nút
         const btn = document.getElementById('btnSubmit');
         const spinner = btn.querySelector('.spinner-border');
         btn.disabled = true;
@@ -192,71 +185,64 @@
 
         const dateValue = document.getElementById('bookingDate').value;
 
-        // --- GỌI FASTAPI ĐỂ KHÓA HÀNG LOẠT ---
-        // Map từng slot thành các request fetch song song
         const lockPromises = selectedSlots.map(slot => {
-            return fetch('http://localhost:8001/api/v1/lock-slot/', {
+            return fetch(lockApiUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                credentials: 'same-origin',
                 body: JSON.stringify({
-                    court_id: parseInt(slot.court_id),
+                    court_id: parseInt(slot.court_id, 10),
                     date: dateValue,
                     start_time: slot.time,
-                    end_time: slot.time, // Gửi cho đủ model, FastAPI không dùng
-                    user_id: parseInt(userId)
-                })
+                    end_time: slot.time,
+                }),
             }).then(async res => {
                 try {
                     const data = await res.json();
-                    return { 
-                        ok: res.ok, 
-                        detail: data.detail || (res.ok ? 'Thành công' : 'Lỗi không xác định'), 
-                        time: slot.time, 
-                        court: slot.court_name 
+                    return {
+                        ok: res.ok,
+                        detail: data.detail || (res.ok ? 'Thành công' : 'Lỗi không xác định'),
+                        time: slot.time,
+                        court: slot.court_name,
                     };
                 } catch (jsonErr) {
-                    // Response không phải JSON (500 error hoặc server không phản hồi đúng)
-                    return { 
-                        ok: false, 
-                        detail: `Lỗi server (HTTP ${res.status})`, 
-                        time: slot.time, 
-                        court: slot.court_name 
+                    return {
+                        ok: false,
+                        detail: `Lỗi server (HTTP ${res.status})`,
+                        time: slot.time,
+                        court: slot.court_name,
                     };
                 }
-            }).catch(err => {
-                // Network error - FastAPI không chạy hoặc không kết nối được
-                return { 
-                    ok: false, 
-                    detail: 'Không thể kết nối server đặt sân. Vui lòng kiểm tra FastAPI đang chạy!', 
-                    time: slot.time, 
-                    court: slot.court_name 
+            }).catch(() => {
+                return {
+                    ok: false,
+                    detail: 'Không thể kết nối server giữ chỗ. Vui lòng thử lại!',
+                    time: slot.time,
+                    court: slot.court_name,
                 };
             });
         });
 
         try {
-            // Chờ tất cả request hoàn thành
             const results = await Promise.all(lockPromises);
-            
-            // Lọc ra các slot bị lỗi (bị người khác khóa trước)
             const failedLocks = results.filter(r => !r.ok);
 
             if (failedLocks.length > 0) {
-                let msg = "Rất tiếc, các khung giờ sau vừa bị người khác đặt:\n";
+                let msg = "Rất tiếc, các khung giờ sau không thể giữ chỗ:\n";
                 failedLocks.forEach(f => msg += `- Sân ${f.court} (${f.time}): ${f.detail}\n`);
-                msg += "\nVui lòng bỏ chọn các ô màu đỏ và thử lại.";
-                
+                msg += "\nVui lòng chọn lại khung giờ khác.";
+
                 alert(msg);
-                location.reload(); // Tải lại trang để cập nhật trạng thái mới nhất
+                location.reload();
                 return;
             }
 
-            // --- NẾU TẤT CẢ THÀNH CÔNG -> SUBMIT FORM SANG DJANGO ---
             document.getElementById('selectedDateInput').value = dateValue;
-            // Chuyển object selectedSlots thành JSON string để gửi đi
             document.getElementById('bookingDataInput').value = JSON.stringify(selectedSlots);
             document.getElementById('bookingForm').submit();
-
         } catch (e) {
             console.error(e);
             alert("Lỗi kết nối đến server đặt sân. Vui lòng thử lại!");

@@ -11,7 +11,7 @@
 
     <div class="container hero-content">
         <div class="row align-items-center">
-            
+
             <div class="col-lg-7 text-white mb-5 mb-lg-0 fade-in-up">
                 <div class="badge-hero">
                     <span class="d-inline-block rounded-circle bg-success" style="width: 8px; height: 8px;"></span>
@@ -24,16 +24,13 @@
                 </h1>
 
                 <p class="lead text-white-50 mb-5" style="max-width: 550px;">
-                    Hệ thống đặt sân thông minh, kết nối cộng đồng vợt thủ toàn quốc. 
+                    Hệ thống đặt sân thông minh, kết nối cộng đồng vợt thủ toàn quốc.
                     Tìm sân gần nhất và thanh toán chỉ trong 30 giây.
                 </p>
-                
+
                 <div class="d-flex gap-3">
                     <a href="#courts" class="btn btn-login-premium px-4 py-3">
                         Đặt sân ngay
-                    </a>
-                    <a href="#" class="btn btn-outline-light fw-bold px-4 py-3 rounded-3" style="border: 1px solid rgba(255,255,255,0.2);">
-                        <i class="fa-solid fa-play me-2"></i>Xem Demo
                     </a>
                 </div>
             </div>
@@ -44,26 +41,26 @@
                         <i class="fa-solid fa-magnifying-glass me-2 text-primary"></i>
                         Tìm sân nhanh
                     </h4>
-                    
+
                     <form id="fast-search-form">
                         <div class="mb-3">
                             <label class="form-label">Ngày chơi</label>
                             <div class="input-group-unified">
                                 <span class="input-group-text"><i class="fa-regular fa-calendar"></i></span>
-                                <input type="date" id="input-date" class="form-control" value="{% now 'Y-m-d' %}" required>
+                                <input type="date" id="input-date" class="form-control" value="{% now 'Y-m-d' %}" min="{% now 'Y-m-d' %}" required>
                             </div>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label class="form-label">Khu vực (Hà Nội)</label>
                             <div class="input-group-unified">
                                 <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
                                 <select id="input-address" class="form-select form-control">
                                     <option value="" selected>Tất cả khu vực</option>
-                                    </select>
+                                </select>
                             </div>
                         </div>
-                        
+
                         <div class="mb-4">
                             <label class="form-label">Giờ bắt đầu</label>
                             <div class="input-group-unified">
@@ -72,7 +69,7 @@
                             </div>
                             <div class="form-text small text-muted">*Tìm sân trống trong vòng 1h kể từ giờ chọn.</div>
                         </div>
-                        
+
                         <button type="submit" id="btn-search" class="btn btn-login-premium w-100 py-3 shadow-sm">
                             <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
                             Tìm kiếm ngay
@@ -103,7 +100,7 @@
                         <i class="fa-solid fa-shield-halved"></i>
                     </div>
                     <h5 class="fw-bold mb-3 text-dark">Thanh toán an toàn</h5>
-                    <p class="text-secondary mb-0 small">Hỗ trợ đa dạng phương thức: QR Code, Ví điện tử. Hoàn tiền tự động nếu hủy lịch.</p>
+                    <p class="text-secondary mb-0 small">Hỗ trợ đa dạng phương thức: QR Code, chuyển khoản. Tự động hủy và nhả sân khi hết hạn.</p>
                 </div>
             </div>
             <div class="col-md-4 fade-in-up" style="animation-delay: 0.3s;">
@@ -126,19 +123,22 @@
                 <span class="text-primary fw-bold text-uppercase small ls-tight">Điểm đến yêu thích</span>
                 <h2 class="fw-bold mb-0 mt-1 text-dark">Sân cầu lông nổi bật</h2>
             </div>
-            <a href="#" class="btn btn-outline-secondary rounded-pill px-4 fw-bold small">Xem tất cả <i class="fa-solid fa-arrow-right ms-2"></i></a>
+            {% if centers|length > 3 %}
+            <button type="button" id="btn-toggle-courts" class="btn btn-outline-secondary rounded-pill px-4 fw-bold small" onclick="toggleAllCourts()">
+                Xem tất cả <i class="fa-solid fa-arrow-right ms-2"></i>
+            </button>
+            {% endif %}
         </div>
 
         <div class="row g-4" id="courts-container">
-            
             {% for center in centers %}
-                <div class="col-md-6 col-lg-4">
+                <div class="col-md-6 col-lg-4 court-item {% if forloop.counter > 3 %}d-none court-hidden{% endif %}" style="{% if forloop.counter > 3 %}opacity: 0; transform: translateY(20px);{% endif %}">
                     <div class="card court-card h-100">
                         <div class="court-img-wrapper">
                             {% if center.image %}
                                 <img src="{{ center.image.url }}" class="court-img-top" alt="{{ center.name }}">
                             {% else %}
-                                <img src="https://placehold.co/600x400/e2e8f0/64748b?text=No+Image" class="court-img-top" alt="No Image">
+                                <img src="{% static 'images/no_image.png' %}" class="court-img-top" alt="No Image">
                             {% endif %}
 
                             {% if center.is_active %}
@@ -157,7 +157,7 @@
                             <p class="text-secondary small mb-3">
                                 <i class="fa-solid fa-location-dot me-1 text-danger"></i> {{ center.address }}
                             </p>
-                            
+
                             <div class="d-flex flex-wrap gap-2 mb-4">
                                 {% for amenity in center.amenities.all|slice:":3" %}
                                     <span class="badge badge-soft-secondary text-secondary bg-light border fw-normal">
@@ -182,8 +182,8 @@
                                         <small class="text-muted">/h</small>
                                     {% endif %}
                                 </div>
-                                
-                                <a href="{% url 'booking_timeline' center.id%}" class="btn btn-sm btn-login-premium rounded-pill px-4">
+
+                                <a href="{% url 'booking_timeline' center.id %}" class="btn btn-sm btn-login-premium rounded-pill px-4">
                                     Đặt ngay
                                 </a>
                             </div>
@@ -194,7 +194,9 @@
                 <div class="col-12 text-center py-5">
                     <p class="text-muted">Chưa có sân nào được đăng ký.</p>
                 </div>
-            {% endfor %} </div> </div>
+            {% endfor %}
+        </div>
+    </div>
 </section>
 
 <section class="py-5 bg-body">
@@ -212,16 +214,51 @@
                         <a href="{% url 'register_partner' %}" class="btn btn-light text-dark rounded-pill px-5 py-3 fw-bold shadow-lg">
                             Đăng ký đối tác
                         </a>
-                        <a href="{% url 'partner_info'%}" class="btn btn-outline-light rounded-pill px-4 py-3 fw-bold">
+                        <a href="{% url 'partner_info' %}" class="btn btn-outline-light rounded-pill px-4 py-3 fw-bold">
                             Tìm hiểu thêm
                         </a>
                     </div>
                 </div>
-                </div>
+            </div>
         </div>
     </div>
 </section>
+
 <script>
+let isShowingAll = false;
+function toggleAllCourts() {
+    const hiddenCourts = document.querySelectorAll('.court-hidden');
+    const btn = document.getElementById('btn-toggle-courts');
+
+    if (!isShowingAll) {
+        hiddenCourts.forEach((court, index) => {
+            court.classList.remove('d-none');
+            setTimeout(() => {
+                court.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                court.style.opacity = '1';
+                court.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+        btn.innerHTML = 'Thu gọn <i class="fa-solid fa-arrow-up ms-2"></i>';
+        isShowingAll = true;
+    } else {
+        hiddenCourts.forEach(court => {
+            court.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            court.style.opacity = '0';
+            court.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                court.classList.add('d-none');
+            }, 300);
+        });
+        btn.innerHTML = 'Xem tất cả <i class="fa-solid fa-arrow-right ms-2"></i>';
+        isShowingAll = false;
+
+        setTimeout(() => {
+            document.getElementById('courts').scrollIntoView({ behavior: 'smooth' });
+        }, 350);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const searchForm = document.getElementById('fast-search-form');
     const courtsContainer = document.getElementById('courts-container');
@@ -229,23 +266,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const spinner = btnSearch.querySelector('.spinner-border');
     const addressSelect = document.getElementById('input-address');
 
-    // Cấu hình URL FastAPI
-    const BASE_API_URL = "http://localhost:8001/api/v1";
+    const BASE_API_URL = "{{ FASTAPI_PUBLIC_URL|escapejs }}/api/v1";
 
-    // --- 1. HÀM LOAD QUẬN/HUYỆN ---
     async function loadDistricts() {
         try {
             const response = await fetch(`${BASE_API_URL}/districts/`);
             if (!response.ok) return;
-            
+
             const districts = await response.json();
-            
-            // Xóa các option cũ (trừ option đầu tiên)
             while (addressSelect.options.length > 1) {
                 addressSelect.remove(1);
             }
 
-            // Thêm option mới
             districts.forEach(district => {
                 const option = document.createElement('option');
                 option.value = district;
@@ -257,121 +289,159 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Gọi hàm load quận ngay khi trang tải xong
     loadDistricts();
 
-    // --- 2. XỬ LÝ TÌM KIẾM ---
     searchForm.addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        // Lấy dữ liệu
         const date = document.getElementById('input-date').value;
         const address = addressSelect.value;
-        const inputTime = document.getElementById('input-time').value; // Dạng "17:30"
+        const inputTime = document.getElementById('input-time').value;
 
         if (!inputTime) {
             alert("Vui lòng chọn giờ chơi!");
             return;
         }
 
-        // Logic tính giờ kết thúc (Mặc định tìm slot 1 tiếng)
-        // VD: Khách chọn 17:30 -> Tìm sân trống từ 17:30 đến 18:30
         const startTime = inputTime;
-        let [hours, minutes] = inputTime.split(':').map(Number);
-        
-        // Cộng thêm 1 giờ
-        let endHours = hours + 1;
-        let endMinutes = minutes;
-        
-        // Format lại thành chuỗi HH:MM
-        const endTime = `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
+        const [hours, minutes] = inputTime.split(':').map(Number);
+        const endHours = hours + 1;
+        const endTime = `${String(endHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 
-        // Hiệu ứng Loading
         btnSearch.disabled = true;
         spinner.classList.remove('d-none');
-        btnSearch.childNodes[2].textContent = " Đang tìm...";
-        
+
         try {
-            // Tạo URL tìm kiếm
             const url = new URL(`${BASE_API_URL}/search/`);
             url.searchParams.append('date', date);
             url.searchParams.append('start_time', startTime);
-            url.searchParams.append('end_time', endTime); // Gửi end_time tự tính
+            url.searchParams.append('end_time', endTime);
             if (address) url.searchParams.append('address', address);
 
             const response = await fetch(url);
             if (!response.ok) throw new Error('Lỗi kết nối server');
-            
+
             const centers = await response.json();
             renderCourts(centers);
-            
-            // Cuộn xuống kết quả
             document.getElementById('courts').scrollIntoView({ behavior: 'smooth' });
-
         } catch (error) {
             console.error(error);
             alert('Có lỗi xảy ra. Vui lòng kiểm tra kết nối FastAPI!');
         } finally {
             btnSearch.disabled = false;
             spinner.classList.add('d-none');
-            btnSearch.childNodes[2].textContent = "Tìm kiếm ngay";
         }
     });
 
-    // Hàm render giữ nguyên như cũ
+    function buildSafeImageUrl(rawUrl) {
+        if (typeof rawUrl === 'string' && rawUrl.startsWith('/media/')) {
+            return rawUrl;
+        }
+        return "{% static 'images/no_image.png' %}";
+    }
+
     function renderCourts(centers) {
-        // ... (Copy lại hàm renderCourts ở câu trả lời trước vào đây) ...
-        // Logic render HTML không thay đổi
-        if (centers.length === 0) {
-            courtsContainer.innerHTML = `
-                <div class="col-12 text-center py-5">
-                    <div class="text-muted opacity-50 mb-3"><i class="fa-regular fa-face-frown-open fa-3x"></i></div>
-                    <h5 class="text-muted">Không tìm thấy sân trống</h5>
-                    <p class="small text-secondary">Thử đổi giờ hoặc khu vực khác xem sao nhé!</p>
-                </div>`;
+        courtsContainer.innerHTML = '';
+
+        if (!Array.isArray(centers) || centers.length === 0) {
+            const emptyCol = document.createElement('div');
+            emptyCol.className = 'col-12 text-center py-5';
+
+            const iconWrap = document.createElement('div');
+            iconWrap.className = 'text-muted opacity-50 mb-3';
+            const icon = document.createElement('i');
+            icon.className = 'fa-regular fa-face-frown-open fa-3x';
+            iconWrap.appendChild(icon);
+
+            const heading = document.createElement('h5');
+            heading.className = 'text-muted';
+            heading.textContent = 'Không tìm thấy sân trống';
+
+            const sub = document.createElement('p');
+            sub.className = 'small text-secondary';
+            sub.textContent = 'Thử đổi giờ hoặc khu vực khác xem sao nhé!';
+
+            emptyCol.append(iconWrap, heading, sub);
+            courtsContainer.appendChild(emptyCol);
             return;
         }
 
-        let html = '';
+        const fragment = document.createDocumentFragment();
+        const fallbackImg = "{% static 'images/no_image.png' %}";
+
         centers.forEach(center => {
-            const priceFormatted = new Intl.NumberFormat('vi-VN').format(center.lowest_price);
-            const imgUrl = center.image ? center.image : 'https://placehold.co/600x400/e2e8f0/64748b?text=No+Image';
-            const availableCount = center.available_courts.length;
+            const col = document.createElement('div');
+            col.className = 'col-md-6 col-lg-4 fade-in-up';
 
-            html += `
-            <div class="col-md-6 col-lg-4 fade-in-up">
-                <div class="card court-card h-100">
-                    <div class="court-img-wrapper">
-                        <img src="${imgUrl}" class="court-img-top" alt="${center.name}" onerror="this.src='https://placehold.co/600x400/e2e8f0/64748b?text=No+Image'">
-                        <div class="court-badge court-badge-type" style="background: rgba(16, 185, 129, 0.9);">
-                            <i class="fa-solid fa-bolt me-1"></i>Còn ${availableCount} sân
-                        </div>
-                    </div>
+            const card = document.createElement('div');
+            card.className = 'card court-card h-100';
 
-                    <div class="card-body p-4">
-                        <h6 class="fw-bold text-dark mb-1">${center.name}</h6>
-                        <p class="text-secondary small mb-3">
-                            <i class="fa-solid fa-location-dot me-1 text-danger"></i> ${center.address}
-                        </p>
-                        
-                        <div class="d-flex align-items-center justify-content-between pt-3 border-top border-light">
-                            <div>
-                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.65rem;">Giá từ</small>
-                                <span class="fw-bold text-primary fs-5">${priceFormatted}đ</span>
-                                <small class="text-muted">/h</small>
-                            </div>
-                            
-                            <a href="/booking/timeline/${center.id}/" class="btn btn-sm btn-login-premium rounded-pill px-4">
-                                Đặt ngay
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
+            const imgWrapper = document.createElement('div');
+            imgWrapper.className = 'court-img-wrapper';
+
+            const img = document.createElement('img');
+            img.className = 'court-img-top';
+            img.src = buildSafeImageUrl(center.image);
+            img.alt = center.name || 'Sân cầu lông';
+            img.addEventListener('error', () => { img.src = fallbackImg; });
+
+            const badge = document.createElement('div');
+            badge.className = 'court-badge court-badge-type';
+            badge.style.background = 'rgba(16, 185, 129, 0.9)';
+            const bolt = document.createElement('i');
+            bolt.className = 'fa-solid fa-bolt me-1';
+            const availableCount = Array.isArray(center.available_courts) ? center.available_courts.length : 0;
+            badge.append(bolt, document.createTextNode(`Còn ${availableCount} sân`));
+
+            imgWrapper.append(img, badge);
+
+            const cardBody = document.createElement('div');
+            cardBody.className = 'card-body p-4';
+
+            const title = document.createElement('h6');
+            title.className = 'fw-bold text-dark mb-1';
+            title.textContent = center.name || '';
+
+            const addr = document.createElement('p');
+            addr.className = 'text-secondary small mb-3';
+            const pin = document.createElement('i');
+            pin.className = 'fa-solid fa-location-dot me-1 text-danger';
+            addr.append(pin, document.createTextNode(' ' + (center.address || '')));
+
+            const footer = document.createElement('div');
+            footer.className = 'd-flex align-items-center justify-content-between pt-3 border-top border-light';
+
+            const priceBox = document.createElement('div');
+            const priceLabel = document.createElement('small');
+            priceLabel.className = 'text-muted d-block text-uppercase fw-bold';
+            priceLabel.style.fontSize = '0.65rem';
+            priceLabel.textContent = 'Giá từ';
+
+            const priceVal = document.createElement('span');
+            priceVal.className = 'fw-bold text-primary fs-5';
+            const priceFormatted = new Intl.NumberFormat('vi-VN').format(center.lowest_price || 0);
+            priceVal.textContent = `${priceFormatted}đ`;
+
+            const priceUnit = document.createElement('small');
+            priceUnit.className = 'text-muted';
+            priceUnit.textContent = '/h';
+
+            priceBox.append(priceLabel, priceVal, priceUnit);
+
+            const bookLink = document.createElement('a');
+            bookLink.href = `/booking/booking_timeline/${encodeURIComponent(center.id)}`;
+            bookLink.className = 'btn btn-sm btn-login-premium rounded-pill px-4';
+            bookLink.textContent = 'Đặt ngay';
+
+            footer.append(priceBox, bookLink);
+            cardBody.append(title, addr, footer);
+            card.append(imgWrapper, cardBody);
+            col.appendChild(card);
+            fragment.appendChild(col);
         });
-        courtsContainer.innerHTML = html;
+
+        courtsContainer.appendChild(fragment);
     }
-    
 });
 </script>
 {% endblock %}

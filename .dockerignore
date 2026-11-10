@@ -1,0 +1,48 @@
+# Ignore python virtual environment
+venv/
+.venv/
+env/
+.env/
+
+# Ignore python cache files
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+
+# Ignore git
+.git/
+.gitignore
+.gitattributes
+
+# Ignore IDE settings
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Ignore local environment file (should not be baked into the image)
+.env
+
+# Ignore executables and logs
+*.exe
+cloudflared.exe
+*.log
+celerybeat-schedule
+gunicorn.ctl
+
+# Ignore database files
+*.db
+*.sqlite3
+
+# Ignore build artifacts / node modules (if any)
+node_modules/
+dist/
+build/
+
+# Ignore Django collected static files and media (mounted via volumes if needed)
+staticfiles/
+media/

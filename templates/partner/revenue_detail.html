@@ -107,9 +107,9 @@
     <div class="card-modern overflow-hidden fade-in-up" style="animation-delay: 0.3s;">
         <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
             <h6 class="mb-0 fw-bold text-dark">Giao dịch gần đây</h6>
-            <button class="btn btn-pro btn-pro-light btn-sm text-success border-success bg-white">
+            <a href="{% url 'partner_export_revenue_detail' center.id %}?period={{ selected_period }}" class="btn btn-pro btn-pro-light btn-sm text-success border-success bg-white">
                 <i class="fa-solid fa-file-excel me-2"></i>Xuất Excel
-            </button>
+            </a>
         </div>
         <div class="table-responsive">
             <table class="table table-modern align-middle mb-0">
