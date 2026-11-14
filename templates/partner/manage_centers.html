@@ -144,30 +144,6 @@
                             </div>
                         </td>
                     </tr>
-
-                    <div class="modal fade" id="deleteCenterModal{{ center.id }}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered modal-sm">
-                            <div class="modal-content border-0">
-                                <div class="modal-body p-4 text-center">
-                                    <div class="mb-3 text-warning">
-                                        <i class="fa-solid fa-triangle-exclamation fa-3x"></i>
-                                    </div>
-                                    <h6 class="fw-bold mb-2">Xóa cơ sở này?</h6>
-                                    <p class="small text-muted mb-4">
-                                        Bạn có chắc muốn xóa <strong>{{ center.name }}</strong>?<br>
-                                        Toàn bộ sân con, lịch đặt và dữ liệu khách hàng liên quan sẽ bị xóa vĩnh viễn.
-                                    </p>
-                                    <div class="d-flex justify-content-center gap-2">
-                                        <button type="button" class="btn btn-pro btn-pro-light btn-sm" data-bs-dismiss="modal">Hủy</button>
-                                        <form action="{% url 'partner_delete_center' center.id %}" method="POST">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-danger btn-sm fw-bold px-3" style="border-radius: 6px;">Xác nhận xóa</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                     {% empty %}
                     <tr>
                         <td colspan="4" class="text-center py-5">
@@ -195,5 +171,31 @@
 </div>
 
 {% include 'partner/add_center.html' %}
+
+{% for center in centers %}
+<div class="modal fade" id="deleteCenterModal{{ center.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3 text-warning">
+                    <i class="fa-solid fa-triangle-exclamation fa-3x"></i>
+                </div>
+                <h6 class="fw-bold mb-2">Xóa cơ sở này?</h6>
+                <p class="small text-muted mb-4">
+                    Bạn có chắc muốn xóa <strong>{{ center.name }}</strong>?<br>
+                    Toàn bộ sân con, lịch đặt và dữ liệu khách hàng liên quan sẽ bị xóa vĩnh viễn.
+                </p>
+                <div class="d-flex justify-content-center gap-2">
+                    <button type="button" class="btn btn-pro btn-pro-light btn-sm" data-bs-dismiss="modal">Hủy</button>
+                    <form action="{% url 'partner_delete_center' center.id %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm fw-bold px-3" style="border-radius: 6px;">Xác nhận xóa</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
 
 {% endblock %}
