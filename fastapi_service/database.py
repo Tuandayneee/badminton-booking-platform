@@ -18,7 +18,12 @@ class Database:
     async def connect(cls):
         cls.pg_pool = await asyncpg.create_pool(DATABASE_URL, min_size=5, max_size=20)
         logger.info("FastAPI connected to PostgreSQL")
-        cls.redis_client = redis.from_url(REDIS_URL, encoding="utf-8", decode_responses=True)
+        cls.redis_client = redis.from_url(
+            REDIS_URL,
+            encoding="utf-8",
+            decode_responses=True,
+            max_connections=1000,
+        )
         logger.info("FastAPI connected to Redis")
 
     @classmethod

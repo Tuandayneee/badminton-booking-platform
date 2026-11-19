@@ -67,6 +67,34 @@ flowchart LR
 
 ---
 
+## ⚡ Benchmark & Kiểm thử tải thực tế (Load Testing)
+
+Hệ thống được kiểm thử tải trực tiếp bằng **Locust** trên module giữ chỗ phân tán (**FastAPI + Redis SETNX**) nhằm xác thực tính toàn vẹn dữ liệu và năng lực chịu tải đồng thời (Concurrency):
+
+* **Kịch bản kiểm thử (Stress & Spike Profile):**
+  * **200 Virtual Users (VUs)** đồng thời, tốc độ tăng tải (Ramp-up) 20 users/giây.
+  * **Tổng 51,237 requests** xử lý liên tục trong 1 phút 46 giây.
+  * **Hotspot Collision (Race Condition Test):** Dồn **10,132 requests** tranh chấp đồng thời vào DUY NHẤT 1 khung giờ vàng (Sân 1 lúc 18:00).
+  * **Normal Traffic:** 41,105 requests đặt rải rác các khung giờ ngẫu nhiên.
+
+### Kết quả đo lường thực tế
+
+| Chỉ số (Metrics) | Kết quả đo được (Locust Report) | Đánh giá kỹ thuật |
+| :--- | :--- | :--- |
+| **Tổng số Requests** | **51,237 requests** | Hoàn thành toàn bộ |
+| **Tỷ lệ lỗi (Failure Rate)** | **0% (0 errors)** | Không phát sinh lỗi 5xx hay rớt kết nối |
+| **Throughput đỉnh (Peak RPS)** | **534 RPS** | Ổn định ở mức 480 – 534 req/giây |
+| **Độ trễ trung vị (Median / p50)** | **69 ms** | Phản hồi tức thì |
+| **Độ trễ phân vị 95 (p95)** | **190 ms** | Đạt chuẩn dưới 200ms trong môi trường Docker local |
+| **Độ trễ phân vị 99 (p99)** | **280 ms** | Đạt chuẩn dưới 300ms |
+| **Toàn vẹn dữ liệu (Double-Booking)** | **0 trường hợp** | 100% request tranh chấp nhận 409 Conflict hợp lệ |
+
+> 📄 **Xem báo cáo kiểm thử chi tiết:** File HTML nghiệm thu đầy đủ được lưu tại [`docs/load_test_report.html`](docs/load_test_report.html).
+> 
+> 🛠 **Bộ script tái hiện kiểm thử:** Xem mã nguồn test tải tại thư mục [`scripts/load_tests/`](scripts/load_tests/).
+
+---
+
 ## 🛠 Tech Stack
 
 - **Backend Core:** Python 3.13, Django 6.0, Django Allauth (Google / GitHub OAuth)
@@ -75,7 +103,7 @@ flowchart LR
 - **Background Jobs:** Celery Worker & Celery Beat (gửi email HTML, tự động hủy đơn quá hạn 10 phút)
 - **Reporting & Exports:** `openpyxl` (xuất báo cáo Excel `.xlsx`), Chart.js
 - **Frontend:** HTML5, CSS3, Bootstrap 5, Vanilla JS (DOM API an toàn chống XSS)
-- **DevOps & CI:** Docker, Docker Compose, WhiteNoise, GitHub Actions (`ruff` + `manage.py test`)
+- **DevOps & CI:** Docker, Docker Compose, WhiteNoise, Locust (Load Testing), GitHub Actions (`ruff` + `manage.py test`)
 
 ---
 
